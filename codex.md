@@ -16,7 +16,8 @@ Die letzte Sitzung hatte nur Lesezugriff. Vor Änderungen prüfen, ob die neue
 Sitzung tatsächlich workspace-write erlaubt.
 
 Kein GitHub-Push und keine öffentliche Bereitstellung ohne entsprechenden
-Auftrag. Bisher wurde nur ein Upload-/Deployment-Paket vorbereitet.
+Auftrag. Privater GitHub-Upload wurde inzwischen ausdrücklich autorisiert; siehe unten.
+Kein öffentlicher oder kostenpflichtiger Deploy wurde autorisiert.
 
 ## Aktueller Stand: Video-Korrektur umgesetzt (2026-11-16)
 
@@ -368,3 +369,13 @@ The user explicitly authorized pushing to a private repository. Created https://
 - PRIVATE_DEPLOYMENT.md records configuration, scope/cost/legal limits and official sources. Tailscale is an optional proposal, not installed/authenticated.
 
 Statistics verification: 29 Node and 46 Python tests passed in source/release. statistics_browser.py covers responsive chart/filter/average/keyboard/legacy tracking; browser.py and performance.py passed. compose.private.yml config validated. No externally accessible deployment or new paid resource created; hosting choice is still pending.
+
+
+## Appearance, frames and local backgrounds (2026-11-16)
+
+- New Appearance sidebar view in assets/appearance.js/.css replaces the cramped frame shop; Daily rewards links to it. Live profile preview, seven frames, clear preview/unlock/equip, My collection filter, account shard balance. Existing classic/silver/orbit/starlit IDs, prices and inventory preserved. Added fern (Night bloom,450), ink (Ink panel,750), lunar (Lunar arc,1250). Server transactions still enforce balances and prevent duplicate purchases.
+- Four free dark palettes: default Midnight mauve, Moonstone, Forest night, Ink blue. Four original CSS background presets; optional local PNG/JPEG/WebP upload, max8MiB and24million pixels, resized max1600px and re-encoded WebP. Blob URL only; image never uploaded to server or stored in localStorage. No external image URL input.
+- Local appearance preferences: aniloop-appearance-v1. Background blob: independent IndexedDB aniloop-appearance/backgrounds/custom. Original aniloop-state-v1 and aniloop-media custom pack untouched. Account-owned frames remain server-side. Background dim35–90%, position, quiz visibility off by default. Reset restores default preferences while keeping image/inventory; Remove upload only deletes cosmetic image.
+- English UI, default black/muted mauve; alternate palettes remain dark. Reduced-motion respected. No new dependency or hosted service.
+- Verification: 32 Node tests,47 Python tests; appearance_browser.py verifies responsive320–1440px, theme persistence, upload/reload/rejection/removal, no POST uploads, unchanged game save, and hidden quiz background. appearance_account_browser.py uses explicitly designated /tmp database to prove real preview/purchase/equip/reload, exact shard deductions and preserved old inventory. Full browser.py real-media quiz/editor/import regression passed. Desktop/mobile/background screenshots in local qa/ (excluded from upload).
+- Sanitized upload package regenerated. GitHub repository stays private and Actions disabled. No external deployment or paid resource created.

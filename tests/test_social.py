@@ -98,6 +98,21 @@ class SocialTests(unittest.TestCase):
         with self.assertRaises(APIError):self.rewards.cosmetic(self.host,'orbit')
         with self.assertRaises(APIError):self.rewards.cosmetic(self.host,'starlit')
         self.assertEqual(self.rewards.cosmetic(self.host,'classic',True)['rewards']['equipped'],'classic')
+    def test_new_frames_preserve_old_inventory_and_charge_once(self):
+        with self.community.db() as db:
+            db.execute("INSERT INTO wallets VALUES(1,3000,'orbit')")
+            db.execute("INSERT INTO cosmetics VALUES(1,'orbit')")
+        for item,price in [('fern',450),('ink',750),('lunar',1250)]:
+            before=self.rewards.get(self.host)['balance']
+            wallet=self.rewards.cosmetic(self.host,item)['rewards']
+            self.assertEqual(wallet['balance'],before-price);self.assertEqual(wallet['equipped'],item)
+            self.assertIn('orbit',wallet['owned'])
+            with self.assertRaises(APIError):self.rewards.cosmetic(self.host,item)
+            self.assertEqual(self.rewards.get(self.host)['balance'],before-price)
+        wallet=self.rewards.cosmetic(self.host,'orbit',True)['rewards']
+        self.assertEqual(wallet['equipped'],'orbit');self.assertEqual(wallet['balance'],550)
+        self.assertEqual(set(wallet['owned']),{'orbit','fern','ink','lunar'})
+        with self.assertRaises(APIError):self.rewards.cosmetic(self.host,'unknown')
     def test_missed_day_resets_current_but_keeps_best_streak(self):
         today=self.rewards.today()
         with self.community.db() as db:

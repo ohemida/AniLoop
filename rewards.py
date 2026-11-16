@@ -2,7 +2,7 @@
 import time
 from datetime import datetime,timedelta,timezone,date
 from community import APIError
-COSMETICS=[{'id':'silver','name':'Silver lining','description':'A quiet silver profile border.','price':250},{'id':'orbit','name':'Mauve orbit','description':'A double mauve ring for your profile.','price':500},{'id':'starlit','name':'Starlit loop','description':'A star-trimmed profile frame.','price':1000}]
+COSMETICS=[{'id':'silver','name':'Silver lining','description':'A quiet silver profile border.','price':250},{'id':'orbit','name':'Mauve orbit','description':'A double mauve ring for your profile.','price':500},{'id':'starlit','name':'Starlit loop','description':'A star-trimmed profile frame.','price':1000},{'id':'fern','name':'Night bloom','description':'Sage corners for a quieter profile.','price':450},{'id':'ink','name':'Ink panel','description':'A sharp frame inspired by manga panels.','price':750},{'id':'lunar','name':'Lunar arc','description':'A crescent that follows your next loop.','price':1250}]
 class Rewards:
     def __init__(self,community):
         self.community=community

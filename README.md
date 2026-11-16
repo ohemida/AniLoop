@@ -94,9 +94,24 @@ For GitHub, run `python3 scripts/prepare_release.py`. It creates `.release/AniLo
 
 Open **Party rooms**, create a room, and share the six-character code or invite link. Everyone must reach the same running server. Join before the game starts. Rooms persist in SQLite, refresh every 1.5 seconds, and can be resumed by signing back into the same account. The host can remove a disconnected player; leaving transfers hosting to the next member. Rooms expire after 24 hours without game activity. For friends on other computers, use your hosted site; a localhost invite only works on your own machine.
 
-**Daily rewards** shows your current/best streak, a rolling seven-day activity record, badges at 3/7/14/30 consecutive claimed days, and a cosmetic frame shop. Finish all five daily categories in the default pool and claim **100 Loop Shards**. Every seventh consecutive claim earns **50 extra**. Rewards reset at **00:00 UTC**, while the existing quiz itself still rotates at local midnight. You can claim each quiz date only once and receive at most one reward per UTC day. A missed reward day resets the current streak, but keeps badges and the best streak.
+**Daily rewards** shows your current/best streak, a rolling seven-day activity record, badges at 3/7/14/30 consecutive claimed days, and a shortcut to Appearance. Finish all five daily categories in the default pool and claim **100 Loop Shards**. Every seventh consecutive claim earns **50 extra**. Rewards reset at **00:00 UTC**, while the existing quiz itself still rotates at local midnight. You can claim each quiz date only once and receive at most one reward per UTC day. A missed reward day resets the current streak, but keeps badges and the best streak.
 
-Spend shards on **Silver lining (250)**, **Mauve orbit (500)**, or **Starlit loop (1,000)** profile frames. Purchases equip the frame immediately; owned frames and Classic can be switched freely. Shards have no monetary value and cannot buy points or gameplay advantages. Rewards, inventory, rooms, and currency use the account database and survive server restarts.
+Open **Appearance → Profile frames** to preview, unlock, and equip **Silver lining (250)**, **Mauve orbit (500)**, **Starlit loop (1,000)**, **Night bloom (450)**, **Ink panel (750)**, or **Lunar arc (1,250)**. Filter **My collection** to see owned frames. Purchases equip the frame immediately; owned frames and Classic can be switched freely. Shards have no monetary value and cannot buy points or gameplay advantages. Rewards, inventory, rooms, and currency use the account database and survive server restarts.
+
+## Themes and personal backgrounds
+
+Open **Appearance → Themes** for Midnight mauve (the default), Moonstone, Forest night, or Ink blue. All four retain dark surfaces and subdued accents. Themes and backgrounds are free and work without an account.
+
+**Backgrounds** offers Pure black, Mauve dusk, Night garden, and Midnight grid, plus a personal PNG/JPEG/WebP image up to 8 MB and 24 million pixels. Images are re-encoded to WebP and resized to at most 1,600 pixels on the longest side. Choose dimming, image position, and whether backgrounds appear during quiz questions (off by default).
+
+Appearance preferences use `aniloop-appearance-v1` in localStorage. The uploaded image stays in the separate `aniloop-appearance` IndexedDB database; it is never sent to the server, placed in the account database, or bundled for GitHub. Themes/uploads apply only in this browser and origin; owned frames follow your account. Clearing browser storage removes local appearance preferences and images. **Reset theme & background** restores black/mauve while retaining the uploaded image and account frames; **Remove upload** deletes only the cosmetic background. Existing game saves and custom quiz media use their original, separate storage.
+
+Appearance browser checks (against a disposable server):
+
+```bash
+ANILOOP_URL=http://localhost:8100 .tools/qa/bin/python tests/appearance_browser.py
+ANILOOP_URL=http://localhost:8100 ANILOOP_TEST_DB=/tmp/aniloop-appearance-qa.sqlite3 .tools/qa/bin/python tests/appearance_account_browser.py
+```
 
 Social browser regression (use a disposable `ANILOOP_DB`):
 
