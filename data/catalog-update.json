@@ -1,0 +1,216 @@
+{
+  "date": "2026-11-16",
+  "previousAnime": 3224,
+  "anime": 3259,
+  "added": [
+    {
+      "id": "anime-567030",
+      "title": "Masamune Datenicle",
+      "source": "https://cms.aniguessr.com/database/anime/567030"
+    },
+    {
+      "id": "anime-567029",
+      "title": "Seasons of Blossom",
+      "source": "https://cms.aniguessr.com/database/anime/567029"
+    },
+    {
+      "id": "anime-567028",
+      "title": "Blame! Movie",
+      "source": "https://cms.aniguessr.com/database/anime/567028"
+    },
+    {
+      "id": "anime-567026",
+      "title": "Ninja Nonsense",
+      "source": "https://cms.aniguessr.com/database/anime/567026"
+    },
+    {
+      "id": "anime-567025",
+      "title": "Sentou Mecha Xabungle",
+      "source": "https://cms.aniguessr.com/database/anime/567025"
+    },
+    {
+      "id": "anime-mal-25777",
+      "title": "Attack on Titan Season 2",
+      "source": "https://anilist.co/anime/20958"
+    },
+    {
+      "id": "anime-mal-35760",
+      "title": "Attack on Titan Season 3",
+      "source": "https://anilist.co/anime/99147"
+    },
+    {
+      "id": "anime-mal-33486",
+      "title": "My Hero Academia Season 2",
+      "source": "https://anilist.co/anime/21856"
+    },
+    {
+      "id": "anime-mal-40028",
+      "title": "Attack on Titan Final Season",
+      "source": "https://anilist.co/anime/110277"
+    },
+    {
+      "id": "anime-mal-38524",
+      "title": "Attack on Titan Season 3 Part 2",
+      "source": "https://anilist.co/anime/104578"
+    },
+    {
+      "id": "anime-mal-1735",
+      "title": "Naruto: Shippuden",
+      "source": "https://anilist.co/anime/1735"
+    },
+    {
+      "id": "anime-mal-36456",
+      "title": "My Hero Academia Season 3",
+      "source": "https://anilist.co/anime/100166"
+    },
+    {
+      "id": "anime-mal-38408",
+      "title": "My Hero Academia Season 4",
+      "source": "https://anilist.co/anime/104276"
+    },
+    {
+      "id": "anime-mal-40456",
+      "title": "Demon Slayer -Kimetsu no Yaiba- The Movie: Mugen Train",
+      "source": "https://anilist.co/anime/112151"
+    },
+    {
+      "id": "anime-mal-51009",
+      "title": "JUJUTSU KAISEN Season 2",
+      "source": "https://anilist.co/anime/145064"
+    },
+    {
+      "id": "anime-mal-47778",
+      "title": "Demon Slayer: Kimetsu no Yaiba Entertainment District Arc",
+      "source": "https://anilist.co/anime/142329"
+    },
+    {
+      "id": "anime-mal-34134",
+      "title": "One-Punch Man Season 2",
+      "source": "https://anilist.co/anime/97668"
+    },
+    {
+      "id": "anime-mal-21881",
+      "title": "Sword Art Online II",
+      "source": "https://anilist.co/anime/20594"
+    },
+    {
+      "id": "anime-mal-37510",
+      "title": "Mob Psycho 100 II",
+      "source": "https://anilist.co/anime/101338"
+    },
+    {
+      "id": "anime-mal-48583",
+      "title": "Attack on Titan Final Season Part 2",
+      "source": "https://anilist.co/anime/131681"
+    },
+    {
+      "id": "anime-mal-48561",
+      "title": "JUJUTSU KAISEN 0",
+      "source": "https://anilist.co/anime/131573"
+    },
+    {
+      "id": "anime-mal-40591",
+      "title": "Kaguya-sama: Love is War?",
+      "source": "https://anilist.co/anime/112641"
+    },
+    {
+      "id": "anime-mal-41587",
+      "title": "My Hero Academia Season 5",
+      "source": "https://anilist.co/anime/117193"
+    },
+    {
+      "id": "anime-mal-27899",
+      "title": "Tokyo Ghoul √A",
+      "source": "https://anilist.co/anime/20850"
+    },
+    {
+      "id": "anime-mal-28891",
+      "title": "HAIKYU!! 2nd Season",
+      "source": "https://anilist.co/anime/20992"
+    },
+    {
+      "id": "anime-mal-39587",
+      "title": "Re:ZERO -Starting Life in Another World- Season 2",
+      "source": "https://anilist.co/anime/108632"
+    },
+    {
+      "id": "anime-mal-51019",
+      "title": "Demon Slayer: Kimetsu no Yaiba Swordsmith Village Arc",
+      "source": "https://anilist.co/anime/145139"
+    },
+    {
+      "id": "anime-mal-32937",
+      "title": "KONOSUBA -God's blessing on this wonderful world! 2",
+      "source": "https://anilist.co/anime/21699"
+    },
+    {
+      "id": "anime-mal-30654",
+      "title": "Assassination Classroom Second Season",
+      "source": "https://anilist.co/anime/21170"
+    },
+    {
+      "id": "anime-mal-2904",
+      "title": "Code Geass: Lelouch of the Rebellion R2",
+      "source": "https://anilist.co/anime/2904"
+    },
+    {
+      "id": "anime-mal-49926",
+      "title": "Demon Slayer: Kimetsu no Yaiba Mugen Train Arc",
+      "source": "https://anilist.co/anime/129874"
+    },
+    {
+      "id": "anime-mal-32935",
+      "title": "HAIKYU!! 3rd Season",
+      "source": "https://anilist.co/anime/21698"
+    },
+    {
+      "id": "anime-mal-20899",
+      "title": "JoJo's Bizarre Adventure: Stardust Crusaders",
+      "source": "https://anilist.co/anime/20474"
+    },
+    {
+      "id": "anime-mal-40852",
+      "title": "Dr. STONE: STONE WARS",
+      "source": "https://anilist.co/anime/113936"
+    },
+    {
+      "id": "anime-mal-50602",
+      "title": "SPY x FAMILY Cour 2",
+      "source": "https://anilist.co/anime/142838"
+    }
+  ],
+  "addedMusic": [
+    {
+      "id": "anime-473",
+      "kind": "opening"
+    },
+    {
+      "id": "anime-27568",
+      "kind": "opening"
+    },
+    {
+      "id": "anime-562418",
+      "kind": "ending"
+    },
+    {
+      "id": "anime-115818",
+      "kind": "opening"
+    },
+    {
+      "id": "anime-7278",
+      "kind": "opening"
+    },
+    {
+      "id": "anime-563101",
+      "kind": "opening"
+    },
+    {
+      "id": "anime-566016",
+      "kind": "opening"
+    },
+    {
+      "id": "anime-564220",
+      "kind": "ending"
+    }
+  ]
+}

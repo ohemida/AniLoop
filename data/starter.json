@@ -1,0 +1,721 @@
+{
+  "version": 1,
+  "name": "Illustriertes Starterpaket",
+  "demo": true,
+  "description": "Eigene Symbolillustrationen und synthetische Übungsmelodien. Keine Original-Screenshots, Originalporträts oder echten Anime-Openings/Endings.",
+  "anime": [
+    {
+      "id": "naruto",
+      "title": "Naruto",
+      "aliases": [
+        "Naruto"
+      ],
+      "character": "Naruto Uzumaki",
+      "characterAliases": [
+        "Naruto",
+        "Uzumaki"
+      ],
+      "year": 2002,
+      "studio": "Pierrot",
+      "source": "Manga",
+      "score": 8.0,
+      "genres": [
+        "Action",
+        "Adventure"
+      ],
+      "tags": [
+        "Ninja",
+        "Friendship",
+        "Training"
+      ],
+      "secondary": [
+        "Martial Arts"
+      ],
+      "synopsis": "Ein junger Ninja will von seinem Dorf anerkannt werden und Hokage werden.",
+      "screenshots": [
+        "assets/scenes/naruto.svg"
+      ],
+      "characterImage": "assets/characters/naruto.svg",
+      "opening": {
+        "demo": true,
+        "notes": [
+          60,
+          64,
+          67,
+          72,
+          69,
+          65,
+          67,
+          60
+        ]
+      },
+      "ending": {
+        "demo": true,
+        "notes": [
+          72,
+          69,
+          65,
+          62,
+          67,
+          64,
+          60,
+          60
+        ]
+      },
+      "color": "#ed9c35"
+    },
+    {
+      "id": "onepiece",
+      "title": "One Piece",
+      "aliases": [],
+      "character": "Monkey D. Luffy",
+      "characterAliases": [
+        "Luffy"
+      ],
+      "year": 1999,
+      "studio": "Toei Animation",
+      "source": "Manga",
+      "score": 8.7,
+      "genres": [
+        "Action",
+        "Adventure"
+      ],
+      "tags": [
+        "Pirates",
+        "Friendship",
+        "Travel"
+      ],
+      "secondary": [
+        "Comedy"
+      ],
+      "synopsis": "Ein Junge mit Strohhut segelt mit seiner Crew auf der Suche nach dem größten Schatz.",
+      "screenshots": [
+        "assets/scenes/onepiece.svg"
+      ],
+      "characterImage": "assets/characters/onepiece.svg",
+      "opening": {
+        "demo": true,
+        "notes": [
+          61,
+          65,
+          66,
+          71,
+          70,
+          66,
+          67,
+          61
+        ]
+      },
+      "ending": {
+        "demo": true,
+        "notes": [
+          71,
+          68,
+          66,
+          63,
+          66,
+          65,
+          60,
+          61
+        ]
+      },
+      "color": "#d95352"
+    },
+    {
+      "id": "aot",
+      "title": "Attack on Titan",
+      "aliases": [
+        "Shingeki no Kyojin"
+      ],
+      "character": "Eren Yeager",
+      "characterAliases": [
+        "Eren",
+        "Yeager"
+      ],
+      "year": 2013,
+      "studio": "Wit Studio",
+      "source": "Manga",
+      "score": 8.6,
+      "genres": [
+        "Action",
+        "Drama"
+      ],
+      "tags": [
+        "Military",
+        "Survival",
+        "Mystery"
+      ],
+      "secondary": [
+        "Politics"
+      ],
+      "synopsis": "Hinter riesigen Mauern versucht die Menschheit, sich vor Titanen zu schützen.",
+      "screenshots": [
+        "assets/scenes/aot.svg"
+      ],
+      "characterImage": "assets/characters/aot.svg",
+      "opening": {
+        "demo": true,
+        "notes": [
+          62,
+          66,
+          65,
+          70,
+          71,
+          67,
+          67,
+          62
+        ]
+      },
+      "ending": {
+        "demo": true,
+        "notes": [
+          70,
+          67,
+          67,
+          64,
+          65,
+          66,
+          60,
+          62
+        ]
+      },
+      "color": "#6d916e"
+    },
+    {
+      "id": "deathnote",
+      "title": "Death Note",
+      "aliases": [],
+      "character": "Light Yagami",
+      "characterAliases": [
+        "Light",
+        "Yagami"
+      ],
+      "year": 2006,
+      "studio": "Madhouse",
+      "source": "Manga",
+      "score": 8.6,
+      "genres": [
+        "Suspense",
+        "Supernatural"
+      ],
+      "tags": [
+        "Detective",
+        "Crime",
+        "Psychological"
+      ],
+      "secondary": [
+        "Mystery"
+      ],
+      "synopsis": "Ein Schüler findet ein Notizbuch, mit dem er Menschen durch das Aufschreiben ihres Namens töten kann.",
+      "screenshots": [
+        "assets/scenes/deathnote.svg"
+      ],
+      "characterImage": "assets/characters/deathnote.svg",
+      "opening": {
+        "demo": true,
+        "notes": [
+          63,
+          67,
+          67,
+          69,
+          72,
+          68,
+          67,
+          63
+        ]
+      },
+      "ending": {
+        "demo": true,
+        "notes": [
+          69,
+          69,
+          68,
+          65,
+          64,
+          67,
+          60,
+          63
+        ]
+      },
+      "color": "#6473ae"
+    },
+    {
+      "id": "demonslayer",
+      "title": "Demon Slayer",
+      "aliases": [
+        "Kimetsu no Yaiba"
+      ],
+      "character": "Tanjiro Kamado",
+      "characterAliases": [
+        "Tanjiro",
+        "Kamado"
+      ],
+      "year": 2019,
+      "studio": "ufotable",
+      "source": "Manga",
+      "score": 8.4,
+      "genres": [
+        "Action",
+        "Fantasy"
+      ],
+      "tags": [
+        "Demons",
+        "Swordplay",
+        "Historical"
+      ],
+      "secondary": [
+        "Family"
+      ],
+      "synopsis": "Nach einem Angriff auf seine Familie sucht Tanjiro ein Heilmittel für seine Schwester.",
+      "screenshots": [
+        "assets/scenes/demonslayer.svg"
+      ],
+      "characterImage": "assets/characters/demonslayer.svg",
+      "opening": {
+        "demo": true,
+        "notes": [
+          64,
+          68,
+          66,
+          72,
+          69,
+          69,
+          67,
+          64
+        ]
+      },
+      "ending": {
+        "demo": true,
+        "notes": [
+          68,
+          68,
+          65,
+          66,
+          67,
+          68,
+          60,
+          64
+        ]
+      },
+      "color": "#488b89"
+    },
+    {
+      "id": "jjk",
+      "title": "Jujutsu Kaisen",
+      "aliases": [],
+      "character": "Yuji Itadori",
+      "characterAliases": [
+        "Yuji",
+        "Itadori"
+      ],
+      "year": 2020,
+      "studio": "MAPPA",
+      "source": "Manga",
+      "score": 8.5,
+      "genres": [
+        "Action",
+        "Supernatural"
+      ],
+      "tags": [
+        "School",
+        "Curses",
+        "Combat"
+      ],
+      "secondary": [
+        "Demons"
+      ],
+      "synopsis": "Ein Schüler verschluckt einen verfluchten Finger und gerät in die Welt der Jujuzisten.",
+      "screenshots": [
+        "assets/scenes/jjk.svg"
+      ],
+      "characterImage": "assets/characters/jjk.svg",
+      "opening": {
+        "demo": true,
+        "notes": [
+          60,
+          69,
+          65,
+          71,
+          70,
+          70,
+          67,
+          60
+        ]
+      },
+      "ending": {
+        "demo": true,
+        "notes": [
+          67,
+          67,
+          66,
+          62,
+          66,
+          64,
+          60,
+          60
+        ]
+      },
+      "color": "#ba7c9e"
+    },
+    {
+      "id": "fmab",
+      "title": "Fullmetal Alchemist: Brotherhood",
+      "aliases": [
+        "Fullmetal Alchemist Brotherhood",
+        "Hagane no Renkinjutsushi: Fullmetal Alchemist"
+      ],
+      "character": "Edward Elric",
+      "characterAliases": [
+        "Edward",
+        "Elric"
+      ],
+      "year": 2009,
+      "studio": "Bones",
+      "source": "Manga",
+      "score": 9.1,
+      "genres": [
+        "Action",
+        "Adventure"
+      ],
+      "tags": [
+        "Alchemy",
+        "Military",
+        "Brothers"
+      ],
+      "secondary": [
+        "Politics"
+      ],
+      "synopsis": "Zwei Brüder suchen nach dem Stein der Weisen, um ihre Körper wiederherzustellen.",
+      "screenshots": [
+        "assets/scenes/fmab.svg"
+      ],
+      "characterImage": "assets/characters/fmab.svg",
+      "opening": {
+        "demo": true,
+        "notes": [
+          61,
+          70,
+          67,
+          70,
+          71,
+          65,
+          67,
+          61
+        ]
+      },
+      "ending": {
+        "demo": true,
+        "notes": [
+          72,
+          69,
+          67,
+          63,
+          65,
+          65,
+          60,
+          61
+        ]
+      },
+      "color": "#b67849"
+    },
+    {
+      "id": "haikyu",
+      "title": "Haikyu!!",
+      "aliases": [
+        "Haikyuu",
+        "Haikyuu!!"
+      ],
+      "character": "Shoyo Hinata",
+      "characterAliases": [
+        "Shoyo",
+        "Hinata"
+      ],
+      "year": 2014,
+      "studio": "Production I.G",
+      "source": "Manga",
+      "score": 8.4,
+      "genres": [
+        "Sports"
+      ],
+      "tags": [
+        "Volleyball",
+        "School",
+        "Teamwork"
+      ],
+      "secondary": [
+        "Training"
+      ],
+      "synopsis": "Ein kleiner, sprungstarker Schüler schließt sich der Volleyballmannschaft der Karasuno an.",
+      "screenshots": [
+        "assets/scenes/haikyu.svg"
+      ],
+      "characterImage": "assets/characters/haikyu.svg",
+      "opening": {
+        "demo": true,
+        "notes": [
+          62,
+          64,
+          66,
+          69,
+          72,
+          66,
+          67,
+          62
+        ]
+      },
+      "ending": {
+        "demo": true,
+        "notes": [
+          71,
+          68,
+          68,
+          64,
+          64,
+          66,
+          60,
+          62
+        ]
+      },
+      "color": "#e78f44"
+    },
+    {
+      "id": "spyfamily",
+      "title": "Spy x Family",
+      "aliases": [
+        "Spy Family"
+      ],
+      "character": "Anya Forger",
+      "characterAliases": [
+        "Anya",
+        "Forger"
+      ],
+      "year": 2022,
+      "studio": "Wit Studio",
+      "source": "Manga",
+      "score": 8.5,
+      "genres": [
+        "Comedy",
+        "Action"
+      ],
+      "tags": [
+        "Espionage",
+        "Family",
+        "Telepathy"
+      ],
+      "secondary": [
+        "School"
+      ],
+      "synopsis": "Ein Spion gründet für einen Auftrag eine Familie – ohne die Geheimnisse seiner Frau und Tochter zu kennen.",
+      "screenshots": [
+        "assets/scenes/spyfamily.svg"
+      ],
+      "characterImage": "assets/characters/spyfamily.svg",
+      "opening": {
+        "demo": true,
+        "notes": [
+          63,
+          65,
+          65,
+          72,
+          69,
+          67,
+          67,
+          63
+        ]
+      },
+      "ending": {
+        "demo": true,
+        "notes": [
+          70,
+          67,
+          65,
+          65,
+          67,
+          67,
+          60,
+          63
+        ]
+      },
+      "color": "#b8839b"
+    },
+    {
+      "id": "eva",
+      "title": "Neon Genesis Evangelion",
+      "aliases": [
+        "Shin Seiki Evangelion",
+        "Evangelion"
+      ],
+      "character": "Shinji Ikari",
+      "characterAliases": [
+        "Shinji",
+        "Ikari"
+      ],
+      "year": 1995,
+      "studio": "Gainax",
+      "source": "Original",
+      "score": 8.4,
+      "genres": [
+        "Drama",
+        "Sci-Fi"
+      ],
+      "tags": [
+        "Mecha",
+        "Psychological",
+        "Apocalypse"
+      ],
+      "secondary": [
+        "Military"
+      ],
+      "synopsis": "Jugendliche steuern riesige biomechanische Einheiten gegen rätselhafte Angreifer.",
+      "screenshots": [
+        "assets/scenes/eva.svg"
+      ],
+      "characterImage": "assets/characters/eva.svg",
+      "opening": {
+        "demo": true,
+        "notes": [
+          64,
+          66,
+          67,
+          71,
+          70,
+          68,
+          67,
+          64
+        ]
+      },
+      "ending": {
+        "demo": true,
+        "notes": [
+          69,
+          69,
+          66,
+          66,
+          66,
+          68,
+          60,
+          64
+        ]
+      },
+      "color": "#8660b0"
+    },
+    {
+      "id": "cowboy",
+      "title": "Cowboy Bebop",
+      "aliases": [],
+      "character": "Spike Spiegel",
+      "characterAliases": [
+        "Spike",
+        "Spiegel"
+      ],
+      "year": 1998,
+      "studio": "Sunrise",
+      "source": "Original",
+      "score": 8.8,
+      "genres": [
+        "Action",
+        "Sci-Fi"
+      ],
+      "tags": [
+        "Space",
+        "Bounty Hunters",
+        "Jazz"
+      ],
+      "secondary": [
+        "Crime"
+      ],
+      "synopsis": "Eine zusammengewürfelte Crew von Kopfgeldjägern reist im Raumschiff Bebop durchs Sonnensystem.",
+      "screenshots": [
+        "assets/scenes/cowboy.svg"
+      ],
+      "characterImage": "assets/characters/cowboy.svg",
+      "opening": {
+        "demo": true,
+        "notes": [
+          60,
+          67,
+          66,
+          70,
+          71,
+          69,
+          67,
+          60
+        ]
+      },
+      "ending": {
+        "demo": true,
+        "notes": [
+          68,
+          68,
+          67,
+          62,
+          65,
+          64,
+          60,
+          60
+        ]
+      },
+      "color": "#597eab"
+    },
+    {
+      "id": "sao",
+      "title": "Sword Art Online",
+      "aliases": [
+        "SAO"
+      ],
+      "character": "Kirito",
+      "characterAliases": [
+        "Kirito",
+        "Kirito"
+      ],
+      "year": 2012,
+      "studio": "A-1 Pictures",
+      "source": "Light Novel",
+      "score": 7.2,
+      "genres": [
+        "Action",
+        "Fantasy"
+      ],
+      "tags": [
+        "Virtual World",
+        "Swordplay",
+        "Survival"
+      ],
+      "secondary": [
+        "Romance"
+      ],
+      "synopsis": "Spieler sind in einem Virtual-Reality-Spiel gefangen, in dem der Tod endgültig ist.",
+      "screenshots": [
+        "assets/scenes/sao.svg"
+      ],
+      "characterImage": "assets/characters/sao.svg",
+      "opening": {
+        "demo": true,
+        "notes": [
+          61,
+          68,
+          65,
+          69,
+          72,
+          70,
+          67,
+          61
+        ]
+      },
+      "ending": {
+        "demo": true,
+        "notes": [
+          67,
+          67,
+          68,
+          63,
+          64,
+          65,
+          60,
+          61
+        ]
+      },
+      "color": "#738da8"
+    }
+  ]
+}

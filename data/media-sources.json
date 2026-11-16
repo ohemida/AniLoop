@@ -1,0 +1,2629 @@
+[
+  {
+    "path": "assets/media/258a3b422dfc197deebd5690.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=NTIxNzMtS29vcmktWm9rdXNlaS1EYW5zaGktdG8tQ29vbC1uYS1Eb3VyeW91LUpvc2hpL0tvb3JpLVpva3VzZWktRGFuc2hpLXRvLUNvb2wtbmEtRG91cnlvdS1Kb3NoaV8wMDYuanBn",
+    "bytes": 42075,
+    "sha256": "0408902ebc7f4bd3981e83669ed745d6d80baa58adff97f30dbdae97bdc7e18b",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/aa53a92a9deb22926e1bf719.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MjEwNDktUmVMSUZFL1JlTElGRV8wMDMucG5n",
+    "bytes": 60349,
+    "sha256": "1bfb0366b0ac5082bd8f7ebcbd774b303a7eba8d16d398d96c96ca91a64ad573",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/fe1ba15f7b7b08f8b882049d.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MTQ2NjUwLVNoaW5lLW9uLUJha3VtYXRzdS1CYWQtQm95cy9TaGluZS1vbi1CYWt1bWF0c3UtQmFkLUJveXNfMDA2LnBuZw==",
+    "bytes": 92080,
+    "sha256": "9a305272e7f6b0e438a43da50bc97d1231c7ce74451a2c0ed90d90f6e6467ccc",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/33dd92272ebcba8b67cd2c8a.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=NTIxNzMtS29vcmktWm9rdXNlaS1EYW5zaGktdG8tQ29vbC1uYS1Eb3VyeW91LUpvc2hpL0tvb3JpLVpva3VzZWktRGFuc2hpLXRvLUNvb2wtbmEtRG91cnlvdS1Kb3NoaV8wMDMuanBn",
+    "bytes": 68622,
+    "sha256": "b265d2a3f1b9ba4810d5d42e39e25e698a1e9b000900e1d8c5cda8c80b8bde33",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/62d5812098c8c362d8d2a4b1.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MjEwNDktUmVMSUZFL1JlTElGRV8wMDYucG5n",
+    "bytes": 44280,
+    "sha256": "17bdf9ac98c34b946fc154bf9a92ec3c25d6c1a18e2983575e4bfe8c2c6b75f3",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/fccc4c711a61b52507880a92.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MTQ2NjUwLVNoaW5lLW9uLUJha3VtYXRzdS1CYWQtQm95cy9TaGluZS1vbi1CYWt1bWF0c3UtQmFkLUJveXNfMDEwLnBuZw==",
+    "bytes": 126017,
+    "sha256": "c641f176e9ee84863e93c33dc1ef80d0e44faf3972ff5ba852c13264e8764b2e",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/7b107b076722cdba14b9dc74.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=NTIxNzMtS29vcmktWm9rdXNlaS1EYW5zaGktdG8tQ29vbC1uYS1Eb3VyeW91LUpvc2hpL0tvb3JpLVpva3VzZWktRGFuc2hpLXRvLUNvb2wtbmEtRG91cnlvdS1Kb3NoaV8wMDIuanBn",
+    "bytes": 67018,
+    "sha256": "b6d912b750539bf9528ea65601e4dde06ddeb0cb3102166988921e27fa81ff93",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/0d079c7d4f134c75206574e6.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MjEwNDktUmVMSUZFL1JlTElGRV8wMTIucG5n",
+    "bytes": 53035,
+    "sha256": "bfe9e04df7f928388c7ec5f95d3a7960da667e85619f934f6a91146dcd7c4b86",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/266ee936cf99bfea6bc2747f.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1927/132758l.jpg",
+    "bytes": 161381,
+    "sha256": "f0c0a3e283f868c12ff0c80d86d46f344720f51cfbfa614a184b37ec2658a9f4",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/1b7ba9862d16d4f492e9d511.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/3/82149l.jpg",
+    "bytes": 141862,
+    "sha256": "4fbcbaa03c83e2ddb759f1336b0db49b11fb853d85918627d5e2adc865dd7c78",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/64ea3d39e390f109f67e9128.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MTQ2NjUwLVNoaW5lLW9uLUJha3VtYXRzdS1CYWQtQm95cy9TaGluZS1vbi1CYWt1bWF0c3UtQmFkLUJveXNfMDA4LnBuZw==",
+    "bytes": 103894,
+    "sha256": "b22ca8841cf08f810a86aed5c3d8e0078eece8a8bb8f591c7eff8351e52bf56a",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/b75aec1977e2c664d1faafbb.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/7/75199l.jpg",
+    "bytes": 101495,
+    "sha256": "c44cb4bbda81221a69dd4b3032c111714650e8ee1d54f284847523dd3fbd5669",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/0764f434833eac63ad894e7a.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1729/141091l.jpg",
+    "bytes": 108709,
+    "sha256": "daa1f7c8553e869512393276f709e9e7cec36599ae600990b3e894aed60c2bd0",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/c993e605b50aa3985767a9e1.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/11/50453l.jpg",
+    "bytes": 106120,
+    "sha256": "f5dd7e2d2c07c3f54d155e848710c66ae8c7e9e8b51306a71a59998d28d1ae09",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/d840bc3f95be1404d2da4279.jpg",
+    "source": "https://cdn.myanimelist.net/images/characters/11/308347.jpg?s=64a1c90d214d76cb4901d83ae78b4630",
+    "bytes": 51138,
+    "sha256": "fc4a81a5651713f27cf1fb8bfa35fd4cf06699a9267b5064ce96b53b1a633090",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/3aa196e8dce0cdb9725f4d9d.jpg",
+    "source": "https://cdn.myanimelist.net/images/characters/2/169361.jpg?s=f512a9ee4fc65da1f7a472c5880a252b",
+    "bytes": 66346,
+    "sha256": "1a1def35eb25b294d29c21c1f3e80f548c49d239ebc4c5331e11e6d2babd14f0",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/67348f59a2498da2aa811836.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1346/119505l.jpg",
+    "bytes": 161209,
+    "sha256": "078250ce95e38f048c74cf7a8bb76db52c29dec96daba23d36d02da120057d1f",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/da88882628355b64ef624714.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1141/142503l.jpg",
+    "bytes": 144505,
+    "sha256": "aa720c9dc320d00e66f1edaa5d5e41103f3f8cc6d3d60767df8eab417e10acc8",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/46d0ed6e1b7ff9101cd23732.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MzU4OC1Tb3VsLUVhdGVyL1NvdWwtRWF0ZXJfMDAzLnBuZw==",
+    "bytes": 41749,
+    "sha256": "4b39129501124f172b9a90486c38835f24e7461b75378a20f7ce28775eb9a543",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/c07eb16a540cb9eee1f49d0e.jpg",
+    "source": "https://cdn.myanimelist.net/images/characters/2/105538.jpg?s=7603e3986722997b66259d9fea83a3b2",
+    "bytes": 64809,
+    "sha256": "1cf633684e79e84b44ed7c79f501d64f8a881f49b923931d5dd60f7f58370c71",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/e7d6426769cb741db7b5d57f.jpg",
+    "source": "https://cdn.myanimelist.net/images/characters/8/73810.jpg?s=08e8e0effd22a6aa122000da932bfbc9",
+    "bytes": 102465,
+    "sha256": "16dd755455faa0086d93f9bbfc0d2cdf5dbd17dba0161f9b7fa86b28a6af4a08",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/62814ebfdaeae18e239e2756.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MzU4OC1Tb3VsLUVhdGVyL1NvdWwtRWF0ZXJfMDA4LnBuZw==",
+    "bytes": 83666,
+    "sha256": "fcbef67daa4f18746e3688edb07d3dd8248ea769af91456c943ea3ac1475882d",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/2fcee8c13bd47eb161389636.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1945/136600l.jpg",
+    "bytes": 175799,
+    "sha256": "56b1450945a7153b9e6c076257deb7434dda0eaa1af88c62e5f7d564bde2a102",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/5eeaaca5f6c8cace96f35948.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1893/133786l.jpg",
+    "bytes": 165186,
+    "sha256": "060cc35d0238f1b63f6d0cf1758990da7f06f6f1c9d4d835a165af9b85b454df",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/5ec7f3dd67b9777fa1db7efe.jpg",
+    "source": "https://cdn.myanimelist.net/images/characters/12/292045.jpg?s=f0d66e77ac6f82f171d49de391ea8b76",
+    "bytes": 93460,
+    "sha256": "c0d7422911634fc8d77b530ac965249106f3e1428374ebce879dc5f850054afc",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/8a30c1083be33dfb2dec4208.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MzU4OC1Tb3VsLUVhdGVyL1NvdWwtRWF0ZXJfMDA1LnBuZw==",
+    "bytes": 71624,
+    "sha256": "a67152a61bd397c3d29c630da558f6e0e5b11f0f57a4912a3f091a442de3130d",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/c694914db02a2a9ad8051608.jpg",
+    "source": "https://cdn.myanimelist.net/images/characters/3/79772.jpg?s=81b26ea0ef0bc41e3f5193a2c10a9240",
+    "bytes": 81898,
+    "sha256": "4a738ca513dd6e9073887449610cbdbf555cfdf88dfb1350ef818ae7bd32dfb0",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/77035aff8cd3b2624635fc81.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1071/149486l.jpg",
+    "bytes": 119360,
+    "sha256": "a83ae312822356f6abde18b670f269d9c29fb1787e1f66db64a2da84023d957f",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/260fd423d9edfeb75d1d3db4.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/7/80636l.webp",
+    "bytes": 135460,
+    "sha256": "df4387bc3b5ee126ab43f760bd7e577944622f92b7b0d4125eded56d514e0115",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/ed00dd9136b5e17ba83ea59d.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1416/113986l.webp",
+    "bytes": 104046,
+    "sha256": "95f4d22817a32247349177ec776197d13355216a47405defd79827303b4c9528",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/bd31cd57da24395f5ae2a152.jpg",
+    "source": "https://cdn.myanimelist.net/images/characters/8/53236.jpg?s=25fb20215f778acf22b77765630eb06e",
+    "bytes": 44518,
+    "sha256": "31e9ee7da9c0708a59fd8ddfd535d7e7b207cde6baa191961e35eb3cc472acc1",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/0b6a3a10ba6da7fb24622406.jpg",
+    "source": "https://cdn.myanimelist.net/images/characters/16/125631.jpg?s=b7b251cc72b6b9f8ddb68177d4553c86",
+    "bytes": 62706,
+    "sha256": "0356b453e38feaca0cc58a3164cae625aa3ed675ac43916a99f9fe2beb3bc61d",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/5246a34f16ea1f3c77a9e14b.jpg",
+    "source": "https://cdn.myanimelist.net/images/characters/4/438275.jpg?s=3ffd4f929eefa11c5998f6d4b4ef249e",
+    "bytes": 84286,
+    "sha256": "c27cd64f6e00ff7227ce5f70cf9b6b0da92cae3ab4b31486b1e8bdab65dd36b9",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/c73b2319dfa78d2304f940da.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1995/121695l.webp",
+    "bytes": 90284,
+    "sha256": "ef995816304b6285fcff4e129ea3d8c8b47e90cbe91af6b7775a9e00d22c6b5a",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/be204245d48b3a5595710b8c.jpg",
+    "source": "https://cdn.myanimelist.net/images/characters/8/125623.jpg?s=ebc7616d3fb83d9b6488bfbbcd326cd0",
+    "bytes": 73753,
+    "sha256": "8e9a28a2a97166198c4fbabc127012510d94eea4478b57d2b727c92fb983f33f",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/5bc785477a512df2773faf20.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/2/89973l.jpg",
+    "bytes": 93886,
+    "sha256": "55a9e556ed0774664f1f8a9fbf8c5c6a60619cc90cba1724cfbc6e435dc37579",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/f765eced38d37c32366b4164.jpg",
+    "source": "https://cdn.myanimelist.net/images/characters/10/465559.jpg?s=eb0b07b8fa34c40e3cafade05664d405",
+    "bytes": 65098,
+    "sha256": "d7e3cc0a9ef50b40c891b8643a61aa9de1e9ee6b1ec75ca43ff23018355db741",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/566e6272199a5ede6fe9702d.jpg",
+    "source": "https://cdn.myanimelist.net/images/characters/3/237117.jpg?s=ac924042d2c58a61be4aabcb689265c6",
+    "bytes": 136160,
+    "sha256": "02d435ee4b9ebda8e1a3c092a237fd76e0ce44c75dac3a394c9149eb3d735320",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/31eba522ee7b38869b979abb.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/3/7327l.jpg",
+    "bytes": 105502,
+    "sha256": "408009e87b1697c5c1030f6efd396543d19504ef7c0712518a4fea0eba8e1b46",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/00db04a6d65837280dae4afb.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/5/86830l.jpg",
+    "bytes": 119537,
+    "sha256": "5a7e6d1294b6f92592359a9087d5480df7cc5143974e15a8f5df713998108390",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/32ff361cfcde7112ef53bcc7.jpg",
+    "source": "https://cdn.myanimelist.net/images/characters/8/80757.jpg?s=0212b59826cf32a591d6ceb5c0fac3ea",
+    "bytes": 58434,
+    "sha256": "960d7cfa8425f9040c36e7ecaf5df896c8b5350034d46347a015074ceb7e05ad",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/36ec8d88d1a905ed6b6ba3be.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1889/105337l.jpg",
+    "bytes": 70595,
+    "sha256": "62e6c5a2867a1d0ee968ab88bb2ebf291df4f6e14d99c0e867bced26f94527ab",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/b72ecdc84f2d2b7bcbbf3b70.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1491/102275l.jpg",
+    "bytes": 176010,
+    "sha256": "934b051f605aeb74cf9f267fb4b499da3cdb9b2a09e1db5244a9a275709b9740",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/89f0fcbf1fd141ac33ba6e7f.mp3",
+    "source": "https://medias.aniguessr.com/YoukosoZitsu-OP1-NCBD1080.mp3?v=188c4da4",
+    "bytes": 384812,
+    "sha256": "4ff94b642f40f8031505ef2baea22396ac4047194ce19c667d9e89b7425758a9",
+    "clipSeconds": 24
+  },
+  {
+    "path": "assets/media/dd89c903acb361ec0e4fbe4f.mp3",
+    "source": "https://medias.aniguessr.com/IDInvaded-OP1-NCBD1080.mp3?v=63150cad",
+    "bytes": 384812,
+    "sha256": "c906431a3decff8be1b93b1332d8f4a519c83d59cef9d52c51b349ebd14bd5c5",
+    "clipSeconds": 24
+  },
+  {
+    "path": "assets/media/cc61539661bb5b95056aa563.mp3",
+    "source": "https://medias.aniguessr.com/SDGundamWorld-OP1.mp3?v=43142613",
+    "bytes": 384812,
+    "sha256": "1dc837b1bf8c843a10a69dfcc100a8557484c99a5df609e45a3707860d9f7367",
+    "clipSeconds": 24
+  },
+  {
+    "path": "assets/media/35a2370df770faf2c3562444.mp4",
+    "source": "https://medias.aniguessr.com/YoukosoZitsu-OP1-NCBD1080.mp4?v=d215b4a1",
+    "bytes": 2266428,
+    "sha256": "24b89be0d97aa9e86d5815943c0bcfb6ab087d6be0fcc46c4b9c4b6e1f8d6319",
+    "clipSeconds": 24
+  },
+  {
+    "path": "assets/media/54b3e3aaef5e4bf595089a31.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/10/47347l.jpg",
+    "bytes": 130774,
+    "sha256": "8d3c341624162faa4573df310171ef6c12df72f99d16fdab1b9782cf05703729",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/3337f23556ea004418b0ac7c.mp4",
+    "source": "https://medias.aniguessr.com/IDInvaded-OP1-NCBD1080.mp4?v=18a294bf",
+    "bytes": 2155189,
+    "sha256": "ca5120d10fd9a1afba0e0d4be86048918ef0fdb180fbcdaf148b48d2218f4d0d",
+    "clipSeconds": 24
+  },
+  {
+    "path": "assets/media/3bdd6ed5952086e0ef7e8ba7.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1787/132772l.jpg",
+    "bytes": 116036,
+    "sha256": "1c6679c591dcb11bef68a88a1ef0dddf537b5662b898a49e062d7e231d3235bb",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/945964e2203841e62d78ba56.mp3",
+    "source": "https://medias.aniguessr.com/ShingekiNoKyojin-ED1.mp3?v=25bc64a9",
+    "bytes": 384812,
+    "sha256": "68acb6b9bb8045d8670c50958f0a67d850a70b52d8adc3a970d60c13d055176f",
+    "clipSeconds": 24
+  },
+  {
+    "path": "assets/media/d6cfe854457817cdf81ac51e.mp4",
+    "source": "https://medias.aniguessr.com/SDGundamWorld-OP1.mp4?v=49ae674e",
+    "bytes": 3098827,
+    "sha256": "821d3017d9bc9297c16291793680f2ac0a88a91c7bc83f8467852db23913a047",
+    "clipSeconds": 24
+  },
+  {
+    "path": "assets/media/971248cc2d456be63ab88531.mp3",
+    "source": "https://medias.aniguessr.com/DecaDence-ED1-NCBD1080.mp3?v=7d344e30",
+    "bytes": 384812,
+    "sha256": "ef58593228b2be5a63b154fc8220ddbd5a3176833f2d922fc5759a1221537d41",
+    "clipSeconds": 24
+  },
+  {
+    "path": "assets/media/bd96a982afe52e6fb47487b8.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1576/119361l.jpg",
+    "bytes": 262570,
+    "sha256": "c79d120011339d0b110217c50c3e6736e0450e3ce861ebeb31c29573c773f75f",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/de6a42b074dee802b1da0f0d.mp3",
+    "source": "https://medias.aniguessr.com/Orient-ED1.mp3?v=e25d2a8e",
+    "bytes": 384812,
+    "sha256": "372b6fbc29b36b934b07b12ad85e38089b2d6409ffc98928376eb418d5e407ae",
+    "clipSeconds": 24
+  },
+  {
+    "path": "assets/media/0618aef5b6a2f6dd7cc13772.mp4",
+    "source": "https://medias.aniguessr.com/DecaDence-ED1-NCBD1080.mp4?v=61bbf989",
+    "bytes": 2246875,
+    "sha256": "07dc0f5fe79c1b546e73e1d036e0f134551a3664749a0daa055ba2a57644aed4",
+    "clipSeconds": 24
+  },
+  {
+    "path": "assets/media/09dbbb73469ad7dd976029e0.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MzMyNTUtU2Fpa2ktS3VzdW8tbm8tzqgtbmFuL1NhaWtpLUt1c3VvLW5vLc6oLW5hbl8wMDMuanBn",
+    "bytes": 76076,
+    "sha256": "3a7f57f2ffcd19a4b6336cb2d5638ff6b363d2a8f6398430708926d61911504f",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/df64577957fbb302cd089be2.mp4",
+    "source": "https://medias.aniguessr.com/Orient-ED1v2.mp4?v=527b9c5c",
+    "bytes": 792240,
+    "sha256": "700b06aab9a9286c5485d5aee1a03e6f7c418db3a51aec4e4cb35b9b740178f1",
+    "clipSeconds": 24
+  },
+  {
+    "path": "assets/media/03ab33958d19aaf6d8bf05c0.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MzMyNTUtU2Fpa2ktS3VzdW8tbm8tzqgtbmFuL1NhaWtpLUt1c3VvLW5vLc6oLW5hbl8wMDQuanBn",
+    "bytes": 127974,
+    "sha256": "971e93f28a5e9c2906fbeb4a4b1d8ce9e73994ce764ae10db870a84325e0d7f9",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/84c62dbd14a85fb8f2066ee2.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MzQ2NjItRmF0ZUFwb2NyeXBoYS9GYXRlQXBvY3J5cGhhXzAwMy5qcGc=",
+    "bytes": 54521,
+    "sha256": "53c8aa571a5963d52b2e72cdf8b6fe17ac604a98236a85b84c38bb74fb40bae8",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/f8430bf32bcf58483d519af0.mp4",
+    "source": "https://medias.aniguessr.com/ShingekiNoKyojin-ED1.mp4?v=d600fdf4",
+    "bytes": 1576689,
+    "sha256": "5726b762a78d36ac835c600ff04eaf93a0e9832251841c96ba030a24f1380509",
+    "clipSeconds": 24
+  },
+  {
+    "path": "assets/media/b3a994cc5a3d564340379335.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MzMyNTUtU2Fpa2ktS3VzdW8tbm8tzqgtbmFuL1NhaWtpLUt1c3VvLW5vLc6oLW5hbl8wMDYuanBn",
+    "bytes": 84384,
+    "sha256": "4680e50ce84df42e7843292e1f8564b81ea980ff567630e3842b1fe10cc9fb4f",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/5e8fa63dbe32e322f7174162.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MzQ2NjItRmF0ZUFwb2NyeXBoYS9GYXRlQXBvY3J5cGhhXzAwNC5qcGc=",
+    "bytes": 45489,
+    "sha256": "733ec574b12eeeee7ba05fafa4be5ff6a0d38495a114fc4ac809db61247dea43",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/62dd48bdce989dc21394b61d.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MTAyNjAtRWl5dXUtRGVuc2V0c3UtU29yYS1uby1LaXNla2ktVGhlLUFuaW1hdGlvbi9FaXl1dS1EZW5zZXRzdS1Tb3JhLW5vLUtpc2VraS1UaGUtQW5pbWF0aW9uXzAwMi5qcGc=",
+    "bytes": 56038,
+    "sha256": "6a7dc72775ebcef5417af369f9bbb5d8bea93236b966a8c4bc67132202fedd01",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/12e692822af4aaa16f8eb27a.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MzQ2NjItRmF0ZUFwb2NyeXBoYS9GYXRlQXBvY3J5cGhhXzAwNi5qcGc=",
+    "bytes": 32947,
+    "sha256": "17ace6452a526ecd95b0e9f893ecfc3014f07c4269981bbbbe6dfeaca89e688a",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/705cdcf711f707c451da65f2.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1973/142750l.webp",
+    "bytes": 138024,
+    "sha256": "310ae2ca726c8dd8c93fe64b63aa12b9346e60e71e9235ba3535cb7d54e8e35e",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/e1af7a1a68aed2bd53937c23.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MTAyNjAtRWl5dXUtRGVuc2V0c3UtU29yYS1uby1LaXNla2ktVGhlLUFuaW1hdGlvbi9FaXl1dS1EZW5zZXRzdS1Tb3JhLW5vLUtpc2VraS1UaGUtQW5pbWF0aW9uXzAwMS5qcGc=",
+    "bytes": 44395,
+    "sha256": "3bf23ab245115a8485437fac76f7dbd3e583165658a1ba91b83a05f7c5bcf189",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/9d6a0f5f1273a13c2b236f58.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/9/86573l.jpg",
+    "bytes": 76850,
+    "sha256": "093cffd5f5b708352a672e78b437972986ef493c7822b8791ee490b457ce2c43",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/c8e82edca0ef77bec6a553a6.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/3/40409l.jpg",
+    "bytes": 87534,
+    "sha256": "f8e32ab5c2191edb236e69c4013d35a7ac32037b9fe1b4746042a84ef043cede",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/434cb88e278db4770c3c5362.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MTAyNjAtRWl5dXUtRGVuc2V0c3UtU29yYS1uby1LaXNla2ktVGhlLUFuaW1hdGlvbi9FaXl1dS1EZW5zZXRzdS1Tb3JhLW5vLUtpc2VraS1UaGUtQW5pbWF0aW9uXzAwMy5qcGc=",
+    "bytes": 69189,
+    "sha256": "2125cf3696978e1b96b40a91da09ad46ad4adac32c89f7d77f39a4bf26ef2366",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/6be680b92e42c26e587d53a6.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1286/99889l.jpg",
+    "bytes": 85431,
+    "sha256": "5f14ba87680cc46ce834cd7c44e50ec5893727085a566394d6277c593c853def",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/c29d64ed6e9aeefacef6afe8.jpg",
+    "source": "https://cdn.myanimelist.net/images/characters/10/182715.jpg?s=d87c934286168a792851f4c46effc8e5",
+    "bytes": 67212,
+    "sha256": "57c0253b8ddf5e18a606781bb4bed6be88d8716474588ea255090357f6fb66a2",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/b718dc62f1e68e18193b9c0c.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/11/35775l.jpg",
+    "bytes": 126542,
+    "sha256": "8ea2a1134f174b3a85ca7363523f8bbb34134ef72a746418e140533ca50ad945",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/a4a426de4af3d3bb87e4bb84.jpg",
+    "source": "https://cdn.myanimelist.net/images/characters/5/464903.jpg?s=8a4c1a500e00fe55746dd8d259401513",
+    "bytes": 71018,
+    "sha256": "2939dd7d027d81edcbf3c337db4aab198c0fb20f8eeaee0a34286fc134716576",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/fa36ace980e3827b03bdb178.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1708/138033l.jpg",
+    "bytes": 171649,
+    "sha256": "d68469e69136f6a27ad973e5f000526af42674d3bea02f3883e556d4473ede6c",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/a03fa01cb628cf86a9f9a317.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/6/25254l.jpg",
+    "bytes": 112721,
+    "sha256": "a6a012df65cf351d8b9a8f594abf8efc09c9171e369a02984b24982c8dc7b091",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/1a5229308bdc5bd7ac722fd7.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/8/32873l.webp",
+    "bytes": 110352,
+    "sha256": "bc304a39fe54c51599482064f98798e7c4e874cac3261123c7a39c9e81928bcd",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/103855a40855589019e0e49e.jpg",
+    "source": "https://cdn.myanimelist.net/images/characters/16/371204.jpg?s=7fa8ef42e1c29ef776c96ea61f864bbd",
+    "bytes": 91759,
+    "sha256": "a52e51d06ab95d1466a18de9fbca94e2a2b22dac075a3e78d74269dc22c4fd33",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/c94b530f309628ac35487d59.jpg",
+    "source": "https://cdn.myanimelist.net/images/characters/14/87812.jpg?s=a1683a25b52f31fda0fb41a2cf4d9a1d",
+    "bytes": 85601,
+    "sha256": "6e336994a1991361ba57f6262bdff9d4480f08c576f33c4a6042b6e1fd22ea1b",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/5a55b0dd9a1bc7767e0c9de0.jpg",
+    "source": "https://cdn.myanimelist.net/images/characters/8/126895.jpg?s=731cb377cb77be8076ad3702ddf5f9c5",
+    "bytes": 86165,
+    "sha256": "71991b45e5a6be27abd151d489f32e5adc0c136951339dd34d0db2a0944d7e99",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/778aaed4afb387321c2c2539.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1903/111646l.jpg",
+    "bytes": 118458,
+    "sha256": "1654e9fd38e0a4e25820ab68ba4df22a86431eda784fa41ffcd3aa67a1083004",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/d5d4632af5bb896586b0aea9.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/11/56849l.webp",
+    "bytes": 113074,
+    "sha256": "0c60193e3b77b1b656efd595cb559cf86a945c6c3ffdbe98d8ae8527b6f39ed1",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/74abca0bb49d6e74c1aaadb1.jpg",
+    "source": "https://cdn.myanimelist.net/images/characters/12/249417.jpg?s=4eac14264591da220d609593158ec8d8",
+    "bytes": 48806,
+    "sha256": "86d523807b99dc2ea691c0554fd941a9f0eb92a19d50807a4ae8acb8b09b14e5",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/d7ee8378fe0f817d6ed0c5d2.jpg",
+    "source": "https://cdn.myanimelist.net/images/characters/5/196143.jpg",
+    "bytes": 88020,
+    "sha256": "4cd81c692d62512d5567cae7c932d73f13f6d77bf5dbd07e3480c1e71dc880fa",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/94470a6af375ac536a9b2170.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1005/145339l.jpg",
+    "bytes": 110344,
+    "sha256": "5ad820d021698c253521e8bc2a7e5eb3ea1a2755e6ecd4e7ffc0a4578baed649",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/21efd1f1e4324556d858fdba.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/10/15182l.jpg",
+    "bytes": 93456,
+    "sha256": "3d34ce8e23df3597e1ef95907c48c8e65221c27a9f4522b01fd5a26462b609be",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/b36371027c617eb2b7081389.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1517/128206l.webp",
+    "bytes": 115019,
+    "sha256": "e0199bf2eec0a84d66ecb268ebec1680da4452adcce18638615f71d4674444fd",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/67a3ab9f0b71b2c779fac940.jpg",
+    "source": "https://cdn.myanimelist.net/images/characters/4/598988.jpg",
+    "bytes": 76727,
+    "sha256": "74056fd3efb446559bc66bca22b9988f22fd583c219456b6f15adc7a1d1cb0a2",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/c73927eb588a9a49f1fa5d6b.jpg",
+    "source": "https://cdn.myanimelist.net/images/characters/14/153893.jpg?s=a5bcfeca2daf524460a6f2a6cabc24a1",
+    "bytes": 65833,
+    "sha256": "08f335891f212ed546b3c884b4bd4adcc87f81625906ea8527bd3087e09391f7",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/f2f9fbb7ece2220ea976033a.jpg",
+    "source": "https://cdn.myanimelist.net/images/characters/5/158303.jpg?s=05cfb653f8d89bdf8d77bc2741d070ba",
+    "bytes": 63387,
+    "sha256": "3e9b42f4eef8944aa98d0e374c4d9c5d7cda8743dbf4e8a0e5fb83a29dbb01e9",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/fb0a0237d209cc4cd51d771d.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1487/95651l.jpg",
+    "bytes": 73725,
+    "sha256": "4dfcdae8bf1194372ec0ad31ea3616bb6699127da25350aa89ebd226688d6230",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/dd5216fdf5bf83c3e3746021.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1522/128039l.webp",
+    "bytes": 150705,
+    "sha256": "5f579faf92e29b44ecb787b529191d2a9e8fdf0d8bcf96c8893e581e913eac92",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/d08e8e09ddd8ca05564c4111.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1171/109222l.jpg",
+    "bytes": 202700,
+    "sha256": "625b4430f9716ebd804769d958c96820318aaa4c63555e0eb9e21eae7b37c59a",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/1b35a28c19bf537841cfba49.jpg",
+    "source": "https://cdn.myanimelist.net/images/characters/6/163577.jpg?s=bf9c956970df723ac5be6e4f93b550dc",
+    "bytes": 51777,
+    "sha256": "3c8a0317ab69110d89272b64158940e93d5914795d6da29a6a529541236ad1e0",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/c7b19b5db5533fe3c7a04b93.jpg",
+    "source": "https://cdn.myanimelist.net/images/characters/5/480481.jpg?s=abe9942fc7985c6d3eea6c771df017a8",
+    "bytes": 75408,
+    "sha256": "48564a19e2999d6b38d3b6e98a83e07bbfb50ac9f9f00ff65288eb3c25393c74",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/98da0d467545ae88a38280a4.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/9/87197l.jpg",
+    "bytes": 57856,
+    "sha256": "0cd9958094fc55fa90755274f8b9abeac759a8a0fceea92d8da217d1a94e79b9",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/ffd097e2126d0b9a05f243ca.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/6/61891l.webp",
+    "bytes": 75386,
+    "sha256": "8d5631a4f0999b6a422f838d4ac028314e83f0abe96e652ae2dcf143081a8cfa",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/6af29f9e37ce1a871a5eb965.mp3",
+    "source": "https://medias.aniguessr.com/JujutsuKaisen-OP1-NCBD1080.mp3?v=1e4a9388",
+    "bytes": 384812,
+    "sha256": "25aef4e3bfdae9d5b3b6bd3376f8a429fbe0841e2505e2f3828f6945619bd05f",
+    "clipSeconds": 24
+  },
+  {
+    "path": "assets/media/bdecad66d0a416418e97ba3b.mp3",
+    "source": "https://medias.aniguessr.com/IsshuukanFriends-OP1.mp3?v=f46587fb",
+    "bytes": 384812,
+    "sha256": "1f71639d88c34c6c3497ada33d33d1f4edea4945af21cdf0bfe79721a3f5c9e9",
+    "clipSeconds": 24
+  },
+  {
+    "path": "assets/media/364b96f30711041b178e5aa1.mp3",
+    "source": "https://medias.aniguessr.com/KillMeBaby-OP1.mp3?v=0ab3a660",
+    "bytes": 384812,
+    "sha256": "48f9ac0e17669581e7feb3d7a3452b89ebf2cbcb4be1e580cc3864d875e0446d",
+    "clipSeconds": 24
+  },
+  {
+    "path": "assets/media/b031166da02efe79f2c3b0ec.mp4",
+    "source": "https://medias.aniguessr.com/IsshuukanFriends-OP1-Lyrics.mp4?v=0996a323",
+    "bytes": 684951,
+    "sha256": "1043fb14830514c4a777875da9eda56165036d64be5f95c9f9e023fbc8051ecd",
+    "clipSeconds": 24
+  },
+  {
+    "path": "assets/media/b8438fb9a04a8c7fc6626e35.mp4",
+    "source": "https://medias.aniguessr.com/JujutsuKaisen-OP1.mp4?v=0efb1e3c",
+    "bytes": 1284513,
+    "sha256": "065ef22fe1536c339c8fd25c21653829b941ac2ac83d4539551606488901267c",
+    "clipSeconds": 24
+  },
+  {
+    "path": "assets/media/3de4f8fa1807c679457f2216.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/5/19570l.webp",
+    "bytes": 57935,
+    "sha256": "66c2730025e68854859f73da0279307ad0499aaf2c9c0286aef7250602daa63d",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/5627ab97c079b82a585871b8.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1277/117155l.jpg",
+    "bytes": 91656,
+    "sha256": "6622f36591abd7433b53ca36f8c5b904a5969ecd47b0b139bf6dae302bb8c610",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/aac9d82689aded4e7f395111.mp4",
+    "source": "https://medias.aniguessr.com/KillMeBaby-OP1.mp4?v=819ad8de",
+    "bytes": 1973826,
+    "sha256": "3c95350935365c62f5de0514bdb846bd7e25235e88fe55faba05a8c24df10d24",
+    "clipSeconds": 24
+  },
+  {
+    "path": "assets/media/028b0bce6c8e7255d2ada521.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/10/83575l.jpg",
+    "bytes": 135757,
+    "sha256": "7fe1b02af9bbe67361c61aa61667bbb041cdb4ffc3c5b3ef49e3b6f9fe3438ab",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/aec0c80ae2cfb9d142f481c3.mp3",
+    "source": "https://medias.aniguessr.com/DarkerThanBlack-ED2.mp3?v=e22fb967",
+    "bytes": 384812,
+    "sha256": "f268a1f125e03a237d91ecd10036b839ddeb44ac0a37b500dd2cc5943b57eea6",
+    "clipSeconds": 24
+  },
+  {
+    "path": "assets/media/b0630858565888e44ac95a96.mp3",
+    "source": "https://medias.aniguessr.com/MierukoChan-ED1-NCBD1080.mp3?v=a0575676",
+    "bytes": 384812,
+    "sha256": "a76ac3b1a5b28771360d98926b1b9012eedd5b47b9bad6d51d9e3933c7fc6636",
+    "clipSeconds": 24
+  },
+  {
+    "path": "assets/media/c95a5fe0a4c551f730e2e91d.mp3",
+    "source": "https://medias.aniguessr.com/TariTari-ED2.mp3?v=059e910f",
+    "bytes": 384812,
+    "sha256": "dab43e9e1934a854a8c4f714ba2c37e3198e1661708c8967126568ad91a889eb",
+    "clipSeconds": 24
+  },
+  {
+    "path": "assets/media/2641938826d4b53c44f57a81.mp4",
+    "source": "https://medias.aniguessr.com/DarkerThanBlack-ED2.mp4?v=083ffcdc",
+    "bytes": 846881,
+    "sha256": "0f1b61e3b5024c8a373519d884a8fb18e978dd0a91961f6340667fd05abbe795",
+    "clipSeconds": 24
+  },
+  {
+    "path": "assets/media/dd79efc0fff6a7f46637675e.mp4",
+    "source": "https://medias.aniguessr.com/MierukoChan-ED1.mp4?v=d2d61f50",
+    "bytes": 843453,
+    "sha256": "cb655de4ec3429ac43f488771cda7d43ecf7a4dd278f2cbf7b1468e9005525d9",
+    "clipSeconds": 24
+  },
+  {
+    "path": "assets/media/0b55ae8c7a752f5897a7c2f0.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MTM4NDU5LUhlcm9pbmVzLVJ1bi10aGUtU2hvdy9IZXJvaW5lcy1SdW4tdGhlLVNob3dfMDAzLnBuZw==",
+    "bytes": 57672,
+    "sha256": "f48dede306a3826e1b16446b48bf6074ebfdd77bce0cacddbb1d0a4efc308c11",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/8e9222e1d5c3fa17eb7311de.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1122/96435l.jpg",
+    "bytes": 109948,
+    "sha256": "2b8dd89dd1d292fbed12f800260bdc81cebf4b216431a9c5f0d002455b0622ea",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/eb332c0d488b6e9c2b1ebc57.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MTM4NDU5LUhlcm9pbmVzLVJ1bi10aGUtU2hvdy9IZXJvaW5lcy1SdW4tdGhlLVNob3dfMDAyLnBuZw==",
+    "bytes": 65109,
+    "sha256": "39f50d9594bd91dea3d4977e009567588bc29724435f8afcb359a9c1f8947463",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/b42a434e91c39b862a6df1ec.mp4",
+    "source": "https://medias.aniguessr.com/TariTari-ED2.mp4?v=7fb4f0bc",
+    "bytes": 691450,
+    "sha256": "fef809edec57f1bbce49a0171a000ee53b36dc0b5395ed3a357687994031fbee",
+    "clipSeconds": 24
+  },
+  {
+    "path": "assets/media/dbd2c31fea4655905c06ead8.jpg",
+    "source": "https://cdn.myanimelist.net/images/characters/8/302316.jpg?s=6c9cad2a15c538e2bc7fd8a97ab806ce",
+    "bytes": 37177,
+    "sha256": "7a0d9af373fbdd7862be70c8838e411fd57c7816f263c9846be2b9a76ad52adb",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/c6ebb89377436b740b513db3.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MTM4NDU5LUhlcm9pbmVzLVJ1bi10aGUtU2hvdy9IZXJvaW5lcy1SdW4tdGhlLVNob3dfMDAxLnBuZw==",
+    "bytes": 78390,
+    "sha256": "36578514fbf6afa9648912c09cf20dfa7bb4b72c57b109dd985b12af6d8ace78",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/ec7a3a7aa68587754f40698b.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1500/103005l.jpg",
+    "bytes": 112638,
+    "sha256": "aad5827e52506de50b8d52ca8683a768284e69382c67d85c61dab4a4427bae45",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/ed4739971f6723a87824369d.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1498/134443l.jpg",
+    "bytes": 157982,
+    "sha256": "6625d5cc19c0627a8df393355a3bc2f397cf8f7033a71d3f5a7b01d56b40fefa",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/272432ecd2e93989ec4d825b.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1311/120270l.webp",
+    "bytes": 150692,
+    "sha256": "c4d79a730b7f39b2cd4827b7a34d32c08be3a5cbaa793563810780a2f36adfb5",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/4ebf570cf40e36c2b0645472.jpg",
+    "source": "https://cdn.myanimelist.net/images/characters/9/309871.jpg?s=faa6eee1fc55878afbc1625baf0c9f3e",
+    "bytes": 75971,
+    "sha256": "6ba9ba1e4abf585d27cc0c6694cf3cd901cbfad86da96d640614efa1324685d2",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/1523a149e2599c69a7ee1305.jpg",
+    "source": "https://cdn.myanimelist.net/images/characters/13/259327.jpg?s=aa8d9d2ead39a6add9b0c2cc36bb69b5",
+    "bytes": 87441,
+    "sha256": "d8cc9e629bf9e86bdb3b503578ab13e78ee95f77bfe713c6d4bc9191481e10fb",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/7b749e37b35a9f8d6f489443.jpg",
+    "source": "https://cdn.myanimelist.net/images/characters/14/401940.jpg?s=738c36550f7afd3f402a32a5bbef66c8",
+    "bytes": 50064,
+    "sha256": "d540e1f5e591f9176a3dbaf7d2a4bc27c526f30c0e0957d97f20285175b636fc",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/48721481ef218b53071d3784.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1470/138723l.jpg",
+    "bytes": 208520,
+    "sha256": "ab24c389a72f1ef31bec246174419f3fd6f46f2e0a1951ddf7c93d7e11afd4e7",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/3106ca345b3d33e83b52945d.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/4/51463l.jpg",
+    "bytes": 114880,
+    "sha256": "eda32dcf8ad3e58a7447976da44aa0211c080ad5cc3c63b2ec965f8e6c62bc08",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/67f88dd1d1028ef30a54a491.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1244/111115l.jpg",
+    "bytes": 144721,
+    "sha256": "dfbfd56ef207899bf92631fd714f20ef31e79a32b654e8b8b1bc0fd7b651a9f5",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/5bf3ddc83671aafe3c67c1e0.jpg",
+    "source": "https://cdn.myanimelist.net/images/characters/12/64076.jpg?s=94a9ed01e067f3381fec59739a276e9e",
+    "bytes": 48759,
+    "sha256": "338c2ad98f5f19b401a830a295c5d3764cf064c80f3ba3c12ab95091d87796e9",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/14a4ae4b31b5affad60975c5.jpg",
+    "source": "https://cdn.myanimelist.net/images/characters/3/554960.jpg",
+    "bytes": 99572,
+    "sha256": "ef07f64207c682f6008bf24c9269830b71e5961b2ea0838f483fe2b6531001c5",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/0f36a01704a34680ba2440ac.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1393/116601l.jpg",
+    "bytes": 83522,
+    "sha256": "1d5e9e36e3fc8aba03683f1fb107d611726a96d639d4080a83bfaaa89e509216",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/c3745808c64e5c9b5921d7d1.jpg",
+    "source": "https://cdn.myanimelist.net/images/characters/8/101119.jpg?s=01555a94825d50a6f537ae41f0392ce2",
+    "bytes": 51692,
+    "sha256": "e34655a05591a82647b4692a4be57f6bf1ca4899f4fea19caf2b30648c20d62d",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/bcbe15bbfaa29b6fba4f8f0a.jpg",
+    "source": "https://cdn.myanimelist.net/images/characters/12/321856.jpg?s=e12e99e0cdb6ce9185130fc802536a7d",
+    "bytes": 32599,
+    "sha256": "256a3af7c9c6f06dd18d1080ab278b012e238e728c09ad3382d689e4df9edc90",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/1484d2d05707d850f8b21a75.jpg",
+    "source": "https://cdn.myanimelist.net/images/characters/11/150391.jpg?s=cf8afe00a695d1002bcd861fe15c7d38",
+    "bytes": 84356,
+    "sha256": "61d7be59d16fc019aa82eb6e6f87bb7cab86970034e6ef60a1a0c435e6e97789",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/f0c9116c38b1c3e87747a8dd.jpg",
+    "source": "https://cdn.myanimelist.net/images/characters/8/256289.jpg",
+    "bytes": 99822,
+    "sha256": "500b86dd98bc111208835a00a13bf70efb024f34cfd96d12a524d13dfde63b30",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/034859be22ecd109930663c0.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/8/83417l.jpg",
+    "bytes": 77026,
+    "sha256": "9f172b371a0b9b0c87a62f9a5ca76f9f93cd3a69e72f4909896338fda31caf3e",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/9062e135e872f8ff017c8506.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MjE4NjAtV29ybGRFbmQtV2hhdC1hcmUteW91LWRvaW5nLWF0LXRoZS1lbmQtb2YtdGhlLXdvcmxkLUFyZS15b3UtYnVzeS1XaWxsLXlvdS1zYXZlLXVzL1dvcmxkRW5kLVdoYXQtYXJlLXlvdS1kb2luZy1hdC10aGUtZW5kLW9mLXRoZS13b3JsZC1BcmUteW91LWJ1c3ktV2lsbC15b3Utc2F2ZS11c18wMDEucG5n",
+    "bytes": 47568,
+    "sha256": "bf64a30d2b41a9fce6d47cdb295ef6b4efb9c6a273ac834ac4daeb8b9a6852a6",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/1df2ef08536cd6ad6faaa37a.jpg",
+    "source": "https://cdn.myanimelist.net/images/characters/5/317631.jpg",
+    "bytes": 52362,
+    "sha256": "49a0a441e84b20040c61fc55c4284e39608f3695760634f336e4e5c5a588a886",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/4aed8f9aa57889f87e6ee159.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/3/85429l.jpg",
+    "bytes": 139033,
+    "sha256": "55ee82d91940f5427757dba625645901b97811c8e002fa86fc18e92e13c3a484",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/a899e9470b202ae51f1c5f86.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1140/154457l.jpg",
+    "bytes": 120681,
+    "sha256": "257a82e1ac82ca654aedacc336c593565554b14509f81f7daa8f0906a55cd664",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/3d2ef60416bf0b5208c2c84f.jpg",
+    "source": "https://cdn.myanimelist.net/images/characters/4/194003.jpg?s=e858f80777cfd667d4e680a642952ff8",
+    "bytes": 62416,
+    "sha256": "f97bdcbe54befb67a062b020e573b68e4dae9346cf5f5ee56cf6cc9df37353a2",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/298636b6fdcca2f01057c3d0.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MjE4NjAtV29ybGRFbmQtV2hhdC1hcmUteW91LWRvaW5nLWF0LXRoZS1lbmQtb2YtdGhlLXdvcmxkLUFyZS15b3UtYnVzeS1XaWxsLXlvdS1zYXZlLXVzL1dvcmxkRW5kLVdoYXQtYXJlLXlvdS1kb2luZy1hdC10aGUtZW5kLW9mLXRoZS13b3JsZC1BcmUteW91LWJ1c3ktV2lsbC15b3Utc2F2ZS11c18wMTAucG5n",
+    "bytes": 77007,
+    "sha256": "4e446637c7da55ca9015eb0f2d9815c7eb0fad3208fcb6587ed93a490e5a3380",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/f7c50360ff238ef9f6a6aac9.jpg",
+    "source": "https://cdn.myanimelist.net/images/characters/10/583514.jpg",
+    "bytes": 70871,
+    "sha256": "83d9fd75e9ea036d20ee9e00641cae3099c2f5b9a4643d6081dc740c57f6433a",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/310ea8e0fae19fafdd240090.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/12/20669l.webp",
+    "bytes": 72799,
+    "sha256": "ce2983f989aa49c313edc97ed11d7ce5cf362756d431ed47642571795ccf2903",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/3399abf69ee4f39e65de5af8.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MjE4NjAtV29ybGRFbmQtV2hhdC1hcmUteW91LWRvaW5nLWF0LXRoZS1lbmQtb2YtdGhlLXdvcmxkLUFyZS15b3UtYnVzeS1XaWxsLXlvdS1zYXZlLXVzL1dvcmxkRW5kLVdoYXQtYXJlLXlvdS1kb2luZy1hdC10aGUtZW5kLW9mLXRoZS13b3JsZC1BcmUteW91LWJ1c3ktV2lsbC15b3Utc2F2ZS11c18wMDMucG5n",
+    "bytes": 32595,
+    "sha256": "46d314d124a382a892d7f36b5bd492498c0f0e195e9928f10cb7ac821fcd6477",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/aa626098a82caceb950db8be.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1277/142022l.jpg",
+    "bytes": 199107,
+    "sha256": "9e8a6bca72f3e268624e2f78802eaccf211038bdbbe075d2e2d06446c3921122",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/bc6e278b28a5a5cec46f789b.jpg",
+    "source": "https://cdn.myanimelist.net/images/characters/8/274191.jpg?s=1d5ec929f32e72615dea0c8ee73f973a",
+    "bytes": 55094,
+    "sha256": "d246b39fa9dceea3859bfed19d4d1ab841271f6e1193032dff1991bb28bd8083",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/db8140fdf98ba02b7a051723.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/4/85260l.webp",
+    "bytes": 119071,
+    "sha256": "af8caf64f96c3972b506529cc038d96d2417485e533e5c28289d2dcc03fc9fbc",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/5cc472fd83fd03692739472f.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1622/111483l.jpg",
+    "bytes": 135561,
+    "sha256": "aabc2db17ddd6f4a9e685454e94fd8044264f073175485f69bff5025a81e456f",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/cb04e09ec1f1a9d3bb669310.jpg",
+    "source": "https://cdn.myanimelist.net/images/characters/14/327409.jpg?s=bec535073a53e3c2b5250e72b388d09c",
+    "bytes": 56354,
+    "sha256": "f58432365421b6a8b87d137bde89338d18ea31eafce307c61e11a747a5ae1721",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/4220c8d7220de01ca2da7d8b.mp3",
+    "source": "https://medias.aniguessr.com/DragonBallZ-OP2.mp3?v=744a5283",
+    "bytes": 384812,
+    "sha256": "381339455651a497f976b0f11a30841085a63b2fc134d187b258ce007c841e10",
+    "clipSeconds": 24
+  },
+  {
+    "path": "assets/media/d64b19f4dd3027f2502703aa.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/9/80746l.jpg",
+    "bytes": 141360,
+    "sha256": "d7a38aac882ebd84c44be53d30b24e0f8e6e17bf024cb741afcf872193e4ab05",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/43780dc93e8b481f3e200915.mp3",
+    "source": "https://medias.aniguessr.com/Araoto-OP1.mp3?v=7b96484a",
+    "bytes": 384812,
+    "sha256": "a5ac5938c72809a00fcb7791717a2178a480868be3a16ffab480b2128cb1e0b9",
+    "clipSeconds": 24
+  },
+  {
+    "path": "assets/media/a947900a0ac53a54e3ec218f.mp3",
+    "source": "https://medias.aniguessr.com/ShakunetsuNoTakkyuuMusume-OP1-NCBD1080.mp3?v=ad1ef9e3",
+    "bytes": 384812,
+    "sha256": "c5ae7da5fe2ea868145fbad1fe651f21bcd266bc1040023c467456305674b16b",
+    "clipSeconds": 24
+  },
+  {
+    "path": "assets/media/997132261389ad92375066d5.mp4",
+    "source": "https://medias.aniguessr.com/DragonBallZ-OP2.mp4?v=327453ef",
+    "bytes": 2077786,
+    "sha256": "4bf16a151d87c90d168be08df8ed4f7800e519f2f15be4a9c8f76bb597239fed",
+    "clipSeconds": 24
+  },
+  {
+    "path": "assets/media/a2e39604c448e0a502f1b787.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1864/93518l.webp",
+    "bytes": 79352,
+    "sha256": "2f730d128fcc08ed0f9fed88eab8d7f67cc71c7ef6a60f4783091f049f93342c",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/18afbd1ae86f9f3a81f7c434.mp4",
+    "source": "https://medias.aniguessr.com/Araoto-OP1-Lyrics.mp4?v=2a3a9513",
+    "bytes": 1508999,
+    "sha256": "021e5699df665ac6a46d90a956d9cd0661488c3d5c5f53982d89744b25e3b7de",
+    "clipSeconds": 24
+  },
+  {
+    "path": "assets/media/7f378724ecf34359d9fef657.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1168/148973l.webp",
+    "bytes": 124894,
+    "sha256": "3d31178f5b2e537b53628a956265e9439372c149029d12e24bdbbd6c7141083e",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/1a6b392cee859cfddc5e082d.mp4",
+    "source": "https://medias.aniguessr.com/ShakunetsuNoTakkyuuMusume-OP1-Lyrics.mp4?v=46de9090",
+    "bytes": 2049891,
+    "sha256": "d513208f0867c597dfed579a0628d4d97e59e3bbb76745182bdb4fb01ec7cdfd",
+    "clipSeconds": 24
+  },
+  {
+    "path": "assets/media/e50f5b21c8124600a543564a.mp3",
+    "source": "https://medias.aniguessr.com/WotaKoi-ED1-NCBD1080.mp3?v=df9607ec",
+    "bytes": 384812,
+    "sha256": "0a50d151bbf78545235ca9a92eb357286dc540c42ac33dbac5ab44fee21d506f",
+    "clipSeconds": 24
+  },
+  {
+    "path": "assets/media/8ee377165ca130913b72cee3.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1571/134525l.jpg",
+    "bytes": 154293,
+    "sha256": "ac858c59b0ab0e466b810322ddada2e0a98725654fb09a68c89b035240e4fcdd",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/ce26c35675ba83408ad42557.mp3",
+    "source": "https://medias.aniguessr.com/ArslanSenkiTV-ED2.mp3?v=88bd9b8b",
+    "bytes": 384812,
+    "sha256": "5b8c7f0ff7bd1c0257b4cde66900e5610d92e42f6d06a428f47f74d5234b7849",
+    "clipSeconds": 24
+  },
+  {
+    "path": "assets/media/9afd6a149e294f8e8700626a.mp3",
+    "source": "https://medias.aniguessr.com/LiarLiar-ED1-NCBD1080.mp3?v=538495d4",
+    "bytes": 384812,
+    "sha256": "d1dffaaa451b321b3dcafab35ed4df90617ff26fce6a7c04453a6450d87bd774",
+    "clipSeconds": 24
+  },
+  {
+    "path": "assets/media/57376cc94e7d1cc5e2244e84.mp4",
+    "source": "https://medias.aniguessr.com/WotaKoi-ED1-NCBD1080.mp4?v=f8ffe6ac",
+    "bytes": 787125,
+    "sha256": "ecaea008d88707fd70e4d3f8c213b0430a1987df16976d1997b1db2b6c759cdd",
+    "clipSeconds": 24
+  },
+  {
+    "path": "assets/media/58db6f751980130091412788.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MjA4NzItUGxhc3RpYy1NZW1vcmllcy9QbGFzdGljLU1lbW9yaWVzXzAwNC5wbmc=",
+    "bytes": 60647,
+    "sha256": "93498ee80092b2fae67fb215c672c7dd1a0c1f645b54ebd8c443a7131898b7c6",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/43fbbe3dbc52f031e075acc6.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MjA4NzItUGxhc3RpYy1NZW1vcmllcy9QbGFzdGljLU1lbW9yaWVzXzAwMi5wbmc=",
+    "bytes": 70629,
+    "sha256": "3e09c14e05786768c2916cd3b72e052c3fa775efca46e214f0e81b6515fb5744",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/42ab3cb825444707f78452de.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MjA4NzItUGxhc3RpYy1NZW1vcmllcy9QbGFzdGljLU1lbW9yaWVzXzAwNy5wbmc=",
+    "bytes": 85368,
+    "sha256": "d71a595658074200171bfa9434cbd8206256826a59090f05b25a2bcb04944910",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/a0e18a4e9b1153d241de5b39.mp4",
+    "source": "https://medias.aniguessr.com/ArslanSenkiTV-ED2.mp4?v=386f1c1f",
+    "bytes": 1629847,
+    "sha256": "58b1fcc6df5d7bb08375133b3c6b9ac21e4cb53f5a2370b80476f3776f3a37fc",
+    "clipSeconds": 24
+  },
+  {
+    "path": "assets/media/a910746813525398d8511f30.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/4/72750l.webp",
+    "bytes": 95010,
+    "sha256": "bca7c6a5ebcb9b96fac93e3a9a0f3df866be704f3818c0b35e7c92afd3d0c538",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/5d1a1b5e4ac7389b72211bf9.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MTUwNjk1LUJlYXN0LVRhbWVyL0JlYXN0LVRhbWVyXzAxMy5wbmc=",
+    "bytes": 77398,
+    "sha256": "5d720d24d2e54209c36a52361e757d5081665f2cadac467c1d6bd6fa25d4c592",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/2b007a2235f637bd72c999ee.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=NTU1OTctSGFuYW5vaS1rdW4tdG8tS29pLW5vLVlhbWFpL0hhbmFub2kta3VuLXRvLUtvaS1uby1ZYW1haV8wMDMucG5n",
+    "bytes": 47859,
+    "sha256": "020e5adbc42e36309a3230471758ed7d0343a5b9e6e255ca6782ad9c91e43bf2",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/ee85399499e492cd678625fe.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MTUwNjk1LUJlYXN0LVRhbWVyL0JlYXN0LVRhbWVyXzAxNC5wbmc=",
+    "bytes": 103541,
+    "sha256": "cd40dbebb6274e2bf7391215eddb312d3dbf13ed480a061f9a1dd772fc5a0f98",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/e27d3935417b8fcdd2cc64da.mp4",
+    "source": "https://medias.aniguessr.com/LiarLiar-ED1.mp4?v=4b32b86c",
+    "bytes": 1412202,
+    "sha256": "3f6aab0d0c5add83a6b71f7b8944bd592e7f9d9d8db4f2edb09d2a932e83c754",
+    "clipSeconds": 24
+  },
+  {
+    "path": "assets/media/4e6bf63a4f248e8b394e8aa3.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=NTU1OTctSGFuYW5vaS1rdW4tdG8tS29pLW5vLVlhbWFpL0hhbmFub2kta3VuLXRvLUtvaS1uby1ZYW1haV8wMDUucG5n",
+    "bytes": 52232,
+    "sha256": "638621ede6ecfc536c6c409bd04ba35ce6d79ca1041b09e5a6ac4a02ed84024c",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/5df18bc4a733b050a2f8b47e.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/9/64225l.jpg",
+    "bytes": 91573,
+    "sha256": "0d911f0ddb2765e461555b867db53d244d9d82b72150a110a64f070942214e26",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/5998282ff86a37283dd222ff.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MTUwNjk1LUJlYXN0LVRhbWVyL0JlYXN0LVRhbWVyXzAwNi5wbmc=",
+    "bytes": 69810,
+    "sha256": "d2281f9a30269a7d6aab2ec54229321d96c2c7de8fe0e46071ae83ecd82c6b33",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/0b6468a3ca4c7a4c99bdf11c.jpg",
+    "source": "https://cdn.myanimelist.net/images/characters/12/312327.jpg?s=b98804bd8b687e490ab0f564e5ae5887",
+    "bytes": 58212,
+    "sha256": "e8c58c1edcd21360f380aa91c31f862fcfa702f6d9355ef7bc35bf6016348484",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/0d20f768812c782c5493b736.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1084/126652l.jpg",
+    "bytes": 130511,
+    "sha256": "c0805a4b7fb3b16d2d7cbeb937798cde47d573f444a8b267c3b09306e66557e6",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/ad4bc780235e278505ce5f94.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=NTU1OTctSGFuYW5vaS1rdW4tdG8tS29pLW5vLVlhbWFpL0hhbmFub2kta3VuLXRvLUtvaS1uby1ZYW1haV8wMDQucG5n",
+    "bytes": 78234,
+    "sha256": "23a00e86c49dfea549115864a815899daa9665b9750ca82493fa8335538691b4",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/4dba7422c4e50937b1a3fdcd.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1646/141411l.jpg",
+    "bytes": 129513,
+    "sha256": "9b57e04289049ff290615fa8ce0d515d05285ae2c32802cbe0de991f6294e57d",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/881bf6b2557ee8fcbfdcf2db.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1130/120002l.jpg",
+    "bytes": 158066,
+    "sha256": "1354252d228f9c5218853677f46ccf162af02f4e304aaad97433c9e96e7719e2",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/3482a366ad8d25990271f8a4.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1987/117507l.jpg",
+    "bytes": 185306,
+    "sha256": "37b604448eeb3b73293fb4c2f1e2767eea7ca737ab6cee3f673de202d3a12a52",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/4192c36aac9399fa8221ef9f.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1541/147774l.jpg",
+    "bytes": 118335,
+    "sha256": "288b6f234d9e3d54011057b5b88cf478206cadf8095f33154d19d9f2d81cc693",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/965a9fb381b03666a44895cf.jpg",
+    "source": "https://cdn.myanimelist.net/images/characters/15/428175.jpg?s=478448b23f60ae7db0e89def84a8b145",
+    "bytes": 72125,
+    "sha256": "76d3bbc5d1afb83b475d7012ef2c113257ae72d43533d6e34c6a595d39da9bd9",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/8c04cfaaac525db429f27d1b.jpg",
+    "source": "https://cdn.myanimelist.net/images/characters/2/89610.jpg?s=29129a4fc1a15754c70c463281a25609",
+    "bytes": 70587,
+    "sha256": "2edd60b4109c2b4c93a517f74debab7acdeea0292d3b9a1e83799446ba0e1214",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/d79d603f5be4ec1bdcdce15c.jpg",
+    "source": "https://cdn.myanimelist.net/images/characters/12/98077.jpg?s=1c0bf6a253287b0c1ed77d8d9530cd42",
+    "bytes": 63932,
+    "sha256": "1152f638ab32e58289c4c0b969e512def55f011ffd4dd9a49d2ccd810e2ce860",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/d2e3e70e5011b5208045d971.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/10/77957l.jpg",
+    "bytes": 63284,
+    "sha256": "a56f3211fe8cefc5bbdcbca06e07b2a352e123734136ee25bad32f99c576323d",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/aacf29d8614783cb6b5e76fc.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1429/95946l.jpg",
+    "bytes": 105779,
+    "sha256": "3621cadad098067cfdcf05d5a885e4a27030d273315d982985df00952465d257",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/3632edb367e836a4fe93fadd.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1478/91837l.jpg",
+    "bytes": 134929,
+    "sha256": "b14315ebd882b946988e81f65918b35b4638c3c10926a9ece1660590811bac05",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/956bc08673ef9346f4f7a98d.jpg",
+    "source": "https://cdn.myanimelist.net/images/characters/12/252829.jpg?s=ae2fcf8361fd44eeae2dc36fbed111ec",
+    "bytes": 57467,
+    "sha256": "f19e124a95219e73877261c9504a4e773d47b51fb61b4586af67ba9477a92591",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/b68083b983639c544beb6b43.jpg",
+    "source": "https://cdn.myanimelist.net/images/characters/5/300491.jpg?s=b39ed0cf50e4e1ae7413e1ed59481ef8",
+    "bytes": 41175,
+    "sha256": "f77d1688729753bc0fc6d348bc3d7c4c37d86fded0373da26a311547fbdfb134",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/31232bd34ca76d0f59c5723e.jpg",
+    "source": "https://cdn.myanimelist.net/images/characters/6/352162.jpg?s=22722f5c80adb883523f805bf18b34f2",
+    "bytes": 72431,
+    "sha256": "19a9272dd3043daa5257e4f869012c4116042b07402ef715d6412324e4a9f9f5",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/1f701c58cb8f5cd56a00293b.jpg",
+    "source": "https://cdn.myanimelist.net/images/characters/12/307107.jpg",
+    "bytes": 50044,
+    "sha256": "dd5e9e60a262bbf80aae2a0ba1bf6c5c6ee3d57ee8b38d6b150e19acd0d9c924",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/1ce8890c6eb0dde3a0de6950.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1959/156735l.jpg",
+    "bytes": 159156,
+    "sha256": "d767b85789ad59594750855069168f0ac786b7a89717f431008be7e1e0fb4a26",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/890267950b58e6255c8f4d1a.jpg",
+    "source": "https://cdn.myanimelist.net/images/characters/5/203279.jpg?s=f6f9578e2522acdd56d64625ef7f79bc",
+    "bytes": 47986,
+    "sha256": "63b2b4bbbb5c48a5dbb7335dbc8e9ca9fcceb9c88b618aed837ad123774d2904",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/97d4328bd80b0607412e3dc6.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1955/123132l.jpg",
+    "bytes": 133678,
+    "sha256": "0c7e3e1cfea06397c23176d3cc74f5ba55c7d1dbe37f4faa0168048d90179628",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/7aefa7721d12fe542aaef632.jpg",
+    "source": "https://cdn.myanimelist.net/images/characters/4/161127.jpg?s=3e7f8781e90eeecbd2b7da5f1e82243a",
+    "bytes": 73400,
+    "sha256": "54e523fc3d964777e6a8bb37124d3ed379fc49013e95a9aa79b5e875aa4d3663",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/254d1f244b9a579b801a429e.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/5/35423l.jpg",
+    "bytes": 130988,
+    "sha256": "cf4f0fcf7ff81c63738d9a6972e192f65f0190e88049209442f2d2f08626f510",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/fa6ed471807ec7397195ad1f.mp3",
+    "source": "https://medias.aniguessr.com/AkameGaKill-ED1.mp3?v=7f490220",
+    "bytes": 384812,
+    "sha256": "0f4b60e71dbfd0f41807741ad8d7b76b6ed55997e64015761d8f2505ef15884d",
+    "clipSeconds": 24
+  },
+  {
+    "path": "assets/media/f8b9a78ca773f8246c51ac0c.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/8/39333l.jpg",
+    "bytes": 134989,
+    "sha256": "eb86cdb30839d385e3399d44818c529447ea26b8bde883308440e31b52f5b66f",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/4604638958966ef7b3d2ecb5.jpg",
+    "source": "https://cdn.myanimelist.net/images/characters/15/88585.jpg?s=e62eeca3bacef0d09bb6805bc15c7ba3",
+    "bytes": 91793,
+    "sha256": "1976f85320c70544d9cb27f6e5c5938662749e126e2541a3a6564dd769e5f523",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/8d3680d57a06317cc28cbeb0.jpg",
+    "source": "https://cdn.myanimelist.net/images/characters/15/177301.jpg?s=9895167a020baa7503a65f499764b188",
+    "bytes": 87345,
+    "sha256": "707abb266316787393e31d2a2f56cdf9b9cadc607418ab02925393b83d8096ad",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/065b5ddaed2c416d365c54fd.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1839/122012l.webp",
+    "bytes": 71398,
+    "sha256": "4bea5b586a0eb6d09d7891cdf53abcd6c5dd0f02233de2ca29d5cf7ff01c8b6a",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/67118ca7dd9b40f3e7b520aa.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1015/138006l.jpg",
+    "bytes": 184100,
+    "sha256": "e6286356439de0465954ccc90f738f940bb71a03ee502e0e01b89e1241a45317",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/df373bf4e1d6c52b4a1e94ff.jpg",
+    "source": "https://cdn.myanimelist.net/images/characters/7/451064.jpg?s=cf44bbaad09552c6765aeeae300c225e",
+    "bytes": 62059,
+    "sha256": "4b5edf53f461c8cad88d3d3e74519539f541c8acae336b93dcfaee493918f65b",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/b0ae04c4333cce24bd12c444.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1310/117188l.jpg",
+    "bytes": 106617,
+    "sha256": "c17d29a35c149bd76ea8378d61799eb2cc5a575bf6dbacc6489c4293b4879d76",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/cdc86178cab79ef4f2db1660.mp3",
+    "source": "https://medias.aniguessr.com/SousouNoFrieren-OP2.mp3?v=5b0e5ce3",
+    "bytes": 384812,
+    "sha256": "f61c276ca2ece88811e53cc4f0e7cf658b2b601cc340e4b2c0b5651510283371",
+    "clipSeconds": 24
+  },
+  {
+    "path": "assets/media/5b2da9c5572718e76253a824.mp3",
+    "source": "https://medias.aniguessr.com/KyokouSuiri-OP1-NCBD1080.mp3?v=a146d3e4",
+    "bytes": 384812,
+    "sha256": "42dd7db12af94c5ab51c0a7405464fb1a8d78b28b4147c914d7bf7c685f7356c",
+    "clipSeconds": 24
+  },
+  {
+    "path": "assets/media/908a8e0857b784e6487f2b48.mp4",
+    "source": "https://medias.aniguessr.com/AkameGaKill-ED1.mp4?v=5dc1b157",
+    "bytes": 851616,
+    "sha256": "adeeb7d17f40e97cf82cf951a9f8e45f679ff639bd19f62b0b33b48ded1af16f",
+    "clipSeconds": 24
+  },
+  {
+    "path": "assets/media/22a3b3aa5d0edb686a926ac8.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1944/149834l.webp",
+    "bytes": 110428,
+    "sha256": "5f3633db7c41894c60e5c828e1cfa801f83e5520c589506fb9ea73417e303217",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/250838906f03986b1690c451.mp4",
+    "source": "https://medias.aniguessr.com/SousouNoFrieren-OP2.mp4?v=972f0f39",
+    "bytes": 1577601,
+    "sha256": "328850fe430cea723c0c62589734748f36df5ab10729ce2168ac1e47b964d1d7",
+    "clipSeconds": 24
+  },
+  {
+    "path": "assets/media/0e06710852a36b9cd55b0245.mp3",
+    "source": "https://medias.aniguessr.com/KodomoNoJikan-OP1.mp3?v=e4a2f707",
+    "bytes": 384812,
+    "sha256": "b6e5116f25a72fc8e387305f172c30b6a49f33ff9c5d5f58f262d2676747b9c3",
+    "clipSeconds": 24
+  },
+  {
+    "path": "assets/media/2f399bcbadee20753f120b11.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1806/126216l.webp",
+    "bytes": 94905,
+    "sha256": "8ee37d3dc45e1b34159312397ad77a929de8b749a24fcf98133e012965b07730",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/e3fe753480b43fd5128f72f7.mp4",
+    "source": "https://medias.aniguessr.com/KyokouSuiri-OP1-NCBD1080.mp4?v=a910cb81",
+    "bytes": 1959427,
+    "sha256": "673dc0436e821e0a8b486ea1bfcd34f4fcae51d33e74af1ce0190045ac8ed1df",
+    "clipSeconds": 24
+  },
+  {
+    "path": "assets/media/0c6e7ea01e8fe6efd5bf1d19.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/4/79413l.webp",
+    "bytes": 118473,
+    "sha256": "b527770f7d937fe3905c2b46c419a1b124bc6ddf89f1203beeda5a1ff51c1c98",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/fd362e543a9821b1d85f15aa.mp3",
+    "source": "https://medias.aniguessr.com/ChainsawMan-ED2-NCBD1080.mp3?v=27327813",
+    "bytes": 384812,
+    "sha256": "b473c2ab7642ab81a82afdf8ea395da32a788c71692ec9181a04e3a69656d492",
+    "clipSeconds": 24
+  },
+  {
+    "path": "assets/media/98ad52ed2df78448827aa963.mp3",
+    "source": "https://medias.aniguessr.com/Mayoiga-ED1v2.mp3?v=3a53802a",
+    "bytes": 384812,
+    "sha256": "34d5caca967a9d683240b5a5bfcafbd5ca61cde529fa8e6313de17edf55f0062",
+    "clipSeconds": 24
+  },
+  {
+    "path": "assets/media/cc75c944023fc5469e4e61d7.mp4",
+    "source": "https://medias.aniguessr.com/KodomoNoJikan-OP1.mp4?v=4e91740f",
+    "bytes": 2312025,
+    "sha256": "c4db5142b42590d997ea703514cf8ee8dad7db555fa29106de19c3441b28c8f5",
+    "clipSeconds": 24
+  },
+  {
+    "path": "assets/media/44c1fcb0ede64f1fe793a0a2.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MTg2NzktS2lsbC1sYS1LaWxsL0tpbGwtbGEtS2lsbF8wMDYuanBn",
+    "bytes": 60611,
+    "sha256": "64f89f944f4ee2b820c461aa8e4e30c949c83a8c472295d955a86f5fa6543239",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/ddbb8488e4c7f6c39cba6b97.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MTg2NzktS2lsbC1sYS1LaWxsL0tpbGwtbGEtS2lsbF8wMDUuanBn",
+    "bytes": 68558,
+    "sha256": "3507338d9c5fe87655cdb15b13904365107e26168705b50cfcfa5a9f335c42aa",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/596ed1a3d4578eb839b6124d.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MTg2NzktS2lsbC1sYS1LaWxsL0tpbGwtbGEtS2lsbF8wMDIuanBn",
+    "bytes": 59193,
+    "sha256": "5afe246eaa0e87a8341683adada4a7f85409ee7d3cc50c47b66196358e4e9fc4",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/0a01aed4db616dda01e9e89c.mp4",
+    "source": "https://medias.aniguessr.com/ChainsawMan-ED2.mp4?v=75fd5b8e",
+    "bytes": 1069626,
+    "sha256": "c5dacb8e08fafa4cc1bc1bdb2b20aa9293b8c001b533eeb1661b2f013f1067df",
+    "clipSeconds": 24
+  },
+  {
+    "path": "assets/media/bd4160d93ebe16d9b23e3597.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1464/111943l.jpg",
+    "bytes": 181801,
+    "sha256": "11f12b75bf97c406eedca84dfd517446bfa1a3bedcbd4aa8055b011ef52157b2",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/9d3c6d199829065d4b2a1c42.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MTAxNTczLUJsb29tLUludG8tWW91L0Jsb29tLUludG8tWW91XzAwMy5wbmc=",
+    "bytes": 53916,
+    "sha256": "a675f5eb9bdd6778b2ddc18aab6ae9bd499c705e2d0ff8043b782bfc981a974a",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/06c9472770b5c6ce226714f8.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MTQ3ODg1LVBsYXktSXQtQ29vbC1HdXlzL1BsYXktSXQtQ29vbC1HdXlzXzAwMi5wbmc=",
+    "bytes": 92700,
+    "sha256": "ccaa9362488554d58409864e50b7520630a0dc9161d4a6ea5fc4ec99a6eacd67",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/550c6011b31510d20dd7d7ad.mp4",
+    "source": "https://medias.aniguessr.com/Mayoiga-ED1v2.mp4?v=58bd5e6f",
+    "bytes": 1323410,
+    "sha256": "ac36d4de48563ce708b0184f47b8802777a7b483dbd649464af78c14c1be2f0a",
+    "clipSeconds": 24
+  },
+  {
+    "path": "assets/media/8dc68228eed99d24c1512d4e.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MTAxNTczLUJsb29tLUludG8tWW91L0Jsb29tLUludG8tWW91XzAwNC5wbmc=",
+    "bytes": 73835,
+    "sha256": "7a1de97406359ef4fb0ce02312e6f96c94e66e21a91a02676f30501b6d7aa26d",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/edfa9258b544ba5d05d40d1b.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1244/138851l.webp",
+    "bytes": 122823,
+    "sha256": "accd215c285688261cd63870204c81582efd7d13a4a3184defa481d883855df1",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/3a318e0761d6807826a989fa.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MTQ3ODg1LVBsYXktSXQtQ29vbC1HdXlzL1BsYXktSXQtQ29vbC1HdXlzXzAwMS5wbmc=",
+    "bytes": 67880,
+    "sha256": "6652b06abb71e8372ed550505ea64db149a6a9a39f91506e1e05f0ea223c5cbf",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/53c93377fb6d0a51e897c4c8.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MTAxNTczLUJsb29tLUludG8tWW91L0Jsb29tLUludG8tWW91XzAwMS5qcGc=",
+    "bytes": 70319,
+    "sha256": "dc7beb0f7bc5acc672f8c63b608de2a56483d99712c045ed5c0f8747f94f03f9",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/365e84e413b7d34094d8640f.jpg",
+    "source": "https://cdn.myanimelist.net/images/characters/15/307148.jpg?s=20f8bf1d3a9854be84b67367849b1322",
+    "bytes": 60367,
+    "sha256": "1458d675d2b43b097381940fa9be76ab3e9c414a3c793b4c93b2a38f11eef16d",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/1974a30c90b14ccf48004d87.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MTQ3ODg1LVBsYXktSXQtQ29vbC1HdXlzL1BsYXktSXQtQ29vbC1HdXlzXzAwMy5wbmc=",
+    "bytes": 37643,
+    "sha256": "499e733eae9a61ae6256c1a21de3970d073b40430d5eeae2168778b4f3e92883",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/a11c0a94df1f32b03dc961b4.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1783/96153l.webp",
+    "bytes": 70676,
+    "sha256": "895caa38d5c289618a1928b619d6ad21c9070041daabd24724842889c0166e0e",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/a7fb3c1455aa5d4429d3a034.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/3/22605l.jpg",
+    "bytes": 83639,
+    "sha256": "3ef4da65a0702a4f1a85ac48731b862a95960c5e5b69755d254c83b21ac2744f",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/c70cd4e07ca7ea012de69558.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1123/134677l.webp",
+    "bytes": 78316,
+    "sha256": "46cea0b11b786c52cebbc8a9bf027dd7598351e53fd38f28c19cf99e9f1f1835",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/585e4f4d1d7622a0f993d7e5.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1456/115123l.jpg",
+    "bytes": 196640,
+    "sha256": "30aa7c237e258f58a70b1ab63c6bd5776e8605613acb0371eb1865b7043942b9",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/a87484085446713d49ae6306.jpg",
+    "source": "https://cdn.myanimelist.net/images/characters/4/65909.jpg?s=963d04e59cafa8421099bb6a3323943a",
+    "bytes": 67894,
+    "sha256": "5dc2d96588a920aaadd0de5cf4c2b0c41b481636c2eed0bb161f4e05490f8f8c",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/52b12f14d00815314f4d305a.jpg",
+    "source": "https://cdn.myanimelist.net/images/characters/5/399120.jpg?s=b08096857284dfdfe1c64e60c4ecc1e7",
+    "bytes": 70778,
+    "sha256": "12a3d533c4f59a7130a17f4ff5c176b605468e5d1c26c14462d9eed54fa4aa30",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/d9eda25252a5cd8a4ba8b197.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/7/80262l.webp",
+    "bytes": 153229,
+    "sha256": "9ecd021d4f58460661dc42783087569dfea561529ee3df6d3a13bd9fae0fdaab",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/b106bca019558751518cf8bc.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1880/113766l.webp",
+    "bytes": 126145,
+    "sha256": "c2a3560cec8a4491a0cc4921120766f9dd615c70ad92b61fc68bc0d2946ee1d7",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/70abfeaab68acf98cbe6f13e.jpg",
+    "source": "https://cdn.myanimelist.net/images/characters/7/307153.jpg?s=cee7c2476e384c221d580147f85c54fd",
+    "bytes": 84887,
+    "sha256": "7d148fdc270bcd16054d978e1b212933838f991cacfb11fe8abeaaa6b7a49453",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/74fa99a9b1f0941428b5f365.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/6/25273l.webp",
+    "bytes": 55676,
+    "sha256": "ced63dbacd3c6bf25d5230dd0e11646bcdda74ae39074d77b8ce0fe2fb814323",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/48c38c3e7b9d4e1b57eab91e.jpg",
+    "source": "https://cdn.myanimelist.net/images/characters/3/425786.jpg?s=ee842a1b33765f3fbffe24416d316ac0",
+    "bytes": 83200,
+    "sha256": "13c68af4614975f744fa1a154c79b9256432f10e7ed9af732af4ea9af2e11a0f",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/275b99aa0dc0250ca26c9fe2.jpg",
+    "source": "https://cdn.myanimelist.net/images/characters/9/312718.jpg",
+    "bytes": 81690,
+    "sha256": "d76619ee6977bf8abe9b483a99c59dde785af59d758981c2abe7a9f20856d53c",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/395fbe2ad35abc6ce9dc2ac7.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/2/67117l.jpg",
+    "bytes": 124091,
+    "sha256": "4af725bcb84d74b22a5a07c5fa647061c18515f3c6b4e7aef522df3de3f1558a",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/49f2712d5856a7e0e60970e3.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/12/52091l.jpg",
+    "bytes": 105592,
+    "sha256": "2fce417a318f189b99e70c12591c24a8cc1b1404ba4e7b46be785fa07bc05ab3",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/39eafa7d712688b1de3e0261.jpg",
+    "source": "https://cdn.myanimelist.net/images/characters/6/277474.jpg?s=a342e103858bfe60a8a92861053607a7",
+    "bytes": 95723,
+    "sha256": "f10e422ae07a9f6e251549ae6de35b76e8ac5f2fdcd3869ac47a8225f345c3a8",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/ac4588852738453aaa5bf17a.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/11/39249l.jpg",
+    "bytes": 110241,
+    "sha256": "0a12bc79614d51eff7c42509726c6a9ab48836b7109ae7a781811b99d23fbce1",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/bb984e3c0b2f0b23a4a93a1c.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1079/147334l.jpg",
+    "bytes": 112500,
+    "sha256": "f2e09f5fe5bf81daa8ceeb15c86b84c7a9a792aa65088619c72c793e9afa0929",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/08da041bb83712780ee4d3fc.mp3",
+    "source": "https://medias.aniguessr.com/GoldenTime-OP1.mp3?v=b74cda23",
+    "bytes": 384812,
+    "sha256": "a479768faa0ca348fb3901c0e68237bb686b090a6f85052de7929ffe2b62087a",
+    "clipSeconds": 24
+  },
+  {
+    "path": "assets/media/17b220acb30a0b84c0c9fe9a.mp3",
+    "source": "https://medias.aniguessr.com/OdaNobunaNoYabou-OP1.mp3?v=c2089288",
+    "bytes": 384812,
+    "sha256": "0481dc8a511fe78564441a0202863727852b0058431aa85cd4e74429568e35f2",
+    "clipSeconds": 24
+  },
+  {
+    "path": "assets/media/4dbfb7a8708f32c75d361b3a.mp4",
+    "source": "https://medias.aniguessr.com/GoldenTime-OP1.mp4?v=559e52de",
+    "bytes": 1629586,
+    "sha256": "2ffe84a8128bacb26608897df545adfaa713a1dce31d157e56f7979efab6f6c3",
+    "clipSeconds": 24
+  },
+  {
+    "path": "assets/media/1abad8494553da3fb0150f91.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/2/43361l.jpg",
+    "bytes": 98123,
+    "sha256": "ad6266ba8814edc4b9a47d416ced738e55dc2166c2d02c70a948a63dc8a5b355",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/35c6b33ad34308363713193f.mp4",
+    "source": "https://medias.aniguessr.com/OdaNobunaNoYabou-OP1.mp4?v=8ac085b0",
+    "bytes": 1887647,
+    "sha256": "db610c055649e9e1ec3899a605d2c1a6691d8e4c45da1856286aeee3d718780b",
+    "clipSeconds": 24
+  },
+  {
+    "path": "assets/media/f8707d9814b1af01d72af53d.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1649/109056l.webp",
+    "bytes": 60621,
+    "sha256": "e1b2117c5562e90ebbb5b85e1cfd276404c2c80da1be6fd6983d0e2262194c8b",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/df816897dfcce78d61c2d195.mp3",
+    "source": "https://medias.aniguessr.com/Kaminomi-ED1-NCBD1080.mp3?v=0777d525",
+    "bytes": 384812,
+    "sha256": "13971e2afcebcd0eade8d70dc1cf8b456c9416aee77fec2b255e435612b69d1b",
+    "clipSeconds": 24
+  },
+  {
+    "path": "assets/media/f1b2c1904a19e90db251814b.mp3",
+    "source": "https://medias.aniguessr.com/AdachiToShimamura-ED1-NCBD1080.mp3?v=db33b8c1",
+    "bytes": 384812,
+    "sha256": "3d9115d126a3ec0f5b862ffd0e0a3e2b450b9698ee579f759ef42f9a04b12dc2",
+    "clipSeconds": 24
+  },
+  {
+    "path": "assets/media/35e9f66e4ca1af941f0c1af2.mp4",
+    "source": "https://medias.aniguessr.com/Kaminomi-ED1-NCBD1080.mp4?v=ca4aa93a",
+    "bytes": 1121316,
+    "sha256": "dbc53f8397ef74f1ef8e40440686380c4d4e572abba5425190ce36baf5724598",
+    "clipSeconds": 24
+  },
+  {
+    "path": "assets/media/f959c81fce9d33d203a7cac1.mp3",
+    "source": "https://a.animethemes.moe/AoNoMiburo-OP1.ogg",
+    "bytes": 384812,
+    "sha256": "57b07b5fb78eaa152d7e5a17346766227f52c4bccc2a4d3d6ce8793362b12d67",
+    "clipSeconds": 24
+  },
+  {
+    "path": "assets/media/3015f3f30cd2ecb88f3a0c33.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MjgyMjMtRGVhdGgtUGFyYWRlL0RlYXRoLVBhcmFkZV8wMDEucG5n",
+    "bytes": 44799,
+    "sha256": "4d4766ea6ae584e111b1883ae3ae711576f357ac820d23e4270255d5ffd139d6",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/1209a58304e94e93ff97c683.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MjgyMjMtRGVhdGgtUGFyYWRlL0RlYXRoLVBhcmFkZV8wMDguanBn",
+    "bytes": 28880,
+    "sha256": "b032598464ef75ebe1f27c409d7d2f570ead31aa29fa3b28c9846814de91b17e",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/cb140eebfe60e372a70882f6.mp4",
+    "source": "https://medias.aniguessr.com/AdachiToShimamura-ED1v3.mp4?v=b80e9f27",
+    "bytes": 1453777,
+    "sha256": "4f1d6ce1c0f00d0ce3689eea38e41300e08dc8a5dfabf6c81c29024fbd11d686",
+    "clipSeconds": 24
+  },
+  {
+    "path": "assets/media/54152196c6dda670c55bae9a.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MjgyMjMtRGVhdGgtUGFyYWRlL0RlYXRoLVBhcmFkZV8wMDcucG5n",
+    "bytes": 56064,
+    "sha256": "a78b975d2ba5234d2cfe431c4bc058d7fc69c9518d8de3f7f261e289eb640c8c",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/b9e50bbb1739c431d5335859.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/5/71553l.jpg",
+    "bytes": 139346,
+    "sha256": "c71400e37be4b25acd39c675777ba86b50e6738e7eccd97e5bf708472f68755a",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/19be9d6f61b4fada28f71c2b.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MTI1MDM4LVNIQURPV1MtSE9VU0UvU0hBRE9XUy1IT1VTRV8wMDUucG5n",
+    "bytes": 54330,
+    "sha256": "02e861e38b6bd7fe37a43ef429b73b12841c8bab84bc4d4a9bf04f0cfa27b00d",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/ff7c526c403393c34c69bead.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=OTk4ODgtS2FpanV1LUdpcmxzLVVsdHJhLUthaWp1dS1HaWppbmthLUtlaWtha3UtMi9LYWlqdXUtR2lybHMtVWx0cmEtS2FpanV1LUdpamlua2EtS2Vpa2FrdS0yXzAwNS5wbmc=",
+    "bytes": 48011,
+    "sha256": "38adbc2e9a605f71872ddb973df967a22b9539bb31f23ef4b2b63c5c6b77730a",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/5493b2999e679928475c4455.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MTI1MDM4LVNIQURPV1MtSE9VU0UvU0hBRE9XUy1IT1VTRV8wMTEucG5n",
+    "bytes": 38881,
+    "sha256": "ed5e35ecd70616aff009b7e2c5bf278dd062168f6255a96a276b3a716d4859eb",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/64a6b6710d1172e9edae67d9.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=OTk4ODgtS2FpanV1LUdpcmxzLVVsdHJhLUthaWp1dS1HaWppbmthLUtlaWtha3UtMi9LYWlqdXUtR2lybHMtVWx0cmEtS2FpanV1LUdpamlua2EtS2Vpa2FrdS0yXzAwMi5wbmc=",
+    "bytes": 35764,
+    "sha256": "5bc8a128591aa8806fc0fed2ef21f1ee6d014c1c0c24d9d91f0262b317e0e7f2",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/19b6f18595d772b496fc1d52.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MTI1MDM4LVNIQURPV1MtSE9VU0UvU0hBRE9XUy1IT1VTRV8wMDgucG5n",
+    "bytes": 55073,
+    "sha256": "17691109a309ba03a603551459c99a4d64adaa157766fc7a9b317ee60b25d6e9",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/bf923fee547678c27979e647.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=OTk4ODgtS2FpanV1LUdpcmxzLVVsdHJhLUthaWp1dS1HaWppbmthLUtlaWtha3UtMi9LYWlqdXUtR2lybHMtVWx0cmEtS2FpanV1LUdpamlua2EtS2Vpa2FrdS0yXzAwNy5wbmc=",
+    "bytes": 78690,
+    "sha256": "50bdd6cc7933aa27627365dd623c46827d85d755afd65b0896943e7cac56ac1c",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/1550aaaf7cc22959752846a8.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1424/113342l.webp",
+    "bytes": 100115,
+    "sha256": "588819edec0bdded10ea7917e72466c56b7ade6d0aaa3dbc5bc4f376c8440a62",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/cf725127865db97de5a77012.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1511/93559l.jpg",
+    "bytes": 127265,
+    "sha256": "d945ced69840704d6ceb39c41b2fd6a5cd64ad6e88c9acbacae863775043b3ad",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/68ce8c394ea2e7a4e566467d.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/12/43369l.jpg",
+    "bytes": 112380,
+    "sha256": "2c149a99ccb9b86e4a5f059316bf8137a0498c617cc47b86544f15c05b6e8187",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/e6e2198ff461132a65788838.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MTQ3NDEtQ2h1dW5pYnlvdS1kZW1vLUtvaS1nYS1TaGl0YWkvQ2h1dW5pYnlvdS1kZW1vLUtvaS1nYS1TaGl0YWlfMDA2LmpwZw==",
+    "bytes": 49877,
+    "sha256": "d9e710a2f19946d6cbf0b9c2dc22a55b951786e6e94ab4c5cdb9b7fbbdc45deb",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/e8d512c4a079b6bfacd6b0ee.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MTQ3NDEtQ2h1dW5pYnlvdS1kZW1vLUtvaS1nYS1TaGl0YWkvQ2h1dW5pYnlvdS1kZW1vLUtvaS1nYS1TaGl0YWlfMDA0LmpwZw==",
+    "bytes": 41274,
+    "sha256": "488152e7b61c668758f66efb182fbd2110af8eeac4c466243bfb8e6cf09d4ca5",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/44933fe5f305b4e2b522801f.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MTQ3NDEtQ2h1dW5pYnlvdS1kZW1vLUtvaS1nYS1TaGl0YWkvQ2h1dW5pYnlvdS1kZW1vLUtvaS1nYS1TaGl0YWlfMDA4LmpwZw==",
+    "bytes": 33197,
+    "sha256": "b977ce4c788d1a9d624edcbdfb22d093e877ec2e9b7b54f29a82996eec342ca5",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/cff3b4beb39e1e7945427f48.mp3",
+    "source": "https://medias.aniguessr.com/Mondaiji-ED1-NCBD1080.mp3?v=980dfa5a",
+    "bytes": 384812,
+    "sha256": "d970b6f6f52d3608bcf788960f0bcc8d15fffc39561be5418362a9255ea27a2c",
+    "clipSeconds": 24
+  },
+  {
+    "path": "assets/media/6a78724abb5c632924bf8689.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1905/142840l.jpg",
+    "bytes": 156322,
+    "sha256": "37442d05c881cd40bc1409fb52a9d135044289a9a6a6e1c8d2664a12ce8e1180",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/2bc71835faa6239a9c590fe8.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MTEyNzE2LU11di1MdXYtQWx0ZXJuYXRpdmUvTXV2LUx1di1BbHRlcm5hdGl2ZV8wMDUucG5n",
+    "bytes": 68002,
+    "sha256": "4b975c0d9cd7c5f6c361831be095bc5e18c149f6c0c526d2bf5bd956745d0de6",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/059ee7d157de3946b36c55ba.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MTEyNzE2LU11di1MdXYtQWx0ZXJuYXRpdmUvTXV2LUx1di1BbHRlcm5hdGl2ZV8wMDYucG5n",
+    "bytes": 50229,
+    "sha256": "5792364ced614d99bdaf8dc594dde1064c32120ca47bedc212b780cd6b965516",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/8a6029f7101ec88efc2baa10.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MTEyNzE2LU11di1MdXYtQWx0ZXJuYXRpdmUvTXV2LUx1di1BbHRlcm5hdGl2ZV8wMDQucG5n",
+    "bytes": 70870,
+    "sha256": "6a2dcf9e41039df5c9db1c8b70785cb41f8f03017d483212063d9cf00087da22",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/318e916f9672fa63d2a3373d.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1916/118439l.webp",
+    "bytes": 132402,
+    "sha256": "c6eb36491fa07fee5f24713fba33ada56c5908ef292a9313d5fdb91d10372a43",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/2b16ab8014def6b9c9bb4edd.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=Mzc0NTAtU2Vpc2h1bi1CdXRhLVlhcm91LXdhLUJ1bm55LUdpcmwtU2VucGFpLW5vLVl1bWUtd28tTWluYWkvU2Vpc2h1bi1CdXRhLVlhcm91LXdhLUJ1bm55LUdpcmwtU2VucGFpLW5vLVl1bWUtd28tTWluYWlfMDAxLmpwZw==",
+    "bytes": 70369,
+    "sha256": "02047454f17f7483b7e81465c516709d14f5f75eb847e6e3098e553b870df74c",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/49f8c3b8de0efbd123df20e9.mp4",
+    "source": "https://medias.aniguessr.com/Mondaiji-ED1-NCBD1080.mp4?v=96c2883b",
+    "bytes": 825056,
+    "sha256": "cdc8b8efa30731a0274b34728cff437e1d3ba050cfea8ab29b142973a1ef5fc0",
+    "clipSeconds": 24
+  },
+  {
+    "path": "assets/media/65d5da83dd5337bfb31dc08e.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=Mzc0NTAtU2Vpc2h1bi1CdXRhLVlhcm91LXdhLUJ1bm55LUdpcmwtU2VucGFpLW5vLVl1bWUtd28tTWluYWkvU2Vpc2h1bi1CdXRhLVlhcm91LXdhLUJ1bm55LUdpcmwtU2VucGFpLW5vLVl1bWUtd28tTWluYWlfMDA2LmpwZw==",
+    "bytes": 42461,
+    "sha256": "f5284e5b4e952691453f053b9357a7336de3f97b6d9a6aea6e87d3122e824988",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/476af66d43b355424b823028.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=Mjg4MDUtQmFrZW1vbm8tbm8tS28vQmFrZW1vbm8tbm8tS29fMDA2LmpwZw==",
+    "bytes": 50969,
+    "sha256": "248a5a0cbda650feb6231da3a7b44ce6c168104b1cc0152c6a367bfeb78f7a86",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/2d288c6248e374eab44475e5.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=Mzc0NTAtU2Vpc2h1bi1CdXRhLVlhcm91LXdhLUJ1bm55LUdpcmwtU2VucGFpLW5vLVl1bWUtd28tTWluYWkvU2Vpc2h1bi1CdXRhLVlhcm91LXdhLUJ1bm55LUdpcmwtU2VucGFpLW5vLVl1bWUtd28tTWluYWlfMDA0LmpwZw==",
+    "bytes": 35103,
+    "sha256": "7f2f2bf461b9edcb6d80283896b545779d0a0e1b61249995726156259e0f8e07",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/5579364c0af87aaaa4bbff6f.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=Mjg4MDUtQmFrZW1vbm8tbm8tS28vQmFrZW1vbm8tbm8tS29fMDA1LmpwZw==",
+    "bytes": 45329,
+    "sha256": "d9cecc9d4a408c8b495f2c856b53ecd00869a8fa149ee63293fd266044767b99",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/0fc8fc6d9b221e2249440d27.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1301/93586l.jpg",
+    "bytes": 104202,
+    "sha256": "586cac527810f5db22aebea0f81641aaea90436ade005b2a43acaf5dd71b77a1",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/92af14602f73284fd106ff12.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=Mjg4MDUtQmFrZW1vbm8tbm8tS28vQmFrZW1vbm8tbm8tS29fMDAyLmpwZw==",
+    "bytes": 35688,
+    "sha256": "c232ff486654e1c9e44f999e04fa883e84ff908589cbfc6e56b999c55ec16d7f",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/aa04c77b5c79d2ac40471dbe.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/11/73540l.jpg",
+    "bytes": 99897,
+    "sha256": "2e63b338cc32e5625c3b7f19f0a070dfd9c06ea2a4d5e529f9474659ba2a544b",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/36a3d0e448a14a6d8ecf5b4c.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MTE0MzAyLURydWctU3RvcmUtaW4tQW5vdGhlci1Xb3JsZC1UaGUtU2xvdy1MaWZlLW9mLWEtQ2hlYXQtUGhhcm1hY2lzdC9EcnVnLVN0b3JlLWluLUFub3RoZXItV29ybGQtVGhlLVNsb3ctTGlmZS1vZi1hLUNoZWF0LVBoYXJtYWNpc3RfMDAxLnBuZw==",
+    "bytes": 59911,
+    "sha256": "b5af5b41220c083af54d7f3b15f53c01160d6fd849f02a3b1422f47ac293a0a1",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/a0177087bb584ce2b3b4f06a.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MTE0MzAyLURydWctU3RvcmUtaW4tQW5vdGhlci1Xb3JsZC1UaGUtU2xvdy1MaWZlLW9mLWEtQ2hlYXQtUGhhcm1hY2lzdC9EcnVnLVN0b3JlLWluLUFub3RoZXItV29ybGQtVGhlLVNsb3ctTGlmZS1vZi1hLUNoZWF0LVBoYXJtYWNpc3RfMDAyLnBuZw==",
+    "bytes": 51738,
+    "sha256": "77a79ece9e88d6509894c2f81faf690ab365ac3f4fa3ccd39459268bf95a72aa",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/1fefa86ac4715704b8c83ac2.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MTgxMzktVG9uYXJpLW5vLVNla2kta3VuLVRoZS1NYXN0ZXItb2YtS2lsbGluZy1UaW1lL1RvbmFyaS1uby1TZWtpLWt1bi1UaGUtTWFzdGVyLW9mLUtpbGxpbmctVGltZV8wMDgucG5n",
+    "bytes": 44915,
+    "sha256": "3baeb09834a264d253f829e164c7890ecbb37835a0e19bcb91de4445cfb189d4",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/4dd4b1385180acbced06099b.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MTE0MzAyLURydWctU3RvcmUtaW4tQW5vdGhlci1Xb3JsZC1UaGUtU2xvdy1MaWZlLW9mLWEtQ2hlYXQtUGhhcm1hY2lzdC9EcnVnLVN0b3JlLWluLUFub3RoZXItV29ybGQtODIxMS1UaGUtU2xvdy1MaWZlLW9mLWEtQ2hlYXQtUGhhcm1hY2lzdF8wMDcucG5n",
+    "bytes": 57364,
+    "sha256": "4e9f29896a18a53376966c87b197663355064f70a59272d5c9b4607e554267f4",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/a2e7b551305dbd0dead8412c.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MTgxMzktVG9uYXJpLW5vLVNla2kta3VuLVRoZS1NYXN0ZXItb2YtS2lsbGluZy1UaW1lL1RvbmFyaS1uby1TZWtpLWt1bi1UaGUtTWFzdGVyLW9mLUtpbGxpbmctVGltZV8wMDEucG5n",
+    "bytes": 65507,
+    "sha256": "f5fd2e6ebcbfd2f94c7d981af3d4d69f2173b04880cf30cf38ca6ee1fd5d8454",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/f1b176dad683b3fd71efdec4.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1787/115817l.jpg",
+    "bytes": 168636,
+    "sha256": "ee66ec8cfb413d9bc83c4bdab5d1d626ae9d7082dabc2a6afa02f9d2518e2025",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/c4794fec1ac0060c37e8cbaa.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MTgxMzktVG9uYXJpLW5vLVNla2kta3VuLVRoZS1NYXN0ZXItb2YtS2lsbGluZy1UaW1lL1RvbmFyaS1uby1TZWtpLWt1bi1UaGUtTWFzdGVyLW9mLUtpbGxpbmctVGltZV8wMDYucG5n",
+    "bytes": 44001,
+    "sha256": "927b609b61e43fc7c03ca9e4b172b2d16ec590b5b149fff268ffc2ad8942d264",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/5ba30d8f27e4a041519b8e1d.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/9/55489l.webp",
+    "bytes": 95974,
+    "sha256": "fa8a0d70dd48a5717a1b0445a1e04fd7dccf2580fe3b57322e6a61947956a68a",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/0877e0bfdc165657a8561a5a.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MTMzNDEyLUhlYWxlci1HaXJsL0hlYWxlci1HaXJsXzAwOC5wbmc=",
+    "bytes": 96006,
+    "sha256": "6437f9b4651e34eaf9ddeee61715af3f92755bb147b219d70188c0b7b6c0e8f9",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/3b35817b9cbeed388e34e4b0.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MjMyODMtWmFua3lvdS1uby1UZXJyb3IvWmFua3lvdS1uby1UZXJyb3JfMDAzLmpwZw==",
+    "bytes": 35559,
+    "sha256": "da5dd00e9116316b838f1a1629dd285f90e4781064c92a92df41c53ede970732",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/27148073157157e5b96aecfa.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MjMyODMtWmFua3lvdS1uby1UZXJyb3IvWmFua3lvdS1uby1UZXJyb3JfMDA1LmpwZw==",
+    "bytes": 46258,
+    "sha256": "ce7d8499951ab7e218ab7e460d5abc8cde12d0f1b9c3e515df1557bf25a38544",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/1519150e77864f457618367f.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MTMzNDEyLUhlYWxlci1HaXJsL0hlYWxlci1HaXJsXzAwNy5wbmc=",
+    "bytes": 34139,
+    "sha256": "b1fbbf010cf425ed3d868313b3ac13f7a6877a77206a12300a790fa030eb1768",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/96a5479cf5432f3850db281e.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MjMyODMtWmFua3lvdS1uby1UZXJyb3IvWmFua3lvdS1uby1UZXJyb3JfMDA0LmpwZw==",
+    "bytes": 51385,
+    "sha256": "f15f8f8c18b133a65468364e301019c6e01625c1a25a9f2a4664c39b072b07d4",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/260a837de936880bd31ee1fd.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MTMzNDEyLUhlYWxlci1HaXJsL0hlYWxlci1HaXJsXzAxMi5wbmc=",
+    "bytes": 64170,
+    "sha256": "ce6ebdfabd4fb0993b161166dffde44e862234a4d776389639fdbbeca56c0aec",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/bfd907cdce5c2d9058bbc4b8.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1417/117422l.jpg",
+    "bytes": 90862,
+    "sha256": "b496ac7cd0c070b36c5ca339ef3a1517e2bb0cad5fcedb01bff15327435d791a",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/84ec7aff081f04586a2ca16d.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/1727/122415l.jpg",
+    "bytes": 197207,
+    "sha256": "d26dd6af625b519857798db7f2d1012bacc73382baada73d2252117e6dc80e45",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/1949bac00d60296704055786.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MjMxMzUtUHJpUGFyYS9QcmlQYXJhXzAwMS5qcGc=",
+    "bytes": 37359,
+    "sha256": "304db0b1b6e4fcf61b2973e572118156a4449e98f395f9cceb5da86e4267bd65",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/7da7632f517167ae66c10906.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MjMxMzUtUHJpUGFyYS9QcmlQYXJhXzAwNi5qcGc=",
+    "bytes": 163397,
+    "sha256": "59990a5784ea562098f2e0d83bd581d1f1ac3aa97178211dc294e82f22796f39",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/077f27c276312d4faf95b403.jpg",
+    "source": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MjMxMzUtUHJpUGFyYS9QcmlQYXJhXzAwMy5qcGc=",
+    "bytes": 118975,
+    "sha256": "205d963c5bc413bd1bbfc299f2a87677a5ef1c18ea4abeea6506105b238e756d",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/ffd9545a3bc28e1ebc078f05.jpg",
+    "source": "https://cdn.myanimelist.net/images/anime/2/75258l.jpg",
+    "bytes": 126642,
+    "sha256": "333d269033e2b00cb9b4c704dc852e1ab89210c85c2244efc535ea47df6836b3",
+    "clipSeconds": null
+  },
+  {
+    "path": "assets/media/bc524078b3b7a38a534def31.mp3",
+    "source": "https://medias.aniguessr.com/IDInvaded-OP1-NCBD1080.mp3?v=63150cad",
+    "bytes": 2921157,
+    "sha256": "5ca2754fa92db24362f57a79a505c407ffeed9656a15a07a4e0ceea4e57d72bd",
+    "fullLength": true,
+    "duration": 90.0135
+  },
+  {
+    "path": "assets/media/c07b3b8b83ebf662bfbef177.mp3",
+    "source": "https://medias.aniguessr.com/SDGundamWorld-OP1.mp3?v=43142613",
+    "bytes": 2662460,
+    "sha256": "f1e5a7034462fe8908e27c9aa0eecaca13f34576480e4c81c791cedd81b5d576",
+    "fullLength": true,
+    "duration": 90.0735
+  },
+  {
+    "path": "assets/media/a83887c922d66b384a941086.mp3",
+    "source": "https://medias.aniguessr.com/YoukosoZitsu-OP1-NCBD1080.mp3?v=188c4da4",
+    "bytes": 2976092,
+    "sha256": "d29175e74feb17b79b3581bc54bedb985efeab898ac84f2410dde4ef9d3c3813",
+    "fullLength": true,
+    "duration": 92.0735
+  },
+  {
+    "path": "assets/media/4b2438c335c794782a795e98.mp4",
+    "source": "https://medias.aniguessr.com/YoukosoZitsu-OP1-NCBD1080.mp4?v=d215b4a1",
+    "bytes": 10051430,
+    "sha256": "8aa78c73397e718eb2d04bd9f8b57369cb61d583e57e6a2f5475ad36bb861138",
+    "fullLength": true,
+    "duration": 92.106322
+  },
+  {
+    "path": "assets/media/ce29464aa28e2c76a6bddd08.mp4",
+    "source": "https://medias.aniguessr.com/SDGundamWorld-OP1.mp4?v=49ae674e",
+    "bytes": 11668423,
+    "sha256": "18af8f54acba67f0ad2cfc1116a1ff2a42fbddd3f67d5e212d1e36de8e6e66b2",
+    "fullLength": true,
+    "duration": 90.146022
+  },
+  {
+    "path": "assets/media/4bce2b2adfb0f6db4db8aa0f.mp4",
+    "source": "https://medias.aniguessr.com/IDInvaded-OP1-NCBD1080.mp4?v=18a294bf",
+    "bytes": 10228249,
+    "sha256": "3c16c8483c6df236c41c1625d4ecae82dc3be0fcb936aaca7998b0d9646508f7",
+    "fullLength": true,
+    "duration": 90.026
+  },
+  {
+    "path": "assets/media/374ffc6c5100bd119614ec99.mp3",
+    "source": "https://medias.aniguessr.com/ShingekiNoKyojin-ED1.mp3?v=25bc64a9",
+    "bytes": 1080045,
+    "sha256": "b97b68b29780d3fa8d93c0b630a9f7a4e6bf85c35ff450a28c841937fe21ed2f",
+    "fullLength": true,
+    "duration": 89.9335
+  },
+  {
+    "path": "assets/media/7245a4697c739715bcfd5dbe.mp3",
+    "source": "https://medias.aniguessr.com/DecaDence-ED1-NCBD1080.mp3?v=7d344e30",
+    "bytes": 1081485,
+    "sha256": "46896225c5f43d153ad18debc59d06fff38dc3be795fc3cffbf4454d60f4cbd6",
+    "fullLength": true,
+    "duration": 90.0535
+  },
+  {
+    "path": "assets/media/4f34010b2a30e71bb3a5abed.mp3",
+    "source": "https://medias.aniguessr.com/Orient-ED1.mp3?v=e25d2a8e",
+    "bytes": 1079469,
+    "sha256": "94eddacbd2f9b9f3c59d75a8c96d681fe12cce1d39440073f0bf068aecb2b44f",
+    "fullLength": true,
+    "duration": 89.8935
+  },
+  {
+    "path": "assets/media/bf46797a68b541ea79068afc.mp4",
+    "source": "https://medias.aniguessr.com/ShingekiNoKyojin-ED1.mp4?v=d600fdf4",
+    "bytes": 8402356,
+    "sha256": "a6f0e96ad431aac3dae5bae634d36e0df759cabfda7b837ae053020c265654ac",
+    "fullLength": true,
+    "duration": 89.93
+  },
+  {
+    "path": "assets/media/a4ff4fb8fa1dcfd2f28aa4ca.mp4",
+    "source": "https://medias.aniguessr.com/Orient-ED1v2.mp4?v=527b9c5c",
+    "bytes": 5088878,
+    "sha256": "b86f24416611881b8c1f89aabbdfe39f325e7e9d170305753528ddab2704d81a",
+    "fullLength": true,
+    "duration": 90.048292
+  },
+  {
+    "path": "assets/media/c5e1999e21d1eba0935a5214.mp4",
+    "source": "https://medias.aniguessr.com/DecaDence-ED1-NCBD1080.mp4?v=61bbf989",
+    "bytes": 12066761,
+    "sha256": "605975619984f31e7353cccb3ce51b573c5f62da2af40972f83d51b8180fa0f3",
+    "fullLength": true,
+    "duration": 90.055
+  },
+  {
+    "path": "assets/media/0180a704f72ba2f3213089d9.mp3",
+    "source": "https://medias.aniguessr.com/JujutsuKaisen-OP1-NCBD1080.mp3?v=1e4a9388",
+    "bytes": 2981349,
+    "sha256": "abb82567dd30b2a5cd88dc7d3cea33ce6065c91585f60f60302f52a11d3f5490",
+    "fullLength": true,
+    "duration": 90.0535
+  },
+  {
+    "path": "assets/media/4f296f47293d2f5bb49676c2.mp3",
+    "source": "https://medias.aniguessr.com/IsshuukanFriends-OP1.mp3?v=f46587fb",
+    "bytes": 1106253,
+    "sha256": "7b77634fd35610fc1ee34ef85f326fc3bea296b726716dc179b48a18ddaf6411",
+    "fullLength": true,
+    "duration": 92.1135
+  },
+  {
+    "path": "assets/media/b364d9e27ed3f2eb3f52579e.mp3",
+    "source": "https://medias.aniguessr.com/KillMeBaby-OP1.mp3?v=0ab3a660",
+    "bytes": 2984468,
+    "sha256": "5c42791185c7f24bda708bc4cf557b7e1b2e0189e0a47b575e3e87d7fb9c029a",
+    "fullLength": true,
+    "duration": 90.0135
+  },
+  {
+    "path": "assets/media/b5622c7e39a8150b374b2677.mp4",
+    "source": "https://medias.aniguessr.com/JujutsuKaisen-OP1.mp4?v=0efb1e3c",
+    "bytes": 8008070,
+    "sha256": "b436983fa8b9a9b97ff85cd79989f986404643e3098c3c2ccc0900694dd10790",
+    "fullLength": true,
+    "duration": 90.104311
+  },
+  {
+    "path": "assets/media/2aa5745d9e4d0b6157c43d9d.mp4",
+    "source": "https://medias.aniguessr.com/IsshuukanFriends-OP1-Lyrics.mp4?v=0996a323",
+    "bytes": 4780803,
+    "sha256": "6eff9fcdc369120ae6662d2484c9804b694c9f11dffa15dab2f0467fc653e9a8",
+    "fullLength": true,
+    "duration": 90.131708
+  },
+  {
+    "path": "assets/media/7e366b1d0d3173ec37061adb.mp4",
+    "source": "https://medias.aniguessr.com/KillMeBaby-OP1.mp4?v=819ad8de",
+    "bytes": 6908280,
+    "sha256": "4dea4d02cdb6ffe82d3b3eb7aa0895f2f5638bbe41cbea1585a0d9e199210074",
+    "fullLength": true,
+    "duration": 90.048
+  },
+  {
+    "path": "assets/media/c14c078c78aab36726f445e9.mp3",
+    "source": "https://medias.aniguessr.com/DarkerThanBlack-ED2.mp3?v=e22fb967",
+    "bytes": 1063917,
+    "sha256": "091e7edbaf81bf1cd1ec248353f9c0622a060ffe6743d9d549c1795efc171d73",
+    "fullLength": true,
+    "duration": 88.5935
+  },
+  {
+    "path": "assets/media/7f4313cb958eb2ad12cbe599.mp3",
+    "source": "https://medias.aniguessr.com/MierukoChan-ED1-NCBD1080.mp3?v=a0575676",
+    "bytes": 1080333,
+    "sha256": "f9dabebd4c19f4cc1e8067dfaebf537f96b5f911a3021ff522a7199c06c2c971",
+    "fullLength": true,
+    "duration": 89.9735
+  },
+  {
+    "path": "assets/media/ea759b48f32c71c1f0c4fb0f.mp3",
+    "source": "https://medias.aniguessr.com/TariTari-ED2.mp3?v=059e910f",
+    "bytes": 1093005,
+    "sha256": "20aec5caeb69db596fb46b9cb0c380be7143d349f88678741034836ce5104e98",
+    "fullLength": true,
+    "duration": 91.0135
+  },
+  {
+    "path": "assets/media/d5b8eb99f3d6cbe134cde3a2.mp4",
+    "source": "https://medias.aniguessr.com/DarkerThanBlack-ED2.mp4?v=083ffcdc",
+    "bytes": 4303206,
+    "sha256": "64ef70cca14692947c372c00a697ec71db153c9577fc584a8909b2a9e7e2ecec",
+    "fullLength": true,
+    "duration": 88.595
+  },
+  {
+    "path": "assets/media/3e18358b0dd68f8479b8df8e.mp4",
+    "source": "https://medias.aniguessr.com/MierukoChan-ED1.mp4?v=d2d61f50",
+    "bytes": 7315752,
+    "sha256": "01505f6a8d623887acdc29221b8ebdcba31d1c73ff90bbea6fa9ddd0e6537693",
+    "fullLength": true,
+    "duration": 89.387
+  },
+  {
+    "path": "assets/media/01f9cc253b897b3ecefa8e62.mp3",
+    "source": "https://medias.aniguessr.com/DragonBallZ-OP2.mp3?v=744a5283",
+    "bytes": 1963964,
+    "sha256": "e99989668552d223ed75040211e3f66c2b2fc15278f8f52f30dc62dc7ca174f4",
+    "fullLength": true,
+    "duration": 110.1335
+  },
+  {
+    "path": "assets/media/78e2c4724682af4e0f4e70e0.mp4",
+    "source": "https://medias.aniguessr.com/TariTari-ED2.mp4?v=7fb4f0bc",
+    "bytes": 4303600,
+    "sha256": "5a941673d52dc3d2bbed89b309ac0ff2aa21bf9b7d894f9ee76000f1a696360d",
+    "fullLength": true,
+    "duration": 91.091
+  },
+  {
+    "path": "assets/media/4a54c18a6580bd9294d6a176.mp3",
+    "source": "https://medias.aniguessr.com/Araoto-OP1.mp3?v=7b96484a",
+    "bytes": 2717420,
+    "sha256": "33595555039c15d38c67a12bb7b464a5c0240f577073367bac11c8b54ef868a6",
+    "fullLength": true,
+    "duration": 89.9535
+  },
+  {
+    "path": "assets/media/f1d823e0f403252bce012176.mp3",
+    "source": "https://medias.aniguessr.com/ShakunetsuNoTakkyuuMusume-OP1-NCBD1080.mp3?v=ad1ef9e3",
+    "bytes": 2947508,
+    "sha256": "3bdf91abc6b9b3b99d0c504668ac8758381e3755289c424806b456c0f2a04491",
+    "fullLength": true,
+    "duration": 91.0135
+  },
+  {
+    "path": "assets/media/82f762d9122bec764d0d7ec7.mp4",
+    "source": "https://medias.aniguessr.com/DragonBallZ-OP2.mp4?v=327453ef",
+    "bytes": 10041061,
+    "sha256": "c262b6a6202846299ae14187eb750df7d1523865435c504776e566e50495f4c4",
+    "fullLength": true,
+    "duration": 110.166022
+  },
+  {
+    "path": "assets/media/2d25033aaa1dff616ba9b6a2.mp4",
+    "source": "https://medias.aniguessr.com/Araoto-OP1-Lyrics.mp4?v=2a3a9513",
+    "bytes": 7510048,
+    "sha256": "2e9f934deb3ea917bcdf7e422723fbb2bdce15fe799918d196a7f70a9f324b84",
+    "fullLength": true,
+    "duration": 90.020911
+  },
+  {
+    "path": "assets/media/81586e642dda38722423e84d.mp3",
+    "source": "https://medias.aniguessr.com/WotaKoi-ED1-NCBD1080.mp3?v=df9607ec",
+    "bytes": 1105965,
+    "sha256": "fdfdeb1f1dd25844397af71b9a5d43f2e50f644d2cb9ba8dfb7cf93a7a7b5c3d",
+    "fullLength": true,
+    "duration": 92.0935
+  },
+  {
+    "path": "assets/media/b4e9cc42c58f0197237297e3.mp3",
+    "source": "https://medias.aniguessr.com/ArslanSenkiTV-ED2.mp3?v=88bd9b8b",
+    "bytes": 1080909,
+    "sha256": "f547d9eb38234d194ac7a3a3cb8f1e3c448c7f552633cd0d4c41c94a4902548a",
+    "fullLength": true,
+    "duration": 90.0135
+  },
+  {
+    "path": "assets/media/cc3993c9816fe289c90aaecf.mp4",
+    "source": "https://medias.aniguessr.com/ShakunetsuNoTakkyuuMusume-OP1-Lyrics.mp4?v=46de9090",
+    "bytes": 12391291,
+    "sha256": "5747357ca3d6a23150c0133ab5d7ec0485984a915aa96a1e4f3c5f5675b7c0a4",
+    "fullLength": true,
+    "duration": 90.020911
+  },
+  {
+    "path": "assets/media/a3f17364915a77ece8db1d22.mp4",
+    "source": "https://medias.aniguessr.com/WotaKoi-ED1-NCBD1080.mp4?v=f8ffe6ac",
+    "bytes": 3868210,
+    "sha256": "6620e46eee3d7dd28164fa5052c870eb5b65ca8fc9a708006fddf048f310d890",
+    "fullLength": true,
+    "duration": 92.097
+  },
+  {
+    "path": "assets/media/37744f77ec89579cfa019b91.mp3",
+    "source": "https://medias.aniguessr.com/LiarLiar-ED1-NCBD1080.mp3?v=538495d4",
+    "bytes": 1078605,
+    "sha256": "dd6270f70f2a6cd88cc78132b432f85f79626742fd40f610e451428b6a753f63",
+    "fullLength": true,
+    "duration": 89.8135
+  },
+  {
+    "path": "assets/media/8372a0b0601faefd3500ba4b.mp4",
+    "source": "https://medias.aniguessr.com/ArslanSenkiTV-ED2.mp4?v=386f1c1f",
+    "bytes": 9692177,
+    "sha256": "09efa842f5f7e614601d54b6e5ab6d0ee4f3854f820b1a89a68c0b574b97db81",
+    "fullLength": true,
+    "duration": 90.048292
+  },
+  {
+    "path": "assets/media/15a76567861e61ad1f97a472.mp3",
+    "source": "https://medias.aniguessr.com/AkameGaKill-ED1.mp3?v=7f490220",
+    "bytes": 1081772,
+    "sha256": "4d6bf60209b984e35a2c0773040c16d389e75c71eabf376549838620c4f42f44",
+    "fullLength": true,
+    "duration": 90.0935
+  },
+  {
+    "path": "assets/media/c965eb66ca395e1da67e65af.mp3",
+    "source": "https://medias.aniguessr.com/SousouNoFrieren-OP2.mp3?v=5b0e5ce3",
+    "bytes": 2595116,
+    "sha256": "4754adff9ef8ba7c8b6148c6878b738c0668c189c0420f73d26499498cab5151",
+    "fullLength": true,
+    "duration": 90.0135
+  },
+  {
+    "path": "assets/media/07677ce8d39fed0fb9f4b2bd.mp4",
+    "source": "https://medias.aniguessr.com/LiarLiar-ED1.mp4?v=4b32b86c",
+    "bytes": 7333393,
+    "sha256": "877bb251a3c0c628552ca7e14efa60efd757c2922d2aa52486f991dd8d9d6c4b",
+    "fullLength": true,
+    "duration": 90.08
+  },
+  {
+    "path": "assets/media/e84b454ec828561230cc6215.mp4",
+    "source": "https://medias.aniguessr.com/AkameGaKill-ED1.mp4?v=5dc1b157",
+    "bytes": 5314229,
+    "sha256": "f6dcd0b4c2273909cd95f89d304bcb9296eb6fe95195a23a2caa8d4b286975a0",
+    "fullLength": true,
+    "duration": 90.09
+  },
+  {
+    "path": "assets/media/b5972c22f0d6671db56ed34c.mp3",
+    "source": "https://medias.aniguessr.com/KyokouSuiri-OP1-NCBD1080.mp3?v=a146d3e4",
+    "bytes": 2983628,
+    "sha256": "edb9b3148a84d2cc32222d509981c0e375845175261f983cc2355bcdcec9db84",
+    "fullLength": true,
+    "duration": 89.0935
+  },
+  {
+    "path": "assets/media/d195695348bac050c7fb9df9.mp4",
+    "source": "https://medias.aniguessr.com/SousouNoFrieren-OP2.mp4?v=972f0f39",
+    "bytes": 7884445,
+    "sha256": "4e14120f951cde73a54ff45b2783de48c51bda55260d092e55741cd4be220fca",
+    "fullLength": true,
+    "duration": 90.062611
+  },
+  {
+    "path": "assets/media/0c1c58cd9a42d0cff84bb819.mp3",
+    "source": "https://medias.aniguessr.com/KodomoNoJikan-OP1.mp3?v=e4a2f707",
+    "bytes": 3003213,
+    "sha256": "0ba24676aef93bf02ff760786719a6010b0ef3eb49e8181247e439cec5b52617",
+    "fullLength": true,
+    "duration": 90.3535
+  },
+  {
+    "path": "assets/media/6b22f892b210b99aa11ea2f7.mp3",
+    "source": "https://medias.aniguessr.com/ChainsawMan-ED2-NCBD1080.mp3?v=27327813",
+    "bytes": 1083213,
+    "sha256": "dae1698616393ba47b63c694162831a11fe9f2e8fbfa5f7993d83c7921da44ee",
+    "fullLength": true,
+    "duration": 90.2135
+  },
+  {
+    "path": "assets/media/870ef1b40321f6c0f341a2fb.mp4",
+    "source": "https://medias.aniguessr.com/KyokouSuiri-OP1-NCBD1080.mp4?v=a910cb81",
+    "bytes": 7347973,
+    "sha256": "638aa2e83aeb1676507d21a28adef23e8fe65cd65a1b4f245637f05f92bb4d2b",
+    "fullLength": true,
+    "duration": 89.145033
+  },
+  {
+    "path": "assets/media/c821a14279f42f7d17831539.mp4",
+    "source": "https://medias.aniguessr.com/KodomoNoJikan-OP1.mp4?v=4e91740f",
+    "bytes": 8249839,
+    "sha256": "09d24d7e27ecfed1e68db605d942e09b8548c5a5e19faa58989a581a0abc2330",
+    "fullLength": true,
+    "duration": 90.368
+  },
+  {
+    "path": "assets/media/14f777de8d6e6e76c56b7a17.mp3",
+    "source": "https://medias.aniguessr.com/Mayoiga-ED1v2.mp3?v=3a53802a",
+    "bytes": 1059885,
+    "sha256": "e71732d4f3b5fd191cd4f2d64c3d768ad1ab2dbc2a8a8c04965bd135d33844c8",
+    "fullLength": true,
+    "duration": 88.2535
+  },
+  {
+    "path": "assets/media/208384b5bfda027bc738264d.mp4",
+    "source": "https://medias.aniguessr.com/ChainsawMan-ED2.mp4?v=75fd5b8e",
+    "bytes": 8053237,
+    "sha256": "2d896b62a14d828f0f2bd79bc24d932c9f5f60f062834e5186cc07598085cca2",
+    "fullLength": true,
+    "duration": 89.932
+  },
+  {
+    "path": "assets/media/7464e0753b4f16f90e215698.mp3",
+    "source": "https://medias.aniguessr.com/GoldenTime-OP1.mp3?v=b74cda23",
+    "bytes": 2943693,
+    "sha256": "2138816b3fffe6a7b2fcaf573bf54f273e27a3299bb2585ce8ba1cc45f548b90",
+    "fullLength": true,
+    "duration": 90.0135
+  },
+  {
+    "path": "assets/media/73322bb91d8d16f0610fc7a1.mp4",
+    "source": "https://medias.aniguessr.com/Mayoiga-ED1v2.mp4?v=58bd5e6f",
+    "bytes": 7537305,
+    "sha256": "711f9618ff882849fa6a94211742c8bc5f672314d82cf939c691b998b918335c",
+    "fullLength": true,
+    "duration": 88.253
+  },
+  {
+    "path": "assets/media/af108d4102ffcb0f3128ff70.mp3",
+    "source": "https://medias.aniguessr.com/OdaNobunaNoYabou-OP1.mp3?v=c2089288",
+    "bytes": 2980532,
+    "sha256": "6b6fa6cfb3680c8edc7a452301866440c298a7e3e08c100ae2ca9b7fb126a090",
+    "fullLength": true,
+    "duration": 90.0135
+  },
+  {
+    "path": "assets/media/ab019e1b333b1b49f7ecdc2b.mp4",
+    "source": "https://medias.aniguessr.com/GoldenTime-OP1.mp4?v=559e52de",
+    "bytes": 8121236,
+    "sha256": "8e6ae7c1d1836656ad5dd3d3e3c82e0da707ce3261edcee043edb02d5c512325",
+    "fullLength": true,
+    "duration": 90.048
+  },
+  {
+    "path": "assets/media/94c197dac90dd1af3bd0c4b6.mp3",
+    "source": "https://medias.aniguessr.com/Kaminomi-ED1-NCBD1080.mp3?v=0777d525",
+    "bytes": 1099052,
+    "sha256": "9c64e69dafa56e981162cc8bc6d23ac5129abee22cd07c1927363b965b25abb5",
+    "fullLength": true,
+    "duration": 91.5135
+  },
+  {
+    "path": "assets/media/4ed071f5e1e709a7304e500a.mp3",
+    "source": "https://medias.aniguessr.com/AdachiToShimamura-ED1-NCBD1080.mp3?v=db33b8c1",
+    "bytes": 1080332,
+    "sha256": "63387b3b3c0b4f7eb295a00c765fc20133c2e5df7f0d8a117f5bece6232e4756",
+    "fullLength": true,
+    "duration": 89.9735
+  },
+  {
+    "path": "assets/media/e29a86177060407f9d6042c9.mp4",
+    "source": "https://medias.aniguessr.com/OdaNobunaNoYabou-OP1.mp4?v=8ac085b0",
+    "bytes": 9439155,
+    "sha256": "9f5604295221dadbf9c0b165d26423b532ae1f4c50322697f212be6bee85372f",
+    "fullLength": true,
+    "duration": 90.048
+  },
+  {
+    "path": "assets/media/89f80d9ee1698dd14251ca35.mp4",
+    "source": "https://medias.aniguessr.com/Kaminomi-ED1-NCBD1080.mp4?v=ca4aa93a",
+    "bytes": 5650461,
+    "sha256": "ba173ca4d0262e8ffaa2b4e7497451a687c5d27613cf2db07b6d65382d8adecc",
+    "fullLength": true,
+    "duration": 91.51
+  },
+  {
+    "path": "assets/media/b1cd392d3216bb53220aa82b.mp3",
+    "source": "https://medias.aniguessr.com/Mondaiji-ED1-NCBD1080.mp3?v=980dfa5a",
+    "bytes": 1106540,
+    "sha256": "a0dabb825cc5fa0dd3a5b5b3cd909ea13d60085607d3f4f9bea91014ae90a4e4",
+    "fullLength": true,
+    "duration": 92.1535
+  },
+  {
+    "path": "assets/media/ce2033ec165b72f7e196e4e9.mp4",
+    "source": "https://medias.aniguessr.com/AdachiToShimamura-ED1v3.mp4?v=b80e9f27",
+    "bytes": 7440763,
+    "sha256": "dafb3d0889d015341ec66d08fd2decb7de97e12519f2e17c5233b8130e4664fa",
+    "fullLength": true,
+    "duration": 90.006583
+  },
+  {
+    "path": "assets/media/1214f182595fd38b3efbdcf5.mp4",
+    "source": "https://medias.aniguessr.com/Mondaiji-ED1-NCBD1080.mp4?v=96c2883b",
+    "bytes": 6159537,
+    "sha256": "dadc22f4b15637c3fcce9330a7ede222a97e30fac46460298b0ec62ca1f5d5d4",
+    "fullLength": true,
+    "duration": 92.145333
+  }
+]
