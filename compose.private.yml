@@ -1,0 +1,36 @@
+# Use the generated release folder: docker compose -f .release/AniLoop/compose.private.yml up --build -d
+# Local-only by default. Add a private VPN separately; do not publish this port to the Internet.
+services:
+  app:
+    build: .
+    image: aniloop:private-local
+    ports:
+      - "127.0.0.1:8110:8097"
+    environment:
+      HOST: 0.0.0.0
+      PORT: 8097
+      ANILOOP_DB: /app/.runtime/community.sqlite3
+      ANILOOP_SECURE_COOKIES: ${ANILOOP_SECURE_COOKIES:-0}
+      ANILOOP_PUBLIC_ORIGIN: ${ANILOOP_PUBLIC_ORIGIN:-http://localhost:8110}
+    volumes:
+      - accounts:/app/.runtime
+      - cache:/app/.tools
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp:size=128m,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 1g
+    cpus: 2.0
+    pids_limit: 128
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "2"
+volumes:
+  accounts:
+  cache:

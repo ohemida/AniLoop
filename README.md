@@ -119,3 +119,11 @@ Open **Friends**, enter another player's exact username, and send a request. The
 The Friends view compares selected-date daily totals, category scores, the seven daily quizzes ending on that date, and each player's best submitted Infinity round and round count. It includes your own result. Complete the default daily quiz and select **Submit to leaderboard** on Overview to share the result. Missing results are labeled **Not submitted**, including unshared or unfinished local games; a submitted zero-point result is still shown as zero. Local saves, custom packs, and Party/Co-op scores are separate. Dates refer to the quiz date, which resets at local midnight. No answers or quiz spoilers are exposed by this view.
 
 Friend requests and friendships persist in the existing SQLite database and are removed when an account is deleted. API routes require authentication and mutations use the existing same-origin checks. Only accepted friends appear in a player's friends comparison; pending requests do not grant membership.
+
+## Statistics
+
+Statistics includes recorded active days, current and best solo-play streaks, highest completed daily score with its date, and a category score-history chart. Switch between Daily and Infinity; filter 7 days, 1 month, 3 months, or all recorded history. Category lines and range averages have separate toggles. Focus a chart date and use arrow keys to inspect scores, or expand the data table. Gaps are dashed and missing breakdowns are not invented. Infinity uses the best complete round per day, including that same round's category breakdown.
+
+Detailed snapshots are retained for up to 1,000 played rounds, separate from the existing 100-row archive. New answers record local activity dates. Existing saves and total-only archives remain valid; older activity dates use the saved round date. These are device-local solo statistics, not synchronized account/Party statistics or reward-claim streaks. No sample data is added to user saves.
+
+For the prepared localhost-only container and the limits of cost/legal guarantees, read [PRIVATE_DEPLOYMENT.md](PRIVATE_DEPLOYMENT.md). No cloud deployment or paid hosting resource has been created. GitHub Actions is disabled on this private repository to prevent future hosted workflow execution; run tests locally.
