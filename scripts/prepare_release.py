@@ -6,7 +6,7 @@ def prepare(destination=None):
     out=Path(destination) if destination else ROOT/'.release/AniLoop'
     if out.exists():raise SystemExit(f'{out} already exists. Choose a fresh output folder or remove that generated folder yourself.')
     out.mkdir(parents=True)
-    for name in ['app.js','friends.py','catalog.js','social-ui.js','core.js','storage.js','styles.css','skin.css','index.html','server.py','community.py','rooms.py','rewards.py','hint_media.py','media_cache.py','start.sh','package.json','README.md','DEPLOYMENT.md','.gitignore','.dockerignore','.env.example','Dockerfile','SECURITY.md','PRIVATE_DEPLOYMENT.md','compose.private.yml','codex.md']:
+    for name in ['bugs.py','app.js','friends.py','catalog.js','social-ui.js','core.js','storage.js','styles.css','skin.css','index.html','server.py','community.py','rooms.py','rewards.py','hint_media.py','media_cache.py','start.sh','package.json','README.md','DEPLOYMENT.md','.gitignore','.dockerignore','.env.example','Dockerfile','SECURITY.md','PRIVATE_DEPLOYMENT.md','compose.private.yml','codex.md']:
         shutil.copy2(ROOT/name,out/name)
     for name in ['.github','scripts','tests']:
         shutil.copytree(ROOT/name,out/name,ignore=shutil.ignore_patterns('__pycache__','*.pyc'))

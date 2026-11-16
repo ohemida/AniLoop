@@ -379,3 +379,11 @@ Statistics verification: 29 Node and 46 Python tests passed in source/release. s
 - English UI, default black/muted mauve; alternate palettes remain dark. Reduced-motion respected. No new dependency or hosted service.
 - Verification: 32 Node tests,47 Python tests; appearance_browser.py verifies responsive320–1440px, theme persistence, upload/reload/rejection/removal, no POST uploads, unchanged game save, and hidden quiz background. appearance_account_browser.py uses explicitly designated /tmp database to prove real preview/purchase/equip/reload, exact shard deductions and preserved old inventory. Full browser.py real-media quiz/editor/import regression passed. Desktop/mobile/background screenshots in local qa/ (excluded from upload).
 - Sanitized upload package regenerated. GitHub repository stays private and Actions disabled. No external deployment or paid resource created.
+
+
+## Visible themes shortcut and bug reports (2026-11-16)
+
+- Themes & backgrounds button directly below brand opens Themes tab without sign-in; Appearance navigation retained. Mobile header explicitly assigns rows to shortcut/category nav/links/rewards; no 320px horizontal overflow.
+- Report a bug sidebar page: guest form, category/reproduction/expected/actual, optional transparent browser/display diagnostics, JSON download, failed-request draft preservation, success reference. Draft is memory-only across app navigation, not reload. No screenshot/file attachment or automatic external messages.
+- bugs.py adds only bug_reports table to existing SQLite. Anonymous POST /api/bugs uses existing same-origin JSON checks, dedicated throttle key (15 attempts/10min), bounded validated fields and allowlisted diagnostics; max1,000 reports. No public read endpoint, account/IP columns, external email/GitHub integration. Owner can review/delete rows locally. Sanitized release includes code only, no reports/database.
+- Verification: 32 Node and50 Python tests; bug_report_browser.py checks prominent theme access, form/download, diagnostics opt-out, saved anonymous reference, retry/navigation draft,320–1440px layout, same-origin enforcement and unchanged game saves. Existing appearance browser regression also retained.

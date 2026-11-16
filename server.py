@@ -11,6 +11,7 @@ from media_cache import MediaCache
 from rooms import Rooms
 from rewards import Rewards
 from friends import Friends
+from bugs import BugReports
 
 class Handler(SimpleHTTPRequestHandler):
     def send_response(self,code,message=None):
@@ -124,6 +125,8 @@ class Handler(SimpleHTTPRequestHandler):
                 user,new_token=service.auth(payload,self.path=='/api/register',self.client_address[0])
                 if token:service.logout(token)
                 result={'user':user};cookie=self.cookie(new_token)
+            elif self.path=='/api/bugs':
+                result=self.server.bugs.submit(payload,self.client_address[0])
             elif self.path=='/api/logout':
                 service.logout(token);result={'ok':True};cookie=self.cookie('',True)
             else:
@@ -153,7 +156,7 @@ class Handler(SimpleHTTPRequestHandler):
         data=json.dumps({'error':message}).encode()
         self.send_response(status);self.send_header('Content-Type','application/json');self.send_header('Content-Length',str(len(data)));self.end_headers();self.wfile.write(data)
     def do_POST(self):
-        if self.path in {'/api/register','/api/login','/api/logout','/api/account/delete','/api/scores','/api/rooms/create','/api/rooms/join','/api/rooms/action','/api/rewards/claim','/api/rewards/buy','/api/rewards/equip','/api/friends/request','/api/friends/accept','/api/friends/decline','/api/friends/cancel','/api/friends/remove'}:
+        if self.path in {'/api/bugs','/api/register','/api/login','/api/logout','/api/account/delete','/api/scores','/api/rooms/create','/api/rooms/join','/api/rooms/action','/api/rewards/claim','/api/rewards/buy','/api/rewards/equip','/api/friends/request','/api/friends/accept','/api/friends/decline','/api/friends/cancel','/api/friends/remove'}:
             self.community_post();return
         if self.path != '/api/hints':
             self.send_error(404);return
@@ -207,6 +210,7 @@ if __name__=='__main__':
             args.port+=1
     with server:
         server.community=Community(root,os.environ.get('ANILOOP_DB'))
+        server.bugs=BugReports(server.community)
         server.friends=Friends(server.community)
         server.rooms=Rooms(server.community);server.rewards=Rewards(server.community)
         server.media_cache=MediaCache(root,args.cache_mb*1024**2)

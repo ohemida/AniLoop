@@ -100,7 +100,7 @@ Open **Appearance → Profile frames** to preview, unlock, and equip **Silver li
 
 ## Themes and personal backgrounds
 
-Open **Appearance → Themes** for Midnight mauve (the default), Moonstone, Forest night, or Ink blue. All four retain dark surfaces and subdued accents. Themes and backgrounds are free and work without an account.
+Use the prominent **Themes & backgrounds** button below the AniLoop logo to open the theme chooser directly, or open **Appearance → Themes** for Midnight mauve (the default), Moonstone, Forest night, or Ink blue. All four retain dark surfaces and subdued accents. Themes and backgrounds are free and work without an account.
 
 **Backgrounds** offers Pure black, Mauve dusk, Night garden, and Midnight grid, plus a personal PNG/JPEG/WebP image up to 8 MB and 24 million pixels. Images are re-encoded to WebP and resized to at most 1,600 pixels on the longest side. Choose dimming, image position, and whether backgrounds appear during quiz questions (off by default).
 
@@ -142,3 +142,12 @@ Statistics includes recorded active days, current and best solo-play streaks, hi
 Detailed snapshots are retained for up to 1,000 played rounds, separate from the existing 100-row archive. New answers record local activity dates. Existing saves and total-only archives remain valid; older activity dates use the saved round date. These are device-local solo statistics, not synchronized account/Party statistics or reward-claim streaks. No sample data is added to user saves.
 
 For the prepared localhost-only container and the limits of cost/legal guarantees, read [PRIVATE_DEPLOYMENT.md](PRIVATE_DEPLOYMENT.md). No cloud deployment or paid hosting resource has been created. GitHub Actions is disabled on this private repository to prevent future hosted workflow execution; run tests locally.
+
+
+## Bug reports
+
+Choose **Report a bug** in the sidebar. Guests and signed-in players can describe the issue, reproduction steps, expected behavior, and actual behavior. Optional diagnostics show exactly what will be included: browser agent, viewport, theme/background IDs, originating app view, and app version. Account information, quiz answers, saves, custom images and console logs are not attached. Avoid personal information in free text.
+
+**Send bug report** saves to this server's `bug_reports` table in the existing `.runtime/community.sqlite3` (or `ANILOOP_DB`). The server returns a `BUG-…` reference; it does not email anyone or create a GitHub issue. There is no public report-reading API. The server owner can review the table with a local SQLite client. **Download copy** creates a JSON file, including when submission fails. Drafts survive in-app navigation for the current tab session, but not page reloads.
+
+Same-origin JSON requests only; maximum field lengths are validated on the server, diagnostic keys are allowlisted, and reports are limited to 15 attempts per client per 10 minutes and 1,000 saved reports. If the inbox is full, the page offers a download instead. Reports do not store the sender's IP or account ID. The owner controls local retention and can delete handled rows using a SQLite client. Restart the server after updating to enable `/api/bugs`.
