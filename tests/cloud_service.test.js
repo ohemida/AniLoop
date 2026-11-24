@@ -60,3 +60,14 @@ test('room membership and answer state are isolated by player',async()=>{
  assert.equal((await api.roomCurrent(users.two)).room.code,code);
  await assert.rejects(api.roomGet('ffffffff-ffff-ffff-ffff-ffffffffffff',code),/Join this room/);
 });
+
+test('profile picture accepts browser-prepared PNG data URLs and remains private',async()=>{
+ const repo=new FakeRepo(),api=new CloudService(repo,pack);
+ const image='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAB';
+ const saved=await api.picture(users.one,{image});
+ assert.equal(saved.pictureUrl,image);
+ assert.equal((await api.current(users.one,{email:'private@example.com'})).user.pictureUrl,image);
+ assert.equal((await api.current(users.two,{email:'other@example.com'})).user.pictureUrl,null);
+ await assert.rejects(api.picture(users.one,{image:'data:image/png;base64,not-a-png'}),/could not be saved/);
+ assert.equal((await api.picture(users.one,{image:null})).hasPicture,false);
+});
