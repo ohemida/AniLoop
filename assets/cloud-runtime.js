@@ -2,6 +2,7 @@
 // This module does not read browser storage until start() is called after consent.
 const STORAGE_KEY='aniloop-cloud-auth-v1';
 const PKCE_KEY='aniloop-cloud-pkce-v1';
+const RECOVERY_KEY='aniloop-cloud-recovery-v1';
 const policyVersion='2026-11-24.5';
 export function createCloudRuntime(config){
  const base=String(config.supabaseUrl||'').replace(/\/$/,'');
@@ -11,7 +12,9 @@ export function createCloudRuntime(config){
  const parse=async r=>{const data=await r.json().catch(()=>null);if(!r.ok)throw new Error(data?.error_description||data?.msg||data?.error||data?.message||'Supabase request failed.');return data;};
  const save=()=>{if(auth?.refresh_token)localStorage.setItem(STORAGE_KEY,JSON.stringify(auth));else localStorage.removeItem(STORAGE_KEY);};
  const authRequest=async(path,payload)=>{let response;try{response=await fetch(base+'/auth/v1/'+path,{method:'POST',headers:{apikey:key,'Content-Type':'application/json'},body:JSON.stringify(payload)});}catch{throw new Error('Could not reach Supabase sign-in. Check your internet connection and try again.');}return parse(response);};
- async function start(code=''){try{const value=JSON.parse(localStorage.getItem(STORAGE_KEY)||'null');if(value?.refresh_token)auth=value;}catch{auth=null;}if(code){const verifier=localStorage.getItem(PKCE_KEY);if(verifier){try{auth=await authRequest('token?grant_type=pkce',{auth_code:code,code_verifier:verifier});auth.expires_at=Date.now()/1000+(auth.expires_in||3600);save();}finally{localStorage.removeItem(PKCE_KEY);}}}if(auth?.expires_at&&auth.expires_at<Date.now()/1000+60)await refresh();}
+ async function start(code=''){let recovery=false;try{const value=JSON.parse(localStorage.getItem(STORAGE_KEY)||'null');if(value?.refresh_token)auth=value;}catch{auth=null;}if(code){const recoveryVerifier=localStorage.getItem(RECOVERY_KEY),verifier=recoveryVerifier||localStorage.getItem(PKCE_KEY);if(verifier){try{auth=await authRequest('token?grant_type=pkce',{auth_code:code,code_verifier:verifier});auth.expires_at=Date.now()/1000+(auth.expires_in||3600);save();recovery=!!recoveryVerifier;}finally{localStorage.removeItem(recoveryVerifier?RECOVERY_KEY:PKCE_KEY);}}else throw new Error('Open the reset link in the same browser where you requested it, or request a new link.');}if(auth?.expires_at&&auth.expires_at<Date.now()/1000+60)await refresh();return {recovery};}
+ async function requestPasswordReset(email){const verifier=base64url(crypto.getRandomValues(new Uint8Array(48))),digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(verifier));localStorage.setItem(RECOVERY_KEY,verifier);const redirect=location.origin+location.pathname;try{await authRequest('recover?'+new URLSearchParams({redirect_to:redirect}),{email,code_challenge:base64url(new Uint8Array(digest)),code_challenge_method:'s256'});}catch(error){localStorage.removeItem(RECOVERY_KEY);throw error;}}
+ async function updatePassword(password){if(!auth?.access_token)throw new Error('Your reset session has expired. Request another reset link.');let response;try{response=await fetch(base+'/auth/v1/user',{method:'PUT',headers:{apikey:key,Authorization:'Bearer '+auth.access_token,'Content-Type':'application/json'},body:JSON.stringify({password})});}catch{throw new Error('Could not reach Supabase. Please try again.');}await parse(response);}
  async function refresh(){if(refreshing)return refreshing;if(!auth?.refresh_token)return null;refreshing=(async()=>{try{auth=await authRequest('token?grant_type=refresh_token',{refresh_token:auth.refresh_token});auth.expires_at=Date.now()/1000+(auth.expires_in||3600);save();return auth;}catch{auth=null;save();return null;}finally{refreshing=null;}})();return refreshing;}
  async function invoke(path,payload,method){
   const send=()=>fetch(endpoint,{method:'POST',headers:{apikey:key,Authorization:'Bearer '+(auth?.access_token||key),'Content-Type':'application/json'},body:JSON.stringify({path,method:method|| (payload===undefined?'GET':'POST'),payload})});
@@ -38,6 +41,6 @@ export function createCloudRuntime(config){
   const merged=payload===undefined?Object.fromEntries(query):{...payload,...Object.fromEntries(query)};
   return invoke(path.includes('?')?`${clean}?${query}`:clean,payload===undefined?merged:merged,payload===undefined?'GET':'POST');
  }
- return {start,api,invoke,get accessToken(){return auth?.access_token||'';},get signedIn(){return !!auth?.access_token;},get policyVersion(){return policyVersion;}};
+ return {start,api,invoke,requestPasswordReset,updatePassword,get accessToken(){return auth?.access_token||'';},get signedIn(){return !!auth?.access_token;},get policyVersion(){return policyVersion;}};
 }
 function base64url(bytes){let text='';for(const b of bytes)text+=String.fromCharCode(b);return btoa(text).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}
