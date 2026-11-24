@@ -105,3 +105,14 @@
  .hub-hero .hero-copy p { margin-top:10px; }
 }
 .toolbar .round-label { max-width:none; }
+
+/* Player avatars (approved profile pictures or an initial) */
+.player-avatar{flex:none;display:inline-grid;place-items:center;width:34px;height:34px;border-radius:50%;overflow:hidden;background:var(--paper,#111217);border:1px solid var(--line,#2a2a2a);color:var(--muted,#b9b9b9);font-weight:700;font-size:.85rem;line-height:1}
+.player-avatar img{display:block;width:100%;height:100%;object-fit:cover}
+.friend-score-heading .player-avatar{width:40px;height:40px}
+.friend-request-name,.leaderboard-player{display:flex;align-items:center;gap:10px;min-width:0}
+.friend-request-name strong{display:inline}
+.leaderboard-player .player-avatar{width:28px;height:28px;font-size:.75rem}
+.picture-status{margin-top:12px;font-size:.85rem;color:var(--muted,#b9b9b9)}
+.picture-status.ok{color:#c9b4d4}
+.daily-gate .hero-copy{max-width:640px}

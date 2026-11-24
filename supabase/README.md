@@ -22,6 +22,17 @@ Alternatively, install the Supabase CLI and run `supabase login` followed by `su
 
 For a different frontend host, configure the exact origin in Supabase Edge Function secret `ANILOOP_ALLOWED_ORIGINS`, comma-separated. The default allows `https://ohemida.github.io` and `http://localhost:8098`.
 
+## Daily quiz and profile picture safety filter
+
+The daily quiz is account-only. Its questions come from an HMAC of the date with a server secret, every answer is graded by the Edge Function, and each account has exactly one attempt per day (stored as `daily:<user id>` in `aniloop_runtime`). Guests and private tabs cannot compute or replay it. Infinity and Category loops stay client-side and free for everyone.
+
+Optional Edge Function secrets (Dashboard → Edge Functions → Secrets, or `supabase secrets set`):
+
+- `OPENAI_API_KEY`: enables the automatic profile picture check with OpenAI's free `omni-moderation-latest` model (nudity/sexual content, graphic violence, self-harm). Without it, or when the check fails, uploaded pictures stay visible only to their owner until an admin approves them on `admin.html`.
+- `ANILOOP_DAILY_SECRET`: a long random string for the daily seed. Defaults to the service-role key; set it to rotate the daily independently.
+
+Approved pictures are shown to friends, to players who receive your friend request and on the leaderboard. No SQL change is needed for these features; redeploy the function after pulling them.
+
 ## Authentication URLs
 
 In Supabase **Authentication → URL Configuration**, set Site URL to `https://ohemida.github.io/AniLoop/` and add that exact URL to Redirect URLs. For local preview, also allow `http://localhost:8098/`. Keep email confirmation enabled. Supabase confirmation must return to the same URL so the browser can exchange its PKCE code. Built-in email delivery may be rate-limited; configure a trusted SMTP provider before inviting users.

@@ -64,6 +64,23 @@ export function answerRoom(g,category,index,data,pack,giveup){
  }
  g.scores.push(score);g.answers.push(answer);g.done=g.scores.length===g.questions.length;
 }
+// Account-bound daily quiz: one server-side attempt per account and day.
+// The client sends the question index it is looking at, so a stale tab or a
+// double click can never answer the next question.
+export function dailyAction(session,category,data,pack){
+ check(CATEGORIES.some(c=>c.id===category),'Choose a quiz category.');
+ const g=session.games[category],action=data?.action;
+ check(Number.isInteger(data?.index)&&data.index===g.index,'The daily quiz changed in another tab. Reload and try again.',409);
+ if(action==='continue'){check(!g.done&&g.scores.length>g.index,'Finish this question first.',409);g.index++;g.hints=[];return;}
+ check(!g.done&&g.scores.length<=g.index,'This question is already finished.',409);
+ if(action==='hint'){
+  const n=data.number;check(Number.isInteger(n)&&(category==='screenshot'?[1,2,3]:['opening','ending'].includes(category)?[1]:[]).includes(n),'Invalid clue.');
+  if(g.hints.includes(n))return;check(category!=='screenshot'||n===1||g.hints.includes(n-1),'Unlock clues in order.');g.hints.push(n);return;
+ }
+ if(action==='skip'){check(category==='anidle'&&g.attempt>3&&g.attempt<22,'No clue can be skipped to right now.');g.attempt=[13,18,22].find(n=>n>g.attempt);return;}
+ if(action==='answer'||action==='giveup'){answerRoom(g,category,g.index,data,pack,action==='giveup');return;}
+ throw new GameError('Unknown daily action.');
+}
 export function roomAction(room,userId,data,pack){
  const s=room.state,action=data.action;check(room.members.some(m=>m.id===userId),'Join this room before viewing it.',403);
  if(action==='leave'){room.members=room.members.filter(m=>m.id!==userId);if(s.players)delete s.players[userId];if(room.owner===userId)room.owner=room.members[0]?.id;}

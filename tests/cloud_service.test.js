@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {CloudService} from '../cloud/service.js';
-import {CATEGORIES} from '../core.js';
+import {CATEGORIES,createSession} from '../core.js';
 import {GameError} from '../cloud/engine.js';
 
 const pack=JSON.parse(readFileSync(new URL('../data/pool.json',import.meta.url)));
@@ -70,4 +70,71 @@ test('profile picture accepts browser-prepared PNG data URLs and remains private
  assert.equal((await api.current(users.two,{email:'other@example.com'})).user.pictureUrl,null);
  await assert.rejects(api.picture(users.one,{image:'data:image/png;base64,not-a-png'}),/could not be saved/);
  assert.equal((await api.picture(users.one,{image:null})).hasPicture,false);
+});
+
+function answerDaily(g,category,index){
+ const catalog=new Map(pack.anime.map(a=>[a.id,a]));
+ if(category==='character')return {entries:g.questions[index].map((id,j)=>{const a=catalog.get(id),c=a.characters.find(c=>c.id===g.characterRefs[index][j]);return {characterValue:c.name,animeValue:a.title};})};
+ return {value:catalog.get(g.questions[index]).title};
+}
+
+test('daily quiz is secret-seeded, the same for everyone and limited to one server-side attempt',async()=>{
+ const repo=new FakeRepo();
+ await assert.rejects(new CloudService(repo,pack).daily(users.one),/not configured/);
+ const api=new CloudService(repo,pack,{dailySecret:'test-secret'});
+ const first=await api.daily(users.one),second=await api.daily(users.two);
+ assert.deepEqual(first.session.games,second.session.games);
+ const publicSeed=createSession('daily',first.day,`${first.day}:${pack.key}`,pack.anime,pack.key);
+ assert.notDeepEqual(publicSeed.games.screenshot.questions,first.session.games.screenshot.questions);
+ const rotated=await new CloudService(new FakeRepo(),pack,{dailySecret:'another-secret'}).daily(users.one);
+ assert.notDeepEqual(rotated.session.games.screenshot.questions,first.session.games.screenshot.questions);
+ assert.equal(first.session.seed,first.day);
+
+ await api.dailyAct(users.one,{category:'screenshot',index:0,action:'giveup'});
+ assert.equal((await api.daily(users.one)).session.games.screenshot.scores.length,1,'reloading keeps the attempt');
+ await assert.rejects(api.dailyAct(users.one,{category:'screenshot',index:0,action:'giveup'}),/already finished/);
+ await assert.rejects(api.dailyAct(users.one,{category:'screenshot',index:1,action:'answer',value:'x'}),/another tab/);
+ await assert.rejects(api.dailyAct(users.one,{category:'screenshot',index:0,action:'hint',number:1}),/already finished/);
+ await assert.rejects(api.submit(users.one,{...validRun(),mode:'daily',seed:first.day}),/saved automatically/);
+
+ let result;
+ for(const {id:category,rounds} of CATEGORIES){
+  for(let i=0;i<rounds;i++){
+   let g=(await api.daily(users.one)).session.games[category];
+   if(g.scores.length<=i)result=await api.dailyAct(users.one,{category,index:i,action:'answer',...answerDaily(g,category,i)});
+   g=(await api.daily(users.one)).session.games[category];
+   if(category==='anidle'&&!g.done)result=await api.dailyAct(users.one,{category,index:0,action:'giveup'});
+   if(i<rounds-1)result=await api.dailyAct(users.one,{category,index:i,action:'continue'});
+  }
+ }
+ assert.equal(result.finished,true);
+ assert.equal(result.earned,100);
+ assert.equal(result.rewards.claimedToday,true);
+ const games=result.session.games;
+ assert.deepEqual(games.screenshot.scores.slice(1),[10000,10000]);
+ assert.equal(games.character.scores.reduce((a,b)=>a+b,0),30000);
+ assert.equal(repo.scores.length,1);assert.equal(repo.scores[0].mode,'daily');assert.equal(repo.scores[0].seed,first.day);assert.equal(repo.scores[0].score,result.score);
+ await assert.rejects(api.claim(users.one),/already been claimed/);
+ const otherPlayer=await api.daily(users.two);assert.equal(otherPlayer.session.games.screenshot.scores.length,0,'attempts are per account');
+});
+
+test('profile pictures must pass the safety filter before friends can see them',async()=>{
+ const repo=new FakeRepo(),jpeg='data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD';
+ const blocked=new CloudService(repo,pack,{moderateImage:async()=>({status:'rejected'})});
+ await assert.rejects(blocked.picture(users.one,{image:jpeg}),/safety filter/);
+ assert.equal((await blocked.current(users.one,{email:'one@example.com'})).user.hasPicture,false);
+ const manual=new CloudService(repo,pack);
+ assert.equal((await manual.picture(users.one,{image:jpeg})).pictureStatus,'pending');
+ await manual.friendChange(users.one,'request',{username:'Kitsune'});
+ let view=await manual.friends(users.two);assert.equal(view.incoming[0].pictureUrl,null);
+ await manual.friendChange(users.two,'accept',{userId:users.one});
+ view=await manual.friends(users.two);assert.equal(view.players.find(p=>p.userId===users.one).pictureUrl,null);
+ const checked=new CloudService(repo,pack,{moderateImage:async()=>({status:'approved'})});
+ assert.equal((await checked.picture(users.one,{image:jpeg})).pictureStatus,'approved');
+ view=await checked.friends(users.two);assert.equal(view.players.find(p=>p.userId===users.one).pictureUrl,jpeg);
+ assert.equal((await checked.friends(users.one)).players.find(p=>p.isSelf).pictureUrl,jpeg);
+ const broken=new CloudService(repo,pack,{moderateImage:async()=>{throw new Error('offline');}});
+ assert.equal((await broken.picture(users.one,{image:jpeg})).pictureStatus,'pending','filter outages fail closed');
+ view=await broken.friends(users.two);assert.equal(view.players.find(p=>p.userId===users.one).pictureUrl,null);
+ await assert.rejects(checked.picture(users.one,{image:'data:image/jpeg;base64,iVBORw0KGgo'}),/could not be saved/);
 });

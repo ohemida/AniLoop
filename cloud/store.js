@@ -12,6 +12,9 @@ export class CloudRepository{
  async isAdmin(id){return (await this.request('/rest/v1/aniloop_admins?'+new URLSearchParams({user_id:'eq.'+id,select:'user_id'}))).length>0;}
  async list(prefix,limit=100){return this.request('/rest/v1/aniloop_runtime?'+new URLSearchParams({key:'like.'+prefix+'%',select:'key,owner_id,value,revision',order:'updated_at.desc',limit:String(limit)}));}
  async getRuntime(key){return (await this.request('/rest/v1/aniloop_runtime?'+new URLSearchParams({key:'eq.'+key,select:'key,owner_id,value,revision'})))[0]||null;}
+ // Approved profile pictures for many players in one query (only the picture fields are read).
+ async pictures(ids){const unique=[...new Set(ids)].filter(id=>/^[0-9a-f-]{36}$/i.test(id)).slice(0,250);if(!unique.length)return new Map();const rows=await this.request('/rest/v1/aniloop_runtime?'+new URLSearchParams({key:'in.('+unique.map(id=>`"account:${id}"`).join(',')+')','value->>pictureStatus':'eq.approved',select:'owner_id,picture:value->>picture,pictureType:value->>pictureType'}));return new Map(rows.filter(r=>r.picture).map(r=>[r.owner_id,`data:image/${r.pictureType||'png'};base64,${r.picture}`]));}
+ async pendingPictures(limit=50){return this.request('/rest/v1/aniloop_runtime?'+new URLSearchParams({key:'like.account:%','value->>pictureStatus':'eq.pending',select:'owner_id,picture:value->>picture,pictureType:value->>pictureType',order:'updated_at.desc',limit:String(limit)}));}
  transaction(actor){return new CloudTransaction(this,actor);}
 }
 export class CloudTransaction{

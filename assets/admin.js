@@ -23,7 +23,7 @@ async function write(payload,button){
 async function load(){
  const data=await request('/api/admin');
  status.textContent=`${data.accountCount} registered server profiles · Read / write administration`;
- document.querySelector('#players').replaceChildren();document.querySelector('#reports').replaceChildren();
+ document.querySelector('#players').replaceChildren();document.querySelector('#reports').replaceChildren();document.querySelector('#pictures')?.replaceChildren();
  for(const player of data.players){
   const tr=node('tr'),cell=node('td'),form=node('form'),input=node('input'),save=node('button','Save');
   form.className='shard-form';input.type='number';input.min='0';input.max='1000000000';input.step='1';input.required=true;input.value=player.shards;input.setAttribute('aria-label',`${player.username} shard balance`);save.type='submit';
@@ -35,6 +35,15 @@ async function load(){
   for(const [label,key] of [['Steps','steps'],['Expected','expected'],['Actual','actual']])article.append(node('h4',label),node('p',report[key]));
   const remove=node('button','Delete report');remove.type='button';remove.addEventListener('click',()=>{if(confirm('Permanently delete this bug report?'))write({action:'delete-report',reportId:report.id},remove);});article.append(remove);document.querySelector('#reports').append(article);
  }
+ for(const picture of data.pictures||[]){
+  if(!/^data:image\/(png|jpeg|webp);base64,/.test(picture.pictureUrl))continue;
+  const article=node('article'),image=node('img'),approve=node('button','Approve'),reject=node('button','Reject and delete');
+  image.src=picture.pictureUrl;image.alt=`Profile picture of ${picture.username}`;image.width=96;image.height=96;approve.type=reject.type='button';
+  approve.addEventListener('click',()=>write({action:'picture-approve',userId:picture.userId},approve));
+  reject.addEventListener('click',()=>{if(confirm('Delete this profile picture?'))write({action:'picture-reject',userId:picture.userId},reject);});
+  article.append(image,node('h3',picture.username),approve,reject);document.querySelector('#pictures')?.append(article);
+ }
+ if(!(data.pictures||[]).length)document.querySelector('#pictures')?.append(node('p','No pictures are waiting for review.'));
  if(!data.reports.length)document.querySelector('#reports').append(node('p','No bug reports.'));
  document.querySelector('#content').hidden=false;
 }

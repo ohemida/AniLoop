@@ -10,7 +10,22 @@ const anon=Deno.env.get('SUPABASE_ANON_KEY')||Deno.env.get('SUPABASE_PUBLISHABLE
 const serviceKey=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')||secretKeys.default||'';
 const allowed=new Set((Deno.env.get('ANILOOP_ALLOWED_ORIGINS')||'https://ohemida.github.io,http://localhost:8098').split(',').map(x=>x.trim()).filter(Boolean));
 const repository=new CloudRepository(url,serviceKey);
-const service=new CloudService(repository,pool);
+const openaiKey=Deno.env.get('OPENAI_API_KEY')||'';
+// Profile picture safety filter: OpenAI's free omni-moderation model checks the
+// image for sexual content/nudity, graphic violence and self-harm. Without a key
+// (or if the check fails) pictures stay private until an admin approves them.
+async function moderateImage(dataUrl:string){
+ if(!openaiKey)return {status:'pending'};
+ const response=await fetch('https://api.openai.com/v1/moderations',{method:'POST',headers:{Authorization:'Bearer '+openaiKey,'Content-Type':'application/json'},body:JSON.stringify({model:'omni-moderation-latest',input:[{type:'image_url',image_url:{url:dataUrl}}]}),signal:AbortSignal.timeout(15000)});
+ if(!response.ok)return {status:'pending'};
+ const result=(await response.json().catch(()=>null))?.results?.[0];if(!result)return {status:'pending'};
+ const score=(name:string)=>Number(result.category_scores?.[name]||0);
+ const blocked=result.flagged===true||score('sexual')>0.2||score('sexual/minors')>0.05||score('violence/graphic')>0.3||score('violence')>0.6||score('self-harm')>0.3||score('self-harm/intent')>0.3||score('self-harm/instructions')>0.3;
+ return {status:blocked?'rejected':'approved'};
+}
+// The daily quiz seed is derived from this secret, so the daily cannot be
+// computed in the browser. Set ANILOOP_DAILY_SECRET to rotate it independently.
+const service=new CloudService(repository,pool,{dailySecret:Deno.env.get('ANILOOP_DAILY_SECRET')||serviceKey,moderateImage});
 const json=(body,status=200,headers={})=>new Response(JSON.stringify(body),{status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store',...headers}});
 function cors(origin){return {'Access-Control-Allow-Origin':origin,'Access-Control-Allow-Headers':'authorization, apikey, content-type','Access-Control-Allow-Methods':'POST, OPTIONS','Vary':'Origin'};}
 async function register(payload){
@@ -36,8 +51,8 @@ Deno.serve(async request=>{
   const body=JSON.parse(raw);if(!body||typeof body!=='object'||Array.isArray(body))throw new GameError('Expected a JSON request.');
   const path=String(body.path||'');if(!path.startsWith('/api/'))throw new GameError('Unknown endpoint.',404);
   const route=path.split('?')[0],method=body.method||'POST';
-  const reads=new Set(['/api/config','/api/account','/api/account/export','/api/leaderboard','/api/rooms/current','/api/rooms/view','/api/rewards','/api/friends','/api/admin']);
-  if(route==='/api/account/save'? !['GET','POST'].includes(method):reads.has(route)?method!=='GET':method!=='POST')throw new GameError('Wrong method for this endpoint.',405);
+  const reads=new Set(['/api/config','/api/account','/api/account/export','/api/leaderboard','/api/rooms/current','/api/rooms/view','/api/rewards','/api/friends','/api/admin','/api/daily']);
+  if(route==='/api/account/save'||route==='/api/account/picture'? !['GET','POST'].includes(method):reads.has(route)?method!=='GET':method!=='POST')throw new GameError('Wrong method for this endpoint.',405);
   if(route==='/api/register')return json(await register(body.payload),200,headers);
   if(route==='/api/bugs'){
    const p=body.payload||{};if(!['General','Screenshots','Characters','Openings','Endings','Anidle','Multiplayer','Appearance'].includes(p.category))throw new GameError('Choose a report category.');
