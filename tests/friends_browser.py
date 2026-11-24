@@ -1,3 +1,4 @@
+from privacy_fixture import open_app
 """Two browser contexts prove mutual friend requests and submitted daily comparisons."""
 from pathlib import Path
 from types import SimpleNamespace
@@ -11,12 +12,12 @@ PACK=json.loads((ROOT/'data/pool.json').read_text());ANIME={a['id']:a for a in P
 def click(p,action):p.locator('[data-action="'+action+'"]:visible').first.click()
 def open_friends(p):click(p,'friends');expect(p.locator('.friends-loading')).to_have_count(0)
 def register(p,username):
-    response=p.request.post(URL+'/api/register',data={'username':username,'password':'Friends test password!'});assert response.ok,response.text()
-    p.goto(URL);expect(p.locator('.account-entry')).to_contain_text(username);return response.json()['user']
+    response=p.request.post(URL+'/api/register',data={'adultConfirmed':True,'username':username,'password':'Friends test password!'});assert response.ok,response.text()
+    open_app(p,URL);expect(p.locator('.account-entry')).to_contain_text(username);return response.json()['user']
 with sync_playwright() as pw:
     browser=pw.chromium.launch();contexts=[browser.new_context(viewport={'width':1440,'height':1100}) for _ in range(2)];host,friend=[c.new_page() for c in contexts];errors=[]
     for p in [host,friend]:p.set_default_timeout(30000);p.on('pageerror',lambda e:errors.append(str(e)))
-    host.goto(URL);host.locator('.hero').wait_for();open_friends(host);expect(host.locator('.friends-signin')).to_be_visible()
+    open_app(host,URL);host.locator('.hero').wait_for();open_friends(host);expect(host.locator('.friends-signin')).to_be_visible()
     a=register(host,'Alice_'+uuid.uuid4().hex[:6]);b=register(friend,'Bob_'+uuid.uuid4().hex[:6]);open_friends(host);open_friends(friend)
     host.locator('#friend-username').fill(b['username']);host.locator('form[data-friends-form=request] button[type=submit]').click()
     expect(host.locator('.friend-request')).to_contain_text(b['username']);click(friend,'friend:refresh')

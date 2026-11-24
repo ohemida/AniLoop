@@ -12,8 +12,15 @@ from rooms import Rooms
 from rewards import Rewards
 from friends import Friends
 from bugs import BugReports
+from retention import Maintenance
+from supabase_auth import SupabaseAuth
 
 class Handler(SimpleHTTPRequestHandler):
+    def log_message(self,format,*args):
+        maintenance=getattr(self.server,'maintenance',None)
+        if maintenance:
+            try:maintenance.log_request(getattr(self,'_response_status',500))
+            except OSError:pass
     def send_response(self,code,message=None):
         self._response_status=code
         return super().send_response(code,message)
@@ -36,17 +43,43 @@ class Handler(SimpleHTTPRequestHandler):
         if accepts_gzip:self.send_header('Content-Encoding','gzip')
         self.end_headers();return BytesIO(data)
 
+    def authenticated_user(self):
+        token=self.session_token();cloud=getattr(self.server,'supabase',None)
+        if SupabaseAuth.cloud_token(token):return cloud.user(token) if cloud else None
+        return self.server.community.user(token)
+    def logout_session(self,token):
+        cloud=getattr(self.server,'supabase',None)
+        if SupabaseAuth.cloud_token(token):
+            if cloud:cloud.logout(token)
+        else:self.server.community.logout(token)
     def send_head(self):
         self._remaining=None
         self._text_response=False
         route=urlsplit(self.path).path
         if any(part.startswith('.') for part in Path(self.translate_path(self.path)).relative_to(Path(self.directory)).parts):
             self.send_error(404);return None
-        if route in {'/api/account','/api/leaderboard','/api/rooms/current','/api/rooms/view','/api/rewards','/api/friends'}:
+        if route=='/api/config':
+            cloud=getattr(self.server,'supabase',None)
+            data=json.dumps({'supabaseEnabled':bool(cloud),'defaultAuthProvider':'supabase' if cloud else 'local','gameDataStorage':'local-backend'}).encode()
+            self.send_response(200);self.send_header('Content-Type','application/json');self.send_header('Content-Length',str(len(data)));self.end_headers();return BytesIO(data)
+        if route=='/api/account/picture':
             try:
-                if route=='/api/account':result={'user':self.server.community.user(self.session_token())}
+                picture=self.server.community.picture(self.authenticated_user())
+                if picture is None:raise APIError('No profile picture.',404)
+                self.send_response(200);self.send_header('Content-Type','image/png');self.send_header('Content-Length',str(len(picture)));self.end_headers();return BytesIO(picture)
+            except APIError as error:self.json_error(error.status,error.message);return None
+        if route in {'/api/admin','/api/account','/api/account/export','/api/leaderboard','/api/rooms/current','/api/rooms/view','/api/rewards','/api/friends'}:
+            try:
+                if route=='/api/admin':result=self.server.community.admin_summary(self.authenticated_user())
+                elif route=='/api/account':
+                    user=self.authenticated_user()
+                    result={'user':dict(user,isAdmin=self.server.community.is_admin(user),hasPicture=bool(self.server.community.picture(user))) if user else None}
+                elif route=='/api/account/export':
+                    user=self.authenticated_user()
+                    if not user:raise APIError('Sign in to continue.',401)
+                    result=self.server.supabase.export(user,self.session_token()) if user.get('provider')=='supabase' else self.server.community.export(user)
                 elif route in {'/api/rooms/current','/api/rooms/view','/api/rewards','/api/friends'}:
-                    user=self.server.community.user(self.session_token())
+                    user=self.authenticated_user()
                     if not user:raise APIError('Sign in to continue.',401)
                     if route=='/api/friends':result=self.server.friends.view(user,parse_qs(urlsplit(self.path).query).get('day',[None])[0])
                     elif route=='/api/rewards':result={'rewards':self.server.rewards.get(user)}
@@ -55,12 +88,10 @@ class Handler(SimpleHTTPRequestHandler):
                 else:
                     query=parse_qs(urlsplit(self.path).query);result=self.server.community.leaderboard(query.get('mode',['infinity'])[0],query.get('period',['all'])[0])
                 data=json.dumps(result).encode()
-                from io import BytesIO
                 self.send_response(200);self.send_header('Content-Type','application/json');self.send_header('Content-Length',str(len(data)));self.end_headers();return BytesIO(data)
             except APIError as error:self.json_error(error.status,error.message);return None
         if route=='/api/health':
             data=json.dumps({'app':'AniLoop','hintApi':1,'communityApi':1,'roomsApi':1,'rewardsApi':1,'friendsApi':1,'ffmpeg':bool(shutil.which('ffmpeg')),'ffprobe':bool(shutil.which('ffprobe'))}).encode()
-            from io import BytesIO
             self.send_response(200);self.send_header('Content-Type','application/json');self.send_header('Content-Length',str(len(data)));self.end_headers();return BytesIO(data)
         if route.startswith('/hints/'):
             try:path=self.server.hint_media.get(route[len('/hints/'):])
@@ -70,10 +101,10 @@ class Handler(SimpleHTTPRequestHandler):
             except FileNotFoundError:self.send_error(404,'Unknown media ID');return None
             except (OSError,ValueError):self.send_error(502,'Media source temporarily unavailable');return None
         else:
-            if route not in {'/','/index.html','/app.js','/catalog.js','/social-ui.js','/core.js','/storage.js','/styles.css','/skin.css'} and not route.startswith(('/assets/','/data/')):
+            if route not in {'/','/admin.html','/index.html','/app.js','/catalog.js','/social-ui.js','/core.js','/storage.js','/styles.css','/skin.css'} and not route.startswith(('/assets/','/data/')):
                 self.send_error(404);return None
             path=Path(self.translate_path(self.path))
-            if path.suffix.lower() in {'.db','.sqlite','.sqlite3','.py'} or path.is_dir() and route!='/':
+            if path.name.endswith('.session-key') or path.suffix.lower() in {'.db','.sqlite','.sqlite3','.py'} or path.is_dir() and route!='/':
                 self.send_error(404);return None
         if route=='/':path=Path(self.directory)/'index.html'
         if path.is_file() and path.suffix.lower() in {'.json','.js','.css','.html','.svg'}:
@@ -106,7 +137,7 @@ class Handler(SimpleHTTPRequestHandler):
             cookie=SimpleCookie(self.headers.get('Cookie',''));return cookie['aniloop_session'].value if 'aniloop_session' in cookie else ''
         except Exception:return ''
     def cookie(self,token,clear=False):
-        secure='; Secure' if os.environ.get('ANILOOP_SECURE_COOKIES')=='1' else ''
+        secure='; Secure' if os.environ.get('ANILOOP_SECURE_COOKIES')=='1' or os.environ.get('ANILOOP_PUBLIC_ORIGIN','').startswith('https://') else ''
         return f'aniloop_session={token}; Path=/; HttpOnly; SameSite=Lax; Max-Age={0 if clear else 30*86400}{secure}'
     def community_post(self):
         if self.headers.get_content_type()!='application/json' or self.headers.get('Sec-Fetch-Site')=='cross-site':
@@ -120,18 +151,28 @@ class Handler(SimpleHTTPRequestHandler):
             if not 0<size<=1024*1024:raise APIError('Request exceeds 1 MB.')
             payload=json.loads(self.rfile.read(size))
             if not isinstance(payload,dict):raise APIError('Expected a JSON object.')
-            service=self.server.community;token=self.session_token();user=service.user(token);cookie=None
+            service=self.server.community;token=self.session_token();user=None if self.path in {'/api/register','/api/login','/api/logout','/api/bugs'} else self.authenticated_user();cookie=None
             if self.path in {'/api/register','/api/login'}:
-                user,new_token=service.auth(payload,self.path=='/api/register',self.client_address[0])
-                if token:service.logout(token)
-                result={'user':user};cookie=self.cookie(new_token)
+                if self.path=='/api/register' and payload.get('adultConfirmed') is not True:raise APIError('Accounts are for adults aged 18 or over. Confirm your age to register.')
+                provider=payload.get('provider','local')
+                if provider not in {'local','supabase'}:raise APIError('Unknown account provider.')
+                auth_service=getattr(self.server,'supabase',None) if provider=='supabase' else service
+                if not auth_service:raise APIError('Supabase is not configured on this server.',503)
+                user,new_token=auth_service.auth(payload,self.path=='/api/register',self.client_address[0])
+                if new_token:
+                    if token:self.logout_session(token)
+                    cookie=self.cookie(new_token)
+                result={'user':dict(user,isAdmin=service.is_admin(user),hasPicture=bool(service.picture(user))) if user else None,'requiresConfirmation':provider=='supabase' and new_token is None}
             elif self.path=='/api/bugs':
                 result=self.server.bugs.submit(payload,self.client_address[0])
             elif self.path=='/api/logout':
-                service.logout(token);result={'ok':True};cookie=self.cookie('',True)
+                self.logout_session(token);result={'ok':True};cookie=self.cookie('',True)
             else:
                 if not user:raise APIError('Sign in to continue.',401)
-                if self.path.startswith('/api/friends/'):
+                if self.path=='/api/admin/action':result=service.admin_change(user,payload)
+                elif self.path=='/api/account/picture':
+                    service.throttle('picture:'+str(user['id']));result=service.set_picture(user,payload)
+                elif self.path.startswith('/api/friends/'):
                     result=self.server.friends.change(user,self.path.rsplit('/',1)[1],payload)
                 elif self.path=='/api/scores':result=service.submit(user,payload.get('round'))
                 elif self.path=='/api/rooms/create':
@@ -142,7 +183,10 @@ class Handler(SimpleHTTPRequestHandler):
                 elif self.path=='/api/rewards/claim':result=self.server.rewards.claim(user,payload.get('round'))
                 elif self.path in {'/api/rewards/buy','/api/rewards/equip'}:result=self.server.rewards.cosmetic(user,payload.get('item'),self.path.endswith('/equip'))
                 elif self.path=='/api/account/delete':
-                    service.throttle(self.client_address[0]);service.delete(user,payload.get('password'));result={'ok':True};cookie=self.cookie('',True)
+                    service.throttle(self.client_address[0])
+                    if user.get('provider')=='supabase':self.server.supabase.delete(user,payload.get('password'),token)
+                    else:service.delete(user,payload.get('password'))
+                    result={'ok':True};cookie=self.cookie('',True)
                 else:raise APIError('Unknown endpoint.',404)
             data=json.dumps(result).encode();self.send_response(200)
             self.send_header('Content-Type','application/json');self.send_header('Content-Length',str(len(data)))
@@ -156,7 +200,7 @@ class Handler(SimpleHTTPRequestHandler):
         data=json.dumps({'error':message}).encode()
         self.send_response(status);self.send_header('Content-Type','application/json');self.send_header('Content-Length',str(len(data)));self.end_headers();self.wfile.write(data)
     def do_POST(self):
-        if self.path in {'/api/bugs','/api/register','/api/login','/api/logout','/api/account/delete','/api/scores','/api/rooms/create','/api/rooms/join','/api/rooms/action','/api/rewards/claim','/api/rewards/buy','/api/rewards/equip','/api/friends/request','/api/friends/accept','/api/friends/decline','/api/friends/cancel','/api/friends/remove'}:
+        if self.path in {'/api/admin/action','/api/account/picture','/api/bugs','/api/register','/api/login','/api/logout','/api/account/delete','/api/scores','/api/rooms/create','/api/rooms/join','/api/rooms/action','/api/rewards/claim','/api/rewards/buy','/api/rewards/equip','/api/friends/request','/api/friends/accept','/api/friends/decline','/api/friends/cancel','/api/friends/remove'}:
             self.community_post();return
         if self.path != '/api/hints':
             self.send_error(404);return
@@ -189,7 +233,7 @@ class Handler(SimpleHTTPRequestHandler):
     def end_headers(self):
         route=urlsplit(self.path).path
         immutable=route.startswith(('/media/','/hints/')) and getattr(self,'_response_status',0) in {200,206}
-        self.send_header('Cache-Control','no-store' if route.startswith('/api/') else 'public, max-age=31536000, immutable' if immutable else 'no-cache');self.send_header('Referrer-Policy','same-origin');self.send_header('X-Frame-Options','DENY');self.send_header('X-Content-Type-Options','nosniff');super().end_headers()
+        self.send_header('Cache-Control','no-store' if route.startswith('/api/') else 'public, max-age=31536000, immutable' if immutable else 'no-cache');self.send_header('Content-Security-Policy',"default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' https: data: blob:; media-src 'self' https: data: blob:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'");self.send_header('Permissions-Policy','camera=(), microphone=(), geolocation=()');self.send_header('Referrer-Policy','no-referrer');self.send_header('X-Frame-Options','DENY');self.send_header('X-Content-Type-Options','nosniff');super().end_headers()
     def handle(self):
         try:super().handle()
         except (BrokenPipeError,ConnectionResetError):pass
@@ -210,11 +254,19 @@ if __name__=='__main__':
             args.port+=1
     with server:
         server.community=Community(root,os.environ.get('ANILOOP_DB'))
+        server.supabase=None
+        project_file=Path(root)/'supabase/project.json'
+        project=json.loads(project_file.read_text()) if project_file.exists() else {}
+        if os.environ.get('ANILOOP_SUPABASE_ENABLED',str(int(project.get('enabled',False))))=='1':
+            server.supabase=SupabaseAuth(server.community,os.environ.get('ANILOOP_SUPABASE_URL',project.get('url','')),os.environ.get('ANILOOP_SUPABASE_PUBLISHABLE_KEY',project.get('publishableKey','')),os.environ.get('ANILOOP_PUBLIC_ORIGIN') or (f'http://localhost:{args.port}' if args.host in {'127.0.0.1','localhost'} else None))
         server.bugs=BugReports(server.community)
         server.friends=Friends(server.community)
         server.rooms=Rooms(server.community);server.rewards=Rewards(server.community)
+        server.maintenance=Maintenance(server.community,backups=os.environ.get('ANILOOP_MANAGED_BACKUPS')=='1',access_logs=os.environ.get('ANILOOP_ACCESS_LOG')=='1')
+        server.maintenance.start()
         server.media_cache=MediaCache(root,args.cache_mb*1024**2)
         server.hint_media=HintMedia(root,server.media_cache)
         print(f'AniLoop: http://localhost:{args.port}',flush=True)
         try:server.serve_forever()
         except KeyboardInterrupt:pass
+        finally:server.maintenance.stop()

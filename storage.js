@@ -1,6 +1,9 @@
 const STATE_KEY='aniloop-state-v1';
-export function readState(){try{return JSON.parse(localStorage.getItem(STATE_KEY))||{};}catch{return {};}}
-export function writeState(state){localStorage.setItem(STATE_KEY,JSON.stringify(state));}
+let stateScope=null;
+function stateKey(){return stateScope?`${STATE_KEY}:${stateScope}`:STATE_KEY;}
+export function setStateScope(value){stateScope=value?String(value):null;}
+export function readState(){try{return JSON.parse(localStorage.getItem(stateKey()))||{};}catch{return {};}}
+export function writeState(state){localStorage.setItem(stateKey(),JSON.stringify(state));}
 let dbPromise;
 function db(){return dbPromise??=new Promise((resolve,reject)=>{const r=indexedDB.open('aniloop-media',1);r.onupgradeneeded=()=>r.result.createObjectStore('packs');r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});}
 export async function loadPack(){const database=await db();return new Promise((resolve,reject)=>{const r=database.transaction('packs').objectStore('packs').get('custom');r.onsuccess=()=>resolve(r.result||null);r.onerror=()=>reject(r.error);});}

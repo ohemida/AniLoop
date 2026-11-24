@@ -1,6 +1,7 @@
 """Bounded, anonymous bug reports; no public read endpoint or external submission."""
 import json,secrets,time
 from community import APIError
+from retention import REPORT_DAYS,DAY
 CATEGORIES=('General','Screenshots','Characters','Openings','Endings','Anidle','Multiplayer','Appearance')
 class BugReports:
     def __init__(self,community):
@@ -28,6 +29,7 @@ class BugReports:
         identifier='BUG-'+secrets.token_hex(5).upper()
         with self.community.db() as db:
             db.execute('BEGIN IMMEDIATE')
+            db.execute('DELETE FROM bug_reports WHERE created < ?',(int(time.time())-REPORT_DAYS*DAY,))
             if db.execute('SELECT COUNT(*) FROM bug_reports').fetchone()[0]>=1000:raise APIError('The report inbox is full. Download your report and share it with the server owner.',503)
             db.execute('INSERT INTO bug_reports VALUES(?,?,?,?,?,?,?,?)',(identifier,data['title'],category,data['steps'],data['expected'],data['actual'],json.dumps(safe),int(time.time())))
         return {'id':identifier}

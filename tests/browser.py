@@ -1,3 +1,4 @@
+from privacy_fixture import open_app
 """Real-media browser regression. Start python3 server.py first."""
 from pathlib import Path
 import json,os,base64,re
@@ -25,7 +26,7 @@ with sync_playwright() as pw:
  p=ctx.new_page();errors=[]
  p.set_default_timeout(120000);p.on('pageerror',lambda e:errors.append(str(e)))
  p.route('https://fonts.googleapis.com/**',lambda r:r.abort());p.route('https://fonts.gstatic.com/**',lambda r:r.abort())
- p.goto(URL,wait_until='networkidle')
+ open_app(p,URL,wait_until='networkidle')
  expect(p.locator('.category-card')).to_have_count(5)
  expect(p.locator('[data-action="next"]').first).to_be_disabled()
  assert 'Demo-Medienpaket' not in p.locator('main').inner_text()
@@ -41,7 +42,7 @@ with sync_playwright() as pw:
  assert current(p,'screenshot')['frames']==initial['frames']
  for n in range(3):
   g=current(p,'screenshot');expect(p.locator('.difficulty').first).to_have_text(['Easy','Medium','Hard'][n])
-  p.wait_for_function('document.querySelector(".question-image").naturalWidth>0')
+  p.wait_for_function('()=>document.querySelector(".question-image").naturalWidth>0')
   if n==0:p.screenshot(path=str(OUT/'dark-screenshot.png'),full_page=True)
   answer(p,ANIME[g['questions'][n]]['title'])
   if n<2:points(p.locator('.result-score'),7500 if n==0 else 10000)
@@ -70,7 +71,7 @@ with sync_playwright() as pw:
   for n in range(3):
    g=current(p,category);play(p)
    if n==0 and category=='opening':
-    click(p,'hint:1');p.wait_for_function('document.querySelector(".quiz-video").dataset.positioned==="true"');play(p,'video');p.screenshot(path=str(OUT/'dark-opening.png'),full_page=True)
+    click(p,'hint:1');p.wait_for_function('()=>document.querySelector(".quiz-video").dataset.positioned==="true"');play(p,'video');p.screenshot(path=str(OUT/'dark-opening.png'),full_page=True)
    if n==0 and category=='ending':click(p,'giveup');points(p.locator('.result-score'),0)
    else:answer(p,ANIME[g['questions'][n]]['title'])
    if n==2:points(p.locator('.category-score>strong'),12500 if category=='opening' else 10000)
@@ -83,7 +84,7 @@ with sync_playwright() as pw:
  expect(p.locator('.comparison-wrap .comparison tbody tr')).to_have_count(3)
  answer(p,wrong[0]['title']);expect(p.locator('#toast')).to_contain_text('already guessed')
  click(p,'skip-anidle');assert current(p,'anidle')['attempt']==13
- p.wait_for_function('document.querySelector(".clue-cover img").naturalWidth>0')
+ p.wait_for_function('()=>document.querySelector(".clue-cover img").naturalWidth>0')
  answer(p,ANIME[target]['title']);points(p.locator('.category-score>strong'),5000)
  click(p,'home');expect(p.locator('.completion')).to_be_visible()
  assert sum(sum(g['scores']) for g in state(p)['infinity']['games'].values())==77000

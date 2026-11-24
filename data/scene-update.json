@@ -1,0 +1,176 @@
+{
+  "date": "2026-11-23",
+  "rightsStatus": "Public-use permissions unverified; no publication authorised.",
+  "addedScenes": 14,
+  "updatedAnime": 8,
+  "scenes": [
+    {
+      "animeId": "anime-1195",
+      "url": "https://cms.aniguessr.com/endpoints/screenshot.php?data=NzA1NC1LYWljaG91LXdhLU1haWQtc2FtYS9LYWljaG91LXdhLU1haWQtc2FtYV8wMDguanBn",
+      "source": "https://cms.aniguessr.com/wp-json/aniguessr/v1/game/screenshots?date=20261123",
+      "sha256": "b9e9006abe6f9aa48fd5e445b3ef74fc3d23e4562a6a0b7fd41d4326237afa14",
+      "width": 1200,
+      "height": 675,
+      "key": "4e93ee377e6fbcdfbe9c27c312fef120.jpg"
+    },
+    {
+      "animeId": "anime-949",
+      "url": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MTAxMzQ4LVZpbmxhbmQtU2FnYS9WaW5sYW5kLVNhZ2FfMDEwLnBuZw==",
+      "source": "https://cms.aniguessr.com/wp-json/aniguessr/v1/game/screenshots?date=20261122",
+      "sha256": "7376db0c0bd59b56464beeca6abfd7b8a9a8139d28184ce8da96cbded3dda0a7",
+      "width": 1200,
+      "height": 675,
+      "key": "2eb4578bfa513a22b4070798eb5bf89f.png"
+    },
+    {
+      "animeId": "anime-949",
+      "url": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MTAxMzQ4LVZpbmxhbmQtU2FnYS9WaW5sYW5kLVNhZ2FfMDA3LnBuZw==",
+      "source": "https://cms.aniguessr.com/wp-json/aniguessr/v1/game/screenshots?date=20261122",
+      "sha256": "92b6a326309efbd42232078e57e7f46d742b61b0e9865459834eae7dbde1a912",
+      "width": 1200,
+      "height": 675,
+      "key": "48d7876f946b79911e05f1bb9edcb85f.png"
+    },
+    {
+      "animeId": "anime-662",
+      "url": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MTA4NDY1LU11c2hva3UtVGVuc2VpLUpvYmxlc3MtUmVpbmNhcm5hdGlvbi9NdXNob2t1LVRlbnNlaS1Kb2JsZXNzLVJlaW5jYXJuYXRpb25fMDAxLnBuZw==",
+      "source": "https://cms.aniguessr.com/wp-json/aniguessr/v1/game/screenshots?date=20261121",
+      "sha256": "3c5b7b3f00ca509e6af91336d5cbc4a7abf6c039fb0614f5c0515ff4fec3abd7",
+      "width": 1200,
+      "height": 675,
+      "key": "6a226f0206b6556136c7df45d06e3adf.png"
+    },
+    {
+      "animeId": "anime-887",
+      "url": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MTEyMzAxLVRoZS1NaXNmaXQtb2YtRGVtb24tS2luZy1BY2FkZW15L1RoZS1NaXNmaXQtb2YtRGVtb24tS2luZy1BY2FkZW15XzAwNi5wbmc=",
+      "source": "https://cms.aniguessr.com/wp-json/aniguessr/v1/game/screenshots?date=20261120",
+      "sha256": "97cd72858abc7d3b5d074353979da05bc0415e2d36b858dc9e069dd05cd17658",
+      "width": 1200,
+      "height": 675,
+      "key": "4bed332b349cb71de3c79051ca34cbe0.png"
+    },
+    {
+      "animeId": "anime-887",
+      "url": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MTEyMzAxLVRoZS1NaXNmaXQtb2YtRGVtb24tS2luZy1BY2FkZW15L1RoZS1NaXNmaXQtb2YtRGVtb24tS2luZy1BY2FkZW15XzAwOS5wbmc=",
+      "source": "https://cms.aniguessr.com/wp-json/aniguessr/v1/game/screenshots?date=20261120",
+      "sha256": "c6d24f7ce129473f179903c7e2f84706700bb5e904078be3f0a0b9fb813dd5f5",
+      "width": 1200,
+      "height": 675,
+      "key": "8d33d9ddc1a7cc79db003edc46f5ea0d.png"
+    },
+    {
+      "animeId": "anime-553",
+      "url": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MjE2MzktS2Vpam8vS2Vpam9fMDA5LnBuZw==",
+      "source": "https://cms.aniguessr.com/wp-json/aniguessr/v1/game/screenshots?date=20261120",
+      "sha256": "986eff9ee42eda7ffdf17430d05ef50ed7adbfe8bf08b89f515d8c3f1887f06c",
+      "width": 1200,
+      "height": 675,
+      "key": "4e6d0e05ca4ac19a815674ff1e106d3d.png"
+    },
+    {
+      "animeId": "anime-553",
+      "url": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MjE2MzktS2Vpam8vS2Vpam9fMDAyLnBuZw==",
+      "source": "https://cms.aniguessr.com/wp-json/aniguessr/v1/game/screenshots?date=20261120",
+      "sha256": "620980fb5dd09c1e25441f6200b32e2e4866c93e8ab83a07985d04dfcd502b7c",
+      "width": 1200,
+      "height": 675,
+      "key": "fad08c9cfec969e7feec917e1c83bc99.png"
+    },
+    {
+      "animeId": "anime-553",
+      "url": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MjE2MzktS2Vpam8vS2Vpam9fMDA0LnBuZw==",
+      "source": "https://cms.aniguessr.com/wp-json/aniguessr/v1/game/screenshots?date=20261120",
+      "sha256": "51fc59aea2b0e03b9e3693720cedddbc8376cf29c4cb9c0158c4221c622c587a",
+      "width": 1200,
+      "height": 675,
+      "key": "706358fbf65786f21c5808a604eb2c8c.png"
+    },
+    {
+      "animeId": "anime-564477",
+      "url": "https://cms.aniguessr.com/endpoints/screenshot.php?data=NTQ3OTgtS2FtaWVyYWJpL0thbWllcmFiaV8wMDEuanBn",
+      "source": "https://cms.aniguessr.com/wp-json/aniguessr/v1/game/screenshots?date=20261120",
+      "sha256": "6407ebbf6489e082e2592af1810570f35f5f5f5fe46234910f13b40102f1b9a9",
+      "width": 1200,
+      "height": 675,
+      "key": "42b187235b43563656c68768386a7bbf.jpg"
+    },
+    {
+      "animeId": "anime-706",
+      "url": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MjE2NDctT3JhbmdlL09yYW5nZV8wMTAucG5n",
+      "source": "https://cms.aniguessr.com/wp-json/aniguessr/v1/game/screenshots?date=20261119",
+      "sha256": "f17a760e8af29818dc6c28c8fb5b118c10e154d17d96c76d36dad6eb3f6df319",
+      "width": 1200,
+      "height": 675,
+      "key": "7286330b23a45b24bbe4a502ead1254e.png"
+    },
+    {
+      "animeId": "anime-706",
+      "url": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MjE2NDctT3JhbmdlL09yYW5nZV8wMDEucG5n",
+      "source": "https://cms.aniguessr.com/wp-json/aniguessr/v1/game/screenshots?date=20261119",
+      "sha256": "35a5c7170cbf9e5a2f4470cd1fe5365ccc0efabb57195a4bc4cd464311380a3e",
+      "width": 1200,
+      "height": 675,
+      "key": "0d4795fc1847b76221ee5afa313561e9.png"
+    },
+    {
+      "animeId": "anime-819",
+      "url": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MTQwOTYwLVNQWS14LUZBTUlMWS9TUFkteC1GQU1JTFlfMDA0LnBuZw==",
+      "source": "https://cms.aniguessr.com/wp-json/aniguessr/v1/game/screenshots?date=20261117",
+      "sha256": "6f20c5f2ac91e52c6d8e0e8afbd011d16e9f3bb6b2b11a735ae49eeeeebbb01a",
+      "width": 1200,
+      "height": 675,
+      "key": "fcfe905ab01d96822edeab1552431b1d.png"
+    },
+    {
+      "animeId": "anime-819",
+      "url": "https://cms.aniguessr.com/endpoints/screenshot.php?data=MTQwOTYwLVNQWS14LUZBTUlMWS9TUFkteC1GQU1JTFlfMDA3LnBuZw==",
+      "source": "https://cms.aniguessr.com/wp-json/aniguessr/v1/game/screenshots?date=20261117",
+      "sha256": "df24eac82036789568c2e86e7b2161f4b577b840c00fa77f953a7879847599e2",
+      "width": 1200,
+      "height": 675,
+      "key": "d5457a8818a859436bb7a095f37cf059.png"
+    }
+  ],
+  "anime": [
+    {
+      "id": "anime-1195",
+      "before": 6,
+      "after": 7
+    },
+    {
+      "id": "anime-949",
+      "before": 4,
+      "after": 6
+    },
+    {
+      "id": "anime-887",
+      "before": 5,
+      "after": 7
+    },
+    {
+      "id": "anime-819",
+      "before": 3,
+      "after": 5
+    },
+    {
+      "id": "anime-662",
+      "before": 5,
+      "after": 6
+    },
+    {
+      "id": "anime-706",
+      "before": 3,
+      "after": 5
+    },
+    {
+      "id": "anime-553",
+      "before": 3,
+      "after": 6
+    },
+    {
+      "id": "anime-564477",
+      "before": 3,
+      "after": 4
+    }
+  ]
+}

@@ -2,7 +2,7 @@
 import base64, hashlib, json, subprocess, threading, os
 from pathlib import Path
 
-TRANSFORM_VERSION = 'opening-window-v3-fast'
+TRANSFORM_VERSION = 'opening-window-v4-light'
 
 class HintMedia:
     def __init__(self, root, media_cache):
@@ -64,7 +64,7 @@ class HintMedia:
                 args = ['ffmpeg', '-hide_banner', '-loglevel', 'error', '-y', '-threads', '2', '-filter_threads', '1']
                 info = {'url': '/hints/' + target.name, 'offset': 0}
                 if kind == 'cover':
-                    args += ['-i', str(source), '-vf', 'scale=24:-1,boxblur=2:2,scale=240:-1', '-frames:v', '1', '-update', '1']
+                    args += ['-i', str(source), '-vf', 'scale=48:-1,boxblur=2:1,scale=240:-1', '-frames:v', '1', '-update', '1']
                 else:
                     probe = subprocess.run(['ffprobe', '-v', 'error', '-show_entries', 'format=duration', '-of', 'json', str(source)], capture_output=True, timeout=30, check=True)
                     duration = float(json.loads(probe.stdout)['format']['duration'])
@@ -78,7 +78,7 @@ class HintMedia:
                         if not 0 <= start < end:
                             raise ValueError('Invalid opening window')
                     info.update(offset=start, end=end)
-                    args += ['-ss', str(start), '-i', str(source), '-t', str(end-start), '-map', '0:v:0', '-map', '0:a:0?', '-vf', 'fps=20,scale=320:-2,boxblur=6:3', '-c:v', 'libx264', '-threads', '2', '-preset', 'ultrafast', '-crf', '28', '-c:a', 'aac', '-b:a', '128k', '-map_metadata', '-1', '-movflags', '+faststart']
+                    args += ['-ss', str(start), '-i', str(source), '-t', str(end-start), '-map', '0:v:0', '-map', '0:a:0?', '-vf', 'fps=20,scale=320:-2,boxblur=3:2', '-c:v', 'libx264', '-threads', '2', '-preset', 'ultrafast', '-crf', '28', '-c:a', 'aac', '-b:a', '128k', '-map_metadata', '-1', '-movflags', '+faststart']
                 temporary = self.directory / (key + '.part' + suffix)
                 try:
                     subprocess.run(args + [str(temporary)], capture_output=True, timeout=240, check=True)

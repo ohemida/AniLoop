@@ -191,3 +191,11 @@ input[type=range],audio{accent-color:#9b83a5}.round-score,.category-score{backgr
 @media(max-width:640px) { .stats-metrics { grid-template-columns:repeat(2,minmax(0,1fr)); } .stats-metrics article:nth-child(3) { border-left:0; } .stats-metrics article:nth-child(n+3) { border-top:1px solid var(--line); } .stats-chart-panel { padding:18px 14px; } .stats-series-controls { grid-template-columns:repeat(2,minmax(0,1fr)); } .stats-series-option { padding:12px 10px; } .stats-series-option label { font-size:.7rem; gap:7px; } .stats-series-option .stats-average-label { font-size:.62rem; } .stats-current-categories { grid-template-columns:repeat(2,minmax(0,1fr)); } .stats-filters { width:100%; justify-content:space-between; gap:8px; } .stats-filters select { font-size:.7rem; padding-right:18px; } .stats-footer-summary { flex-direction:column; } }
 
 @media(max-width:640px) { .score-history-chart .stats-axis { font-size:18px; } }
+
+/* Account providers and long public aliases stay readable on narrow screens. */
+.community-intro h1 { overflow-wrap:anywhere; }
+.account-providers { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:4px; margin-bottom:16px; }
+.account-providers button { min-width:0; white-space:normal; overflow-wrap:anywhere; }
+.account-message { color:var(--muted); font-size:.85rem; line-height:1.7; }
+.account-message[hidden] { display:none; }
+.community-intro .hero-actions { flex-wrap:wrap; }

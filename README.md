@@ -4,10 +4,13 @@ English anime quiz with five categories, a daily challenge, complete music track
 
 ## Run locally
 
-Requirements: Python 3, `curl`, `ffmpeg`, and `ffprobe` on your PATH. No npm installation is needed.
+Requirements: Python 3.12+, `curl`, `ffmpeg`, and `ffprobe` on your PATH. Install the Python dependencies for encrypted Supabase sessions. Docker installs them automatically. No npm installation is needed.
 
 ```bash
 cd /home/insider/IdeaProjects/AniLoop
+python3 -m venv .venv
+source .venv/bin/activate
+python3 -m pip install -r requirements.txt
 python3 server.py
 ```
 
@@ -141,7 +144,7 @@ Statistics includes recorded active days, current and best solo-play streaks, hi
 
 Detailed snapshots are retained for up to 1,000 played rounds, separate from the existing 100-row archive. New answers record local activity dates. Existing saves and total-only archives remain valid; older activity dates use the saved round date. These are device-local solo statistics, not synchronized account/Party statistics or reward-claim streaks. No sample data is added to user saves.
 
-For the prepared localhost-only container and the limits of cost/legal guarantees, read [PRIVATE_DEPLOYMENT.md](PRIVATE_DEPLOYMENT.md). No cloud deployment or paid hosting resource has been created. GitHub Actions is disabled on this private repository to prevent future hosted workflow execution; run tests locally.
+For the prepared localhost-only container and the limits of cost/legal guarantees, read [PRIVATE_DEPLOYMENT.md](PRIVATE_DEPLOYMENT.md). No paid hosting resource has been created. GitHub Actions is currently disabled in repository settings; local verification is documented below, and Actions must be enabled to run the Supabase deploy workflow.
 
 
 ## Bug reports
@@ -151,3 +154,64 @@ Choose **Report a bug** in the sidebar. Guests and signed-in players can describ
 **Send bug report** saves to this server's `bug_reports` table in the existing `.runtime/community.sqlite3` (or `ANILOOP_DB`). The server returns a `BUG-…` reference; it does not email anyone or create a GitHub issue. There is no public report-reading API. The server owner can review the table with a local SQLite client. **Download copy** creates a JSON file, including when submission fails. Drafts survive in-app navigation for the current tab session, but not page reloads.
 
 Same-origin JSON requests only; maximum field lengths are validated on the server, diagnostic keys are allowlisted, and reports are limited to 15 attempts per client per 10 minutes and 1,000 saved reports. If the inbox is full, the page offers a download instead. Reports do not store the sender's IP or account ID. The owner controls local retention and can delete handled rows using a SQLite client. Restart the server after updating to enable `/api/bugs`.
+
+
+## Public launch status and privacy (2026-11-23)
+
+The Pages version is a static client with Supabase as its backend. Publication of the repository does not certify legal notices or grant rights to external media; review the draft status and checklist in [PUBLIC_LAUNCH.md](PUBLIC_LAUNCH.md) before inviting users. Pages excludes bundled anime media and protected video derivatives.
+
+Footer links open **Privacy policy**, **Cookies & storage**, **Terms of use**, and **Legal & contact**, including direct `/#privacy`, `/#cookies`, `/#terms`, and `/#legal` links. Registration also links the policies. Contact: **dailyaniloop@gmail.com**. Notices are explicitly pre-launch drafts; the operator's legal identity and actual hosting arrangements remain unresolved (Vienna, Austria is confirmed). Local registration collects no email; enabled Supabase accounts use email/password and provider email confirmation. Password recovery and marketing email are not implemented. Optional bug diagnostics now default to off.
+
+Signed-in users can open **Manage account → Download my account data** for authenticated JSON export. Password hashes, session tokens, and other players’ individual room progress are excluded. Account deletion additionally removes the account's individual state from serialized rooms; browser-only saves and custom media stay unchanged. Existing linked account data still follows its original deletion cascades. HTTPS public origins now imply Secure cookies; server responses add CSP, no-referrer and denied camera/microphone/geolocation permissions.
+
+Hint cache version **opening-window-v4-light** uses a lighter burned-in video blur (`boxblur=3:2`, previously `6:3`) and a less heavily pixelated cover (48px intermediate, previously24px). Videos remain320px/20fps with protected Opening35–65% / full seekable Ending; both audios stay complete. Older strong-blur cache entries are not reused. Refresh the browser after restarting the server.
+
+
+## Privacy acknowledgement and cookie choices
+
+A first-visit screen appears before game-state/custom-media reads, pool/media fetches, or account API requests. Read the linked policies and acknowledge receipt of the privacy notice, then choose **Accept all**, **Only necessary**, or **Decline**. Decline rejects optional cookies, not storage required for requested features. All three buttons have equal visual weight and allow play; all currently enable **zero optional purposes**, because no advertising/analytics/tracking is installed. Acknowledgement is not blanket processing consent or a waiver of rights.
+
+The `aniloop-privacy-v1` localStorage record contains notice/choice versions, acknowledgement, choice, timestamp, and an empty optional-purpose list. It expires after180 days or a version change. **Cookie settings** in the footer reopens it for an equally easy change. Future optional technologies require their own accurate purposes and new prior choices; an old Accept all never authorises future trackers. Existing quiz/media storage is untouched. Policy pages remain accessible before acknowledgement. This is a pre-launch implementation, not legal clearance.
+
+## Extra scene variants
+
+Screenshot questions already choose three different scene indices at random from each anime's image pool and retain them through reloads. Added **14 verified screenshots across8 existing anime** on2026-11-23. Library cards now show the available scene count. New scenes are appended, preserving old indices, anime IDs and pack identity so current saves are not reset. Updates include Maid Sama!, Keijo!!!!!!!!, KamiErabi GOD.app, Mushoku Tensei, Orange, Spy x Family, The Misfit of Demon King Academy, and Vinland Saga. Images were fetched and decoded to verify dimensions/content; provenance and hashes are in `data/scene-update.json`. Availability does not establish public-use rights; publication remains blocked.
+
+`python3 scripts/add_scene_variants.py --days 60 --limit 120` checks recent source quizzes for alternate scenes of existing playable titles, deduplicates frame identities, and verifies images before appending. It never invents frames or changes custom media/accounts.
+
+
+## Game-picker layout
+
+The interface now uses a compact top bar and a centered game picker inspired by the layout of creatdle.dev. Five image-backed category cards and a personal-media entry lead into the original quiz. A compact round summary keeps progress visible; friends/party shortcuts and daily rewards remain below. Themes and account access stay visible on phones; the category switcher appears during quiz play. Library, editor, statistics, privacy and bug-report pages keep their existing functionality. The default remains black with muted mauve; alternate palettes and custom backgrounds still apply.
+
+This is a visual reference only: AniLoop retains its own branding/code/assets, game rules and truthful pre-launch policies. No operator identity, hosting-provider claims or legal clearance were copied from the reference. The required privacy acknowledgement and cookie choices remain unchanged. No publication or GitHub push was performed.
+
+
+## Browser navigation
+
+Top-bar pages, quiz category/mode and Help now create real browser history entries using URL hashes. Back/Forward restores the screen and mode without undoing answers, scores or saves. Reloading a link such as `/#game/opening?mode=daily` returns to that category. Repeated clicks on the same route do not add duplicate entries. Existing `/#privacy` links still work. Help supports Back/Forward and Escape; closing a directly opened Help link returns home. The first Back from the initial AniLoop entry can leave the site normally.
+
+
+## Austria project status and retention
+
+AniLoop is a **personal project in Austria**, contact **dailyaniloop@gmail.com**. The legal operator name and any required public postal details remain outstanding. Privacy complaints can be directed to the Austrian Datenschutzbehörde; this does not claim the project has been approved by that authority.
+
+`retention.py` cleans expired sessions,24-hour inactive rooms and90-day bug reports on server startup and hourly. It never expires existing accounts, scores, inventory, local saves or custom media. Account database connections enable SQLite secure deletion for future deleted records, and the account database is restricted to mode0600 when maintenance starts. Optional status/timestamp-only logs retain7 days; optional daily managed backups retain30 days and use mode0600. Both are off by default for local development; the private compose file enables managed backups only. Only conventionally named files in the dedicated `privacy-managed` subtree are rotated—old manual backups and symlinks are untouched.
+
+A local privacy-request CLI tracks calendar-month response deadlines, a72-hour incident-assessment deadline, and minimal closed-case records for365 days; the internal reference is cleared after30 days. See [PRIVACY_OPERATIONS.md](PRIVACY_OPERATIONS.md) for commands, email handling, identity checks, mailbox security, request outcomes and deletion reconciliation before backup restores. These are operational procedures, not automatic Gmail settings or certification.
+
+**Supabase Auth/PostgreSQL is the backend for the static Pages build.** The Python/Docker deployment remains available separately. Existing browser saves are retained locally; cloud save sync is opt-in to a signed-in account and does not migrate or delete existing local saves. Cloud deployment requires applying the additive SQL migration and deploying the Edge Function.
+
+Prepared single-server HTTPS deployment: [PRODUCTION_SETUP.md](PRODUCTION_SETUP.md) and `compose.production.yml` keep the full application on one origin with persistent SQLite and a Caddy TLS proxy. Default ports bind only to loopback. No public host is configured and PUBLIC_LAUNCH.md still blocks publication.
+
+AniLoop now uses an18+ self-declaration before quiz loading and account registration. This is not verified age assurance. The metadata-only content audit is in data/content-review.json; it does not classify individual frames. Private verification status and remaining external checks: [SECURITY_VERIFICATION.md](SECURITY_VERIFICATION.md).
+
+## Clean GitHub upload build
+
+Run `npm run build:pages -- /tmp/aniloop-pages` with Node.js 20 or newer. It creates a standalone static site with `index.html`, the Supabase browser client, registered media URLs and no Python runtime. Local media, accounts, saves, caches and service keys are excluded. Copy the generated files to the root of the Pages branch, including `.nojekyll`; the build refuses to overwrite an existing output folder. `npm run build` runs this same Pages build. The older `python3 scripts/prepare_release.py` command remains for the Python/Docker source package.
+
+The static site uses Supabase Auth, PostgreSQL and the `aniloop` Edge Function for accounts, saves, leaderboards, friends, rewards, rooms and bug reports. First apply `supabase/cloud_runtime.sql` after the existing setup and account-actions migrations; then deploy the Edge Function and configure the public origin in Supabase Auth. Exact steps and current limitations are in [DEPLOYMENT.md](DEPLOYMENT.md) and [supabase/README.md](supabase/README.md). Protected opening/ending video hints are unavailable in Pages until licensed, preprocessed derivatives are configured in Storage; original video is never exposed as a hint.
+
+## Supabase accounts
+
+For local browser testing, build the Pages output and serve it from `http://localhost:8098` (for example, `python3 -m http.server 8098 --directory /tmp/aniloop-pages`). Python is only a convenient local static-file server, not an app runtime requirement. Production uses `https://ohemida.github.io/AniLoop/`. The browser contains only Supabase's publishable key. Passwords and session tokens go directly to Supabase Auth; privileged database access stays in the Edge Function. See [supabase/README.md](supabase/README.md) for migrations, deployment secrets and redirects.

@@ -1,0 +1,2 @@
+[functions.aniloop]
+verify_jwt = false

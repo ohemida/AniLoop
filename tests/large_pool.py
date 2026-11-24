@@ -1,3 +1,4 @@
+from privacy_fixture import open_app
 """Large catalogue pagination, on-demand source cache and configurable opening bounds."""
 from pathlib import Path
 import os,json,urllib.request
@@ -6,7 +7,7 @@ ROOT=Path(__file__).resolve().parents[1];PACK=json.loads((ROOT/'data/pool.json')
 def click(p,a):p.locator(f'[data-action="{a}"]:visible').first.click()
 with sync_playwright() as pw:
  b=pw.chromium.launch(headless=True);p=b.new_page(viewport={'width':1440,'height':1000},reduced_motion='reduce');errors=[];p.set_default_timeout(120000);p.on('pageerror',lambda e:errors.append(str(e)))
- p.route('https://fonts.googleapis.com/**',lambda r:r.abort());p.route('https://fonts.gstatic.com/**',lambda r:r.abort());p.goto(URL,wait_until='networkidle')
+ p.route('https://fonts.googleapis.com/**',lambda r:r.abort());p.route('https://fonts.gstatic.com/**',lambda r:r.abort());open_app(p,URL,wait_until='networkidle')
  click(p,'library');expect(p.locator('.library-item')).to_have_count(60)
  first=p.locator('.library-item h3').first.inner_text();click(p,'library-page:2');assert p.locator('.library-item h3').first.inner_text()!=first
  p.locator('#library-category').select_option('screenshot');expect(p.locator('#pool-results')).to_contain_text(str(sum(bool(a['screenshots']) for a in PACK['anime']))+' results')

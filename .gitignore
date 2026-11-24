@@ -15,3 +15,10 @@ qa/
 *.sqlite3-*
 *.db
 *.pyc
+
+build/
+.aniloop-build-*/
+
+*.session-key
+
+.venv/

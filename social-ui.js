@@ -38,7 +38,7 @@ export function createSocial(ctx){
    if(operation==='resume'){applyLocal(room);if(room?.category)ctx.select(room.category);ctx.go('room');startPoll();}
    if(operation==='leave'){await mutate('leave');ctx.go('rooms');}
    if(['start','next','next-loop'].includes(operation))await mutate(operation);
-   if(operation==='kick')await mutate('kick',{userId:Number(parts[2])});
+   if(operation==='kick')await mutate('kick',{userId:/^[0-9a-f-]{36}$/i.test(parts[2])?parts[2]:Number(parts[2])});
    if(operation==='copy'){const invite=location.origin+location.pathname+'?room='+room.code;try{await navigator.clipboard.writeText(invite);ctx.toast('Invite link copied.');}catch{ctx.toast('Room code: '+room.code);}}
    if(operation==='claim'){const result=await ctx.api('/api/rewards/claim',{round:ctx.soloDaily()});rewards=result.rewards;ctx.render();ctx.toast('Daily claimed: +'+result.earned+' Loop Shards.');}
    if(operation==='buy'||operation==='equip'){const result=await ctx.api('/api/rewards/'+operation,{item:parts[2]});rewards=result.rewards;ctx.render();ctx.toast(operation==='buy'?'Frame unlocked and equipped.':'Profile frame equipped.');}

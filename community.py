@@ -20,10 +20,55 @@ class Community:
             CREATE TABLE IF NOT EXISTS sessions(token TEXT PRIMARY KEY,user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,expires INTEGER NOT NULL);
             CREATE TABLE IF NOT EXISTS scores(id INTEGER PRIMARY KEY,user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,mode TEXT NOT NULL,seed TEXT NOT NULL,score INTEGER NOT NULL CHECK(score BETWEEN 0 AND 100000),breakdown TEXT NOT NULL,created INTEGER NOT NULL,UNIQUE(user_id,mode,seed));
             CREATE INDEX IF NOT EXISTS scores_ranking ON scores(mode,created,score);
+            CREATE TABLE IF NOT EXISTS account_roles(user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,role TEXT NOT NULL CHECK(role='admin'));
+            CREATE TABLE IF NOT EXISTS profile_pictures(user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,image BLOB NOT NULL);
             ''')
+    def is_admin(self,user):
+        if not user:return False
+        with self.db() as db:
+            return bool(db.execute("SELECT 1 FROM account_roles WHERE user_id=? AND role='admin'",(user['id'],)).fetchone())
+    def admin_summary(self,user):
+        if not user:raise APIError('Sign in to continue.',401)
+        # Always check the database, never a client flag, username or provider metadata.
+        with self.db() as db:
+            if not db.execute("SELECT 1 FROM account_roles WHERE user_id=? AND role='admin'",(user['id'],)).fetchone():raise APIError('Administrator access required.',403)
+            tables={r['name'] for r in db.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+            players=[dict(r) for r in db.execute("SELECT u.id,u.username,u.created,COALESCE(w.shards,0) AS shards,COALESCE(r.role,'none') AS role FROM users u LEFT JOIN wallets w ON w.user_id=u.id LEFT JOIN account_roles r ON r.user_id=u.id ORDER BY u.id DESC LIMIT 100")] if 'wallets' in tables else []
+            reports=[dict(r) for r in db.execute('SELECT id,title,category,steps,expected,actual,created FROM bug_reports ORDER BY created DESC LIMIT 100')] if 'bug_reports' in tables else []
+            return {'accountCount':db.execute('SELECT COUNT(*) FROM users').fetchone()[0],'players':players,'reports':reports}
+    def admin_change(self,user,payload):
+        if not user:raise APIError('Sign in to continue.',401)
+        with self.db() as db:
+            db.execute('BEGIN IMMEDIATE')
+            if not db.execute("SELECT 1 FROM account_roles WHERE user_id=? AND role='admin'",(user['id'],)).fetchone():raise APIError('Administrator access required.',403)
+            if payload.get('action')=='set-shards':
+                target=payload.get('userId');amount=payload.get('shards')
+                if type(target) is not int or type(amount) is not int or not 0<=amount<=1000000000:raise APIError('Enter a whole shard balance from 0 to 1,000,000,000.')
+                if not db.execute('SELECT 1 FROM users WHERE id=?',(target,)).fetchone():raise APIError('Player not found.',404)
+                db.execute('INSERT INTO wallets(user_id,shards) VALUES(?,?) ON CONFLICT(user_id) DO UPDATE SET shards=excluded.shards',(target,amount))
+            elif payload.get('action')=='delete-report':
+                report=payload.get('reportId')
+                if not isinstance(report,str) or not re.fullmatch(r'BUG-[A-F0-9]{10}',report):raise APIError('Invalid report reference.')
+                if db.execute('DELETE FROM bug_reports WHERE id=?',(report,)).rowcount!=1:raise APIError('Report not found.',404)
+            else:raise APIError('Unknown administrator action.')
+        return {'ok':True}
+    def picture(self,user):
+        if not user:raise APIError('Sign in to continue.',401)
+        with self.db() as db:
+            row=db.execute('SELECT image FROM profile_pictures WHERE user_id=?',(user['id'],)).fetchone()
+            return bytes(row['image']) if row else None
+    def set_picture(self,user,payload):
+        if not user:raise APIError('Sign in to continue.',401)
+        from profile_images import clean_picture
+        if 'image' not in payload:raise APIError('Choose a profile picture or remove the current one.')
+        image=clean_picture(payload['image']) if payload.get('image') is not None else None
+        with self.db() as db:
+            if image:db.execute('INSERT INTO profile_pictures VALUES(?,?) ON CONFLICT(user_id) DO UPDATE SET image=excluded.image',(user['id'],image))
+            else:db.execute('DELETE FROM profile_pictures WHERE user_id=?',(user['id'],))
+        return {'hasPicture':image is not None}
     @contextmanager
     def db(self):
-        db=sqlite3.connect(self.path,timeout=15);db.row_factory=sqlite3.Row;db.execute('PRAGMA foreign_keys=ON')
+        db=sqlite3.connect(self.path,timeout=15);db.row_factory=sqlite3.Row;db.execute('PRAGMA foreign_keys=ON');db.execute('PRAGMA secure_delete=ON')
         try:
             with db:yield db
         finally:db.close()
@@ -80,7 +125,32 @@ class Community:
         with self.db() as db:
             row=db.execute('SELECT password FROM users WHERE id=?',(user['id'],)).fetchone()
             if not row or not self.check_password(password,row['password']):raise APIError('Incorrect password.',401)
+            tables={item['name'] for item in db.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+            if 'rooms' in tables:
+                for room in db.execute('SELECT code,state FROM rooms').fetchall():
+                    state=json.loads(room['state'])
+                    if str(user['id']) in state.get('players',{}):
+                        del state['players'][str(user['id'])]
+                        db.execute('UPDATE rooms SET state=?,revision=revision+1 WHERE code=?',(json.dumps(state),room['code']))
             db.execute('DELETE FROM users WHERE id=?',(user['id'],))
+    def export(self,user):
+        with self.db() as db:
+            account=db.execute('SELECT id,username,created FROM users WHERE id=?',(user['id'],)).fetchone()
+            if not account:raise APIError('Sign in to continue.',401)
+            result={'account':dict(account),'scores':[],'dailyClaims':[],'wallet':[],'cosmetics':[],'friendships':[],'rooms':[]}
+            picture=db.execute('SELECT image FROM profile_pictures WHERE user_id=?',(user['id'],)).fetchone()
+            if picture:
+                import base64
+                result['profilePicture']='data:image/png;base64,'+base64.b64encode(picture['image']).decode()
+            tables={row['name'] for row in db.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+            for table,key in [('scores','scores'),('daily_claims','dailyClaims'),('wallets','wallet'),('cosmetics','cosmetics')]:
+                if table in tables:result[key]=[dict(row) for row in db.execute(f'SELECT * FROM {table} WHERE user_id=?',(user['id'],))]
+            if 'friendships' in tables:result['friendships']=[dict(row) for row in db.execute('SELECT * FROM friendships WHERE user_low=? OR user_high=?',(user['id'],user['id']))]
+            if 'rooms' in tables and 'room_members' in tables:
+                for row in db.execute('SELECT r.*,m.joined FROM rooms r JOIN room_members m ON m.code=r.code WHERE m.user_id=?',(user['id'],)):
+                    state=json.loads(row['state']);result['rooms'].append({'code':row['code'],'mode':row['mode'],'joined':row['joined'],'updated':row['updated'],'ownProgress':state.get('players',{}).get(str(user['id'])),'sharedTeamProgress':state.get('team') if row['mode']=='coop' else None})
+            result['notes']='No password hashes or session tokens are exported. Browser-only saves, custom media, and anonymous bug reports are not linked to this account.'
+            return result
     @staticmethod
     def normalize(value):
         return ''.join(c for c in unicodedata.normalize('NFKD',str(value or '')).lower() if c.isalnum())

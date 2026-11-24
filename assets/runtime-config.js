@@ -1,0 +1,1 @@
+export const runtimeConfig=Object.freeze({"mode":"supabase","supabaseUrl":"https://adxwsbaztwgjzvynobad.supabase.co","publishableKey":"sb_publishable_nrahb5V-xHoYQCN4B3KJSA_sWcLnRA2","functionUrl":"https://adxwsbaztwgjzvynobad.supabase.co/functions/v1/aniloop","videoHintsEnabled":false});

@@ -1,3 +1,4 @@
+from privacy_fixture import open_app
 """Guest reports, transparent diagnostics, offline draft/download, and visible theme entry."""
 from pathlib import Path
 import json,os
@@ -5,15 +6,15 @@ from playwright.sync_api import sync_playwright,expect
 ROOT=Path(__file__).resolve().parents[1];URL=os.environ.get('ANILOOP_URL','http://localhost:8100')
 with sync_playwright() as pw:
     browser=pw.chromium.launch();page=browser.new_page(viewport={'width':1440,'height':1100});errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
-    page.goto(URL);page.locator('.hero').wait_for();saved=page.evaluate("localStorage.getItem('aniloop-state-v1')")
-    shortcut=page.get_by_role('button',name='Themes & backgrounds Make AniLoop yours');expect(shortcut).to_be_visible()
+    open_app(page,URL);page.locator('.hero').wait_for();saved=page.evaluate("localStorage.getItem('aniloop-state-v1')")
+    shortcut=page.locator('.theme-shortcut');expect(shortcut).to_be_visible()
     assert shortcut.bounding_box()['y']<200
     shortcut.click();expect(page.locator('.theme-collection')).to_be_visible()
     page.get_by_role('button',name='Report a bug',exact=True).click()
     page.locator('#bug-title').fill('Opening video never starts');page.locator('#bug-category').select_option('Openings')
     page.locator('#bug-steps').fill('Start the opening quiz and unlock the video hint.')
     page.locator('#bug-expected').fill('The video should play.');page.locator('#bug-actual').fill('The loading message stays visible forever.')
-    page.locator('.report-diagnostics summary').click();expect(page.locator('#bug-diagnostics')).to_contain_text('viewport')
+    expect(page.locator('[name=includeDiagnostics]')).not_to_be_checked();page.locator('[name=includeDiagnostics]').check();page.locator('.report-diagnostics summary').click();expect(page.locator('#bug-diagnostics')).to_contain_text('viewport')
     page.locator('[name=includeDiagnostics]').uncheck();expect(page.locator('#bug-diagnostics')).to_have_text('{}')
     with page.expect_download() as download:page.get_by_role('button',name='Download copy').click()
     contents=json.loads(Path(download.value.path()).read_text());assert contents['diagnostics']=={} and contents['category']=='Openings'

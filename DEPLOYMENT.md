@@ -1,6 +1,23 @@
-# Publish AniLoop
+# Deploy AniLoop
 
-The repository can live on GitHub. The complete app needs a running Python backend: GitHub Pages only serves static files, so it cannot run accounts, SQLite leaderboards, or ffmpeg hints. See [GitHub's Pages documentation](https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages).
+The repository supports two deployments. GitHub Pages serves the static browser app; Supabase Auth, PostgreSQL and one Supabase Edge Function provide the cloud API. The separate Python/Docker deployment remains available for protected video processing and local installations. Pages does not run Python or FFmpeg.
+
+## GitHub.dev and the intended GitHub Pages address
+
+The public repository can be edited at https://github.dev/ohemida/AniLoop. GitHub.dev is a browser editor, not an application host, and cannot execute the Python backend or database. It does not deploy the app. See [GitHub.dev documentation](https://docs.github.com/en/codespaces/the-githubdev-web-based-editor).
+
+The configured project URL is `https://ohemida.github.io/AniLoop/`. GitHub Pages serves static files; the browser calls the Supabase Edge Function at the configured Supabase project. This split-origin setup is implemented with a narrow CORS allowlist and Supabase Auth PKCE. GitHub Pages remains a public static host, while no paid service was added by this change.
+
+## GitHub Pages + Supabase
+
+1. From the repository root, run `npm run build:pages -- /tmp/aniloop-pages` (Node.js 20+). Copy the contents of that output folder, including `.nojekyll`, to the root of the GitHub Pages branch. The repository now also includes a root static build for the configured project site.
+2. In the existing Supabase SQL Editor, run `supabase/cloud_runtime.sql` **after** the previously applied `setup.sql` and `account_actions.sql`. This adds cloud saves, rooms, friend state, bug intake and account-profile initialization; it does not delete existing tables or local browser data.
+3. In GitHub repository Settings → Secrets and variables → Actions, add `SUPABASE_ACCESS_TOKEN` using a Supabase personal access token. Enable GitHub Actions, then run **Deploy AniLoop Supabase function** from Actions. The workflow only deploys the `aniloop` Edge Function. Alternatively install Supabase CLI and run `supabase functions deploy aniloop --project-ref adxwsbaztwgjzvynobad` after `supabase login`.
+4. In Supabase Edge Function secrets, verify `SUPABASE_URL`, `SUPABASE_ANON_KEY` (or publishable key), and `SUPABASE_SERVICE_ROLE_KEY` are available. Supabase supplies these to functions by default. For another site hostname, set `ANILOOP_ALLOWED_ORIGINS` to a comma-separated exact-origin allowlist.
+5. In Supabase Authentication → URL Configuration, set the Site URL to `https://ohemida.github.io/AniLoop/` and add that exact URL to Redirect URLs. Keep email confirmation enabled unless you have configured a reliable SMTP provider.
+6. Visit the Pages URL and test signup/confirmation, login/logout, private save sync, account export/deletion, friends, rankings and rooms. Opening/ending video hints remain disabled on this static build until protected licensed derivative videos are provisioned in Supabase Storage.
+
+The published root contains only static app files, catalog metadata and references to registered external media. It does not bundle `.runtime`, personal media, video caches, admin/service keys or user data. Public media permissions and the draft legal notices remain operator responsibilities; see [PUBLIC_LAUNCH.md](PUBLIC_LAUNCH.md). Do not describe this as legal approval or media permission.
 
 ## Create the upload folder
 
@@ -24,6 +41,10 @@ python3 server.py
 
 Use the printed URL. Default port is 8097; if it is occupied, the launcher tries the next port. Explicit `--port` values are never silently changed. Restart the Python process after backend updates.
 
+## Prepared HTTPS deployment
+
+See [PRODUCTION_SETUP.md](PRODUCTION_SETUP.md) for the single-server Caddy HTTPS proxy, persistent SQLite, bounded resources and isolated TLS rehearsal. It has no configured public provider or hostname. Launch prerequisites in PUBLIC_LAUNCH.md still apply.
+
 ## Container deployment
 
 A Dockerfile is included. Build and test locally:
@@ -42,7 +63,7 @@ ANILOOP_SECURE_COOKIES=1
 ANILOOP_PUBLIC_ORIGIN=https://your-domain.example
 ```
 
-The origin must exactly match the public site origin, without a path. Keep frontend and API on the same origin. Do not set secure cookies when testing plain HTTP locally. Set request/body/rate/resource limits at the reverse proxy and hosting layer. The bundled Python server is a small single-node application server; it is not a managed production platform or a substitute for deployment review. No public deployment has been performed.
+The origin must exactly match the public site origin, without a path. Keep frontend and API on the same origin. Do not set secure cookies when testing plain HTTP locally. Set request/body/rate/resource limits at the reverse proxy and hosting layer. The bundled Python server is a small single-node application server; it is not a managed production platform or a substitute for deployment review. No public deployment of this Python server has been performed.
 
 ## Accounts and rankings
 
@@ -65,7 +86,7 @@ node --test tests/core.test.js
 python3 -m unittest discover -s tests -p 'test_*.py'
 ```
 
-GitHub Actions runs these checks on pushes and pull requests. Browser tests additionally use Playwright/Chromium. See `tests/community_browser.py` for account and leaderboard flows.
+The included GitHub Actions workflow defines checks for pushes and pull requests. Actions is currently disabled in repository settings, so run these checks locally; enable Actions to deploy the Supabase Edge Function with the repository secret described above. Browser tests additionally use Playwright/Chromium. See `tests/community_browser.py` for account and leaderboard flows.
 
 ## Multiplayer and daily rewards
 
@@ -77,6 +98,6 @@ Room codes are unlisted invitations, not public matchmaking. All participants mu
 
 Daily rewards require a complete default-pool daily round and a signed-in account. Claims are limited by both quiz date and UTC claim day. The UTC reward reset can differ from the quiz's local-midnight reset. Players receive 100 shards, plus 50 every seventh consecutive claim day; coins buy cosmetic profile frames only. These are community game rewards, not an anti-cheat or real-money economy. Badge history survives a broken streak. Account deletion cascades to its claims, wallet, inventory, and membership. Inactive rooms expire after 24 hours and are cleaned when room endpoints are used.
 
-Hint transformation version `opening-window-v3-fast` invalidates earlier derivatives without deleting original media or account data. Openings contain only their configured window (35–65% by default); endings are complete and seekable from zero, with a blurred cover. Both audio tracks stay complete. These rules apply to Solo, Party and Co-op. Restart the backend when updating.
+Hint transformation version `opening-window-v4-light` invalidates earlier derivatives without deleting original media or account data. Openings contain only their configured window (35–65% by default); endings are complete and seekable from zero, with a blurred cover. Both audio tracks stay complete. These rules apply to Solo, Party and Co-op. Restart the backend when updating.
 
 The Friends feature adds the `friendships` table to the existing SQLite database through an additive startup migration. Keep the same persistent database; do not replace it. Deploy `friends.py` and `assets/friends-ui.js`, and restart the backend. `/api/health` reports `friendsApi: 1`. Friends compare explicitly submitted daily and Infinity results on the same server. They do not synchronize browser saves or publish scores automatically. Include `tests/friends_browser.py` in browser QA with a separate disposable `ANILOOP_DB`.

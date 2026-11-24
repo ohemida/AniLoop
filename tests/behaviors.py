@@ -1,3 +1,4 @@
+from privacy_fixture import open_app
 """Regression for full music, middle-start blurred hints and Anidle clue stages."""
 from pathlib import Path
 import json,re,urllib.request,os
@@ -11,22 +12,22 @@ def submit(p,title):
  p.locator('#answer').fill(title);p.locator('form[data-form="anidle"] button[type=submit],form[data-form="anime"] button[type=submit]').click()
 with sync_playwright() as pw:
  b=pw.chromium.launch(headless=True);p=b.new_page(viewport={'width':1440,'height':1000},reduced_motion='reduce');errors=[];p.set_default_timeout(120000);p.on('pageerror',lambda e:errors.append(str(e)))
- p.route('https://fonts.googleapis.com/**',lambda r:r.abort());p.route('https://fonts.gstatic.com/**',lambda r:r.abort());p.goto(URL,wait_until='networkidle')
+ p.route('https://fonts.googleapis.com/**',lambda r:r.abort());p.route('https://fonts.gstatic.com/**',lambda r:r.abort());open_app(p,URL,wait_until='networkidle')
  click(p,'play:ending');g=game(p,'ending');a=ANIME[g['questions'][0]];m=a['ending']
- p.wait_for_function('document.querySelector("audio").duration>24');duration=p.locator('audio').evaluate('(m)=>m.duration');assert duration>1
+ p.wait_for_function('()=>document.querySelector("audio").duration>24');duration=p.locator('audio').evaluate('(m)=>m.duration');assert duration>1
  if 'audioDuration' in m:assert abs(duration-m['audioDuration'])<1
  assert p.locator('audio').evaluate('(m)=>m.currentTime')==0
  p.locator('#answer').fill('Some unfinished answer');click(p,'hint:1')
- expect(p.locator('.ending-cover img')).to_be_visible();p.wait_for_function('document.querySelector(".ending-cover img").naturalWidth>0');assert p.locator('.ending-cover img').get_attribute('src').startswith('/hints/')
- p.wait_for_function('document.querySelector(".quiz-video").dataset.positioned==="true"')
+ expect(p.locator('.ending-cover img')).to_be_visible();p.wait_for_function('()=>document.querySelector(".ending-cover img").naturalWidth>0');assert p.locator('.ending-cover img').get_attribute('src').startswith('/hints/')
+ p.wait_for_function('()=>document.querySelector(".quiz-video").dataset.positioned==="true"')
  position=p.locator('.quiz-video').evaluate('(v)=>v.currentTime/v.duration');assert position<.01,position;assert p.locator('.quiz-video').get_attribute('src').startswith('/hints/');assert abs(p.locator('.quiz-video').evaluate('(v)=>v.duration')-duration)<1
  assert p.locator('.quiz-video').evaluate('(i)=>getComputedStyle(i).filter')=='none'
  assert p.locator('.video-controls').evaluate('(i)=>getComputedStyle(i).filter')=='none'
  expect(p.locator('#answer')).to_have_value('Some unfinished answer')
- click(p,'media-toggle');p.wait_for_function('document.querySelector(".quiz-video").currentTime>0.1');click(p,'media-toggle')
+ click(p,'media-toggle');p.wait_for_function('()=>document.querySelector(".quiz-video").currentTime>0.1');click(p,'media-toggle')
  p.locator('#video-seek').fill('700');p.locator('#video-seek').dispatch_event('input');assert abs(p.locator('.quiz-video').evaluate('(v)=>v.currentTime/v.duration')-.7)<.02
- p.locator('.quiz-video').evaluate('(v)=>v.currentTime=0');p.wait_for_function('document.querySelector(".quiz-video").currentTime>=Number(document.querySelector(".quiz-video").dataset.windowStart)-.02')
- p.locator('.quiz-video').evaluate('(v)=>v.currentTime=v.duration-1');p.wait_for_function('document.querySelector(".quiz-video").currentTime<=Number(document.querySelector(".quiz-video").dataset.windowEnd)')
+ p.locator('.quiz-video').evaluate('(v)=>v.currentTime=0');p.wait_for_function('()=>document.querySelector(".quiz-video").currentTime>=Number(document.querySelector(".quiz-video").dataset.windowStart)-.02')
+ p.locator('.quiz-video').evaluate('(v)=>v.currentTime=v.duration-1');p.wait_for_function('()=>document.querySelector(".quiz-video").currentTime<=Number(document.querySelector(".quiz-video").dataset.windowEnd)')
  p.locator('#video-volume').fill('0.3');p.locator('#video-volume').dispatch_event('input');assert p.locator('.quiz-video').evaluate('(v)=>v.volume')==.3
  for _ in range(2):click(p,'music-mode:audio');click(p,'music-mode:video')
  assert game(p,'ending')['hints']==[1]
@@ -34,14 +35,14 @@ with sync_playwright() as pw:
  req=urllib.request.Request(URL+'/'+m['video'],headers={'Range':'bytes=100-199'})
  with urllib.request.urlopen(req) as response:assert response.status==206 and len(response.read())==100
  print('PASS: full audio at 0, full blurred ending cover/video, clear controls, seeking and one-time hint cost')
- click(p,'play:opening');p.wait_for_function('document.querySelector("audio").readyState>=1');full=p.locator('audio').evaluate('(a)=>a.duration')
+ click(p,'play:opening');p.wait_for_function('()=>document.querySelector("audio").readyState>=1');full=p.locator('audio').evaluate('(a)=>a.duration')
  assert p.locator('audio').evaluate('(a)=>a.currentTime')==0
- click(p,'hint:1');p.wait_for_function('document.querySelector(".quiz-video").dataset.positioned==="true"')
+ click(p,'hint:1');p.wait_for_function('()=>document.querySelector(".quiz-video").dataset.positioned==="true"')
  info=p.locator('.quiz-video').evaluate('(v)=>({duration:v.duration,offset:Number(v.dataset.offset),time:v.currentTime})')
  assert abs(info['duration']-full*.3)<1 and abs(info['offset']-full*.35)<1 and info['time']==0,info
  expect(p.locator('.video-window-note')).to_contain_text('Locked video window')
  expect(p.locator('.ending-cover')).to_have_count(0)
- click(p,'media-toggle');p.wait_for_function('document.querySelector(".quiz-video").currentTime>.1');click(p,'media-toggle')
+ click(p,'media-toggle');p.wait_for_function('()=>document.querySelector(".quiz-video").currentTime>.1');click(p,'media-toggle')
  print('PASS: actual opening playback, physical 35–65% window, original timestamps, complete audio at zero')
  click(p,'play:character');g=game(p,'character')
  p.locator('#character-0').fill('a');expect(p.locator('#character-0-suggestions [role=option]').first).to_be_visible()

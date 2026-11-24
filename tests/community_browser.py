@@ -1,3 +1,4 @@
+from privacy_fixture import open_app
 """Use a disposable ANILOOP_DB on the server when running this test."""
 from pathlib import Path
 import os,json,sys,uuid
@@ -10,7 +11,7 @@ PACK=json.loads((ROOT/'data/pool.json').read_text())
 with sync_playwright() as pw:
     browser=pw.chromium.launch();page=browser.new_page(viewport={'width':1440,'height':1000});page.set_default_timeout(30000)
     errors=[];page.on('pageerror',lambda error:errors.append(str(error)))
-    page.goto(URL);page.locator('.hero').wait_for()
+    open_app(page,URL);page.locator('.hero').wait_for()
     page.locator('[data-action="leaderboard"]').first.click();page.locator('.leaderboard-empty,.leaderboard-table').wait_for()
     page.locator('[data-action="register"]').click()
     name='QA_'+uuid.uuid4().hex[:10];password='Anime loop test password!'
@@ -18,7 +19,7 @@ with sync_playwright() as pw:
     page.locator('form[data-community-form="register"] button[type="submit"]').click()
     expect(page.locator('dialog')).not_to_be_visible();expect(page.locator('.account-entry')).to_contain_text(name)
     cookies=page.context.cookies();session=next(c for c in cookies if c['name']=='aniloop_session');assert session['httpOnly'] and session['sameSite']=='Lax'
-    page.reload();page.locator('.hero').wait_for();expect(page.locator('.account-entry')).to_contain_text(name)
+    page.reload();page.locator('main h1').wait_for();page.locator('[data-action=home]').first.click();page.locator('.hero').wait_for();expect(page.locator('.account-entry')).to_contain_text(name)
     fixture=complete_round(SimpleNamespace(catalog={a['id']:a for a in PACK['anime']},pack_key=PACK['key']))
     page.evaluate('''fixture=>{const state=JSON.parse(localStorage.getItem('aniloop-state-v1'));for(const [key,game] of Object.entries(fixture.games)){Object.assign(state.infinity.games[key],game);const count=key==='anidle'?1:3;state.infinity.games[key].index=count-1;state.infinity.games[key].scores=Array(count).fill(key==='opening'||key==='ending'?5000:10000);}localStorage.setItem('aniloop-state-v1',JSON.stringify(state));}''',fixture)
     page.reload();page.locator('.completion').wait_for();page.locator('[data-action="submit-score"]').click()

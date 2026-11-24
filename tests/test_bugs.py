@@ -1,4 +1,4 @@
-import json,tempfile,unittest
+import json,tempfile,unittest,time
 from pathlib import Path
 from community import Community,APIError
 from bugs import BugReports
@@ -24,6 +24,6 @@ class BugReportTests(unittest.TestCase):
         with self.assertRaises(APIError) as error:self.bugs.submit(self.payload,'test')
         self.assertEqual(error.exception.status,429)
         with self.community.db() as db:
-            for i in range(985):db.execute("INSERT INTO bug_reports VALUES(?, 'title','General','steps','','actual','{}',0)",(str(i),))
+            for i in range(985):db.execute("INSERT INTO bug_reports VALUES(?, 'title','General','steps','','actual','{}',?)",(str(i),int(time.time())))
         with self.assertRaises(APIError) as error:self.bugs.submit(self.payload,'another')
         self.assertEqual(error.exception.status,503)

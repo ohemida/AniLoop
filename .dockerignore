@@ -13,3 +13,10 @@ __pycache__
 .env.*
 !.env.example
 .release
+
+build/
+.aniloop-build-*/
+
+*.session-key
+
+.venv/

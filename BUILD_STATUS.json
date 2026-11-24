@@ -1,0 +1,9 @@
+{
+  "artifact": "github-pages-supabase-static",
+  "pythonRuntimeRequired": false,
+  "edgeFunction": "supabase/functions/aniloop",
+  "databaseMigration": "supabase/cloud_runtime.sql",
+  "protectedVideoHints": "not bundled; no original or unblurred video is exposed",
+  "cachedLocalVideoDerivatives": 104,
+  "requiresSupabaseFunctionDeployment": true
+}

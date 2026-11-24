@@ -25,7 +25,7 @@ export function createFriends(ctx){
   if(operation==='play-daily'){ctx.playDaily();return true;}
   if(operation==='refresh'){if(!busy)await load();return true;}
   if(busy)return true;busy=true;
-  try{await ctx.api('/api/friends/'+operation,{userId:Number(id)});await load();ctx.toast({accept:'Friend request accepted.',decline:'Request declined.',cancel:'Request canceled.',remove:'Friend removed.'}[operation]||'Friend list updated.');}
+  try{await ctx.api('/api/friends/'+operation,{userId:/^[0-9a-f-]{36}$/i.test(id)?id:Number(id)});await load();ctx.toast({accept:'Friend request accepted.',decline:'Request declined.',cancel:'Request canceled.',remove:'Friend removed.'}[operation]||'Friend list updated.');}
   catch(cause){error=cause.message;if(ctx.getView()==='friends')ctx.render();}
   finally{busy=false;if(ctx.getView()==='friends')ctx.render();}return true;
  }

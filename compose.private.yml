@@ -10,6 +10,8 @@ services:
       HOST: 0.0.0.0
       PORT: 8097
       ANILOOP_DB: /app/.runtime/community.sqlite3
+      ANILOOP_MANAGED_BACKUPS: "1"
+      ANILOOP_ACCESS_LOG: "0"
       ANILOOP_SECURE_COOKIES: ${ANILOOP_SECURE_COOKIES:-0}
       ANILOOP_PUBLIC_ORIGIN: ${ANILOOP_PUBLIC_ORIGIN:-http://localhost:8110}
     volumes:

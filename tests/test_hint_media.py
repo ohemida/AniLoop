@@ -48,3 +48,22 @@ class HintMediaTest(unittest.TestCase):
         first=self.hints.create({**spec,'id':'hint-0'})
         second=self.hints.create({**spec,'id':'hint-1','window':{'startSeconds':2,'endSeconds':4}})
         self.assertEqual(first,second)
+
+    def test_lighter_blur_retains_detail_without_removing_baked_blur(self):
+        info=self.hints.create({'source':'assets/media/test.mp4','kind':'ending'})
+        derivative=self.hints.get(info['url'].split('/')[-1])
+        def edges(path,filters=None):
+            args=['ffmpeg','-v','error','-i',str(path)]
+            if filters:args+=['-vf',filters]
+            raw=subprocess.check_output(args+['-frames:v','1','-pix_fmt','gray','-f','rawvideo','-threads','1','-'])
+            return sum(abs(raw[i]-raw[i-1]) for i in range(1,len(raw)) if i%320)/len(raw)
+        source=self.assets/'test.mp4'
+        self.assertLess(edges(source,'boxblur=6:3'),edges(derivative))
+        self.assertLess(edges(derivative),edges(source))
+    def test_previous_strong_blur_cache_is_not_reused(self):
+        import hashlib
+        spec={'source':'assets/media/test.mp4','kind':'ending'}
+        old=hashlib.sha256(json.dumps({'version':'opening-window-v3-fast','spec':spec},sort_keys=True).encode()).hexdigest()
+        (self.hints.directory/(old+'.mp4')).write_bytes(b'previous strong blur')
+        (self.hints.directory/(old+'.json')).write_text(json.dumps({'url':'/hints/'+old+'.mp4'}))
+        info=self.hints.create(spec);self.assertNotIn(old,info['url'])
