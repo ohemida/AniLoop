@@ -28,7 +28,9 @@ Complete all five categories before starting another Infinity round. Play catego
 | Endings | Easy, Medium, Hard | 5,000 each; video and cover clue cost 2,500 once |
 | Anidle | Up to 22 guesses | 10,000 on guesses 1–3, then minus 500 per guess, including skips |
 
-Maximum round score: **100,000**. Anidle unlocks its blurred cover at guess 13, synopsis at 18, and most popular character at 22. Its summary shows only evidence established by previous guesses. Rating sources are shown per guess.
+Maximum round score: **100,000**.
+
+**Category loop** (`⟳ Category loop` in the mode switch, route `#game/<category>?mode=loop`) lets you play a single category endlessly: every loop round has three questions (one game for Anidle), and one click starts the next round. Each category keeps its own round counter, best score and average in `state.loops` / `state.loopStats`; Infinity, daily and leaderboard data are untouched. Anidle unlocks its blurred cover at guess 13, synopsis at 18, and most popular character at 22. Its summary shows only evidence established by previous guesses. Rating sources are shown per guess.
 
 ## Catalog
 
@@ -46,6 +48,9 @@ The pool contains **3,259 unique anime**. Random selection uses real eligible me
 Counts are recorded in `data/pool-report.json`. The library supports search, category filters, and 60-item pages. It deliberately reveals answers. The larger catalog is not a literal 1,000-fold expansion; entries are not duplicated to inflate counts.
 
 ## Protected hint media
+
+**GitHub Pages / static hosting:** there is no Python backend, so `assets/blur-media.js` blurs video and cover clues in the browser. Frames are drawn into a 48 px canvas (covers 14 px) and upscaled, so the visible canvas never contains sharp pixels; the opening clue is locked to its 35–65 % window in the player. The original media URL is still reachable for a determined user, just like the answers in `data/pool.json`. The local Python server below remains available with its ffmpeg pipeline.
+
 
 Hint images and videos are **processed into separate files by the local Python server**. Covers are downsampled, blurred, and re-encoded. Video blur is encoded into every frame. Removing CSS filters in Inspect does not restore sharp pixels.
 

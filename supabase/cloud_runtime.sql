@@ -85,6 +85,8 @@ BEGIN
  IF used>3 THEN RAISE EXCEPTION 'Please wait before sending another report'; END IF;
  INSERT INTO public.aniloop_runtime(key,owner_id,value) VALUES('report:'||report_id,NULL,p_report||jsonb_build_object('created',extract(epoch FROM now())::bigint));
  DELETE FROM public.aniloop_bug_rate WHERE window_start<now()-interval '7 days';
+ -- Privacy policy promise: bug reports are kept for at most 90 days.
+ DELETE FROM public.aniloop_runtime WHERE key LIKE 'report:%' AND (value->>'created')::bigint < extract(epoch FROM now()-interval '90 days')::bigint;
  RETURN report_id;
 END $$;
 REVOKE ALL ON FUNCTION public.aniloop_cloud_submit_bug(text,jsonb) FROM PUBLIC,anon,authenticated;

@@ -10,3 +10,8 @@ test('old policy hashes work and unknown routes/categories cannot enter a broken
  for(const hash of ['#unknown','#game/unknown','#game','#javascript:alert(1)'])assert.equal(readRoute(hash).view,'home');
  assert.equal(readRoute('#game/opening?mode=invalid','daily').mode,'daily');
 });
+test('category loop mode survives URL round trips',()=>{
+ for(const selected of ['screenshot','character','opening','ending','anidle'])assert.deepEqual(readRoute(routeHash({view:'game',selected,mode:'loop'})),{view:'game',selected,mode:'loop'});
+ assert.deepEqual(readRoute(routeHash({view:'home',mode:'loop'})),{view:'home',selected:null,mode:'loop'});
+ assert.equal(readRoute('#home','loop').mode,'loop');
+});

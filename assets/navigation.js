@@ -2,7 +2,7 @@ const VIEWS=new Set(['home','library','stats','leaderboard','friends','rooms','r
 const CATEGORIES=new Set(['screenshot','character','opening','ending','anidle']);
 export function readRoute(hash,defaultMode='infinity'){
  const [path,query='']=String(hash||'').replace(/^#/,'').split('?');const [page,category]=path.split('/');
- const requested=new URLSearchParams(query).get('mode');const mode=['daily','infinity'].includes(requested)?requested:defaultMode==='daily'?'daily':'infinity';
+ const requested=new URLSearchParams(query).get('mode');const MODES=['daily','infinity','loop'];const mode=MODES.includes(requested)?requested:MODES.includes(defaultMode)?defaultMode:'infinity';
  if(page==='game'&&CATEGORIES.has(category))return {view:'game',selected:category,mode};
  return {view:VIEWS.has(page)?page:'home',selected:null,mode};
 }
