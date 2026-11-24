@@ -10,13 +10,13 @@ export function createCloudRuntime(config){
  let auth=null,refreshing=null;
  const parse=async r=>{const data=await r.json().catch(()=>null);if(!r.ok)throw new Error(data?.error_description||data?.msg||data?.error||data?.message||'Supabase request failed.');return data;};
  const save=()=>{if(auth?.refresh_token)localStorage.setItem(STORAGE_KEY,JSON.stringify(auth));else localStorage.removeItem(STORAGE_KEY);};
- const authRequest=async(path,payload)=>parse(await fetch(base+'/auth/v1/'+path,{method:'POST',headers:{apikey:key,'Content-Type':'application/json'},body:JSON.stringify(payload)}));
+ const authRequest=async(path,payload)=>{let response;try{response=await fetch(base+'/auth/v1/'+path,{method:'POST',headers:{apikey:key,'Content-Type':'application/json'},body:JSON.stringify(payload)});}catch{throw new Error('Could not reach Supabase sign-in. Check your internet connection and try again.');}return parse(response);};
  async function start(code=''){try{const value=JSON.parse(localStorage.getItem(STORAGE_KEY)||'null');if(value?.refresh_token)auth=value;}catch{auth=null;}if(code){const verifier=localStorage.getItem(PKCE_KEY);if(verifier){try{auth=await authRequest('token?grant_type=pkce',{auth_code:code,code_verifier:verifier});auth.expires_at=Date.now()/1000+(auth.expires_in||3600);save();}finally{localStorage.removeItem(PKCE_KEY);}}}if(auth?.expires_at&&auth.expires_at<Date.now()/1000+60)await refresh();}
  async function refresh(){if(refreshing)return refreshing;if(!auth?.refresh_token)return null;refreshing=(async()=>{try{auth=await authRequest('token?grant_type=refresh_token',{refresh_token:auth.refresh_token});auth.expires_at=Date.now()/1000+(auth.expires_in||3600);save();return auth;}catch{auth=null;save();return null;}finally{refreshing=null;}})();return refreshing;}
  async function invoke(path,payload,method){
   const send=()=>fetch(endpoint,{method:'POST',headers:{apikey:key,Authorization:'Bearer '+(auth?.access_token||key),'Content-Type':'application/json'},body:JSON.stringify({path,method:method|| (payload===undefined?'GET':'POST'),payload})});
-  let response=await send();if(response.status===401&&auth?.refresh_token){if(await refresh())response=await send();}
-  const data=await response.json().catch(()=>null);if(!response.ok)throw new Error(data?.error||'AniLoop cloud request failed.');return data;
+  let response;try{response=await send();if(response.status===401&&auth?.refresh_token){if(await refresh())response=await send();}}catch{throw new Error('AniLoop’s cloud service is unavailable. Please try again later.');}
+  const data=await response.json().catch(()=>null);if(response.status===404&&data?.code==='NOT_FOUND')throw new Error('AniLoop’s cloud service has not been deployed yet. Please try again later.');if(!response.ok)throw new Error(data?.error||'AniLoop cloud request failed.');return data;
  }
  async function api(path,payload){
   const clean=path.split('?')[0],query=path.includes('?')?new URLSearchParams(path.split('?')[1]):new URLSearchParams();
