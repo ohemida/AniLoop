@@ -5,14 +5,15 @@ export const POLICY_VERSION='2026-11-24.5';
 export const POLICY_UPDATED='2026-11-24';
 export const CONTACT='dailyaniloop@gmail.com';
 // Austrian law (§25 MedienG, §5 ECG) requires the operator's real name and place
-// of residence in the legal notice. Fill in `name` before sharing the site widely.
+// of residence in the legal notice. The operator chose to publish the alias only;
+// set `name` to show the real name next to the alias.
 export const OPERATOR=Object.freeze({name:'',alias:'Insider',city:'Vienna',country:'Austria'});
 export const POLICY_PAGES=['privacy','cookies','terms','legal'];
 export function createPolicies(ctx){
  const {button}=ctx;
  const contact=`<a href="mailto:${CONTACT}">${CONTACT}</a>`;
  const cloud=runtimeConfig.mode==='supabase';
- const operator=OPERATOR.name?`${OPERATOR.name} (“${OPERATOR.alias}”)`:`${OPERATOR.alias} <em>(legal name to be added by the operator)</em>`;
+ const operator=OPERATOR.name?`${OPERATOR.name} (“${OPERATOR.alias}”)`:OPERATOR.alias;
  const link=(href,label)=>`<a href="${href}" target="_blank" rel="noopener noreferrer">${label}</a>`;
  const authRow=cloud?'<tr><td>aniloop-cloud-auth-v1</td><td>LocalStorage · Supabase sign-in tokens so you stay signed in after a reload.</td><td>Until sign-out or token expiry.</td></tr>':'<tr><td>aniloop_session</td><td>Cookie · HttpOnly, SameSite=Lax sign-in session.</td><td>Up to 30 days or until sign-out.</td></tr>';
  const articles={
