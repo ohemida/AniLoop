@@ -15,13 +15,13 @@ const openaiKey=Deno.env.get('OPENAI_API_KEY')||'';
 // image for sexual content/nudity, graphic violence and self-harm. Without a key
 // (or if the check fails) pictures stay private until an admin approves them.
 async function moderateImage(dataUrl:string){
- if(!openaiKey)return {status:'pending'};
+ if(!openaiKey)return {status:'pending',reason:'not-configured'};
  const response=await fetch('https://api.openai.com/v1/moderations',{method:'POST',headers:{Authorization:'Bearer '+openaiKey,'Content-Type':'application/json'},body:JSON.stringify({model:'omni-moderation-latest',input:[{type:'image_url',image_url:{url:dataUrl}}]}),signal:AbortSignal.timeout(15000)});
- if(!response.ok)return {status:'pending'};
- const result=(await response.json().catch(()=>null))?.results?.[0];if(!result)return {status:'pending'};
+ if(!response.ok)return {status:'pending',reason:'openai-'+response.status};
+ const result=(await response.json().catch(()=>null))?.results?.[0];if(!result)return {status:'pending',reason:'openai-invalid'};
  const score=(name:string)=>Number(result.category_scores?.[name]||0);
  const blocked=result.flagged===true||score('sexual')>0.2||score('sexual/minors')>0.05||score('violence/graphic')>0.3||score('violence')>0.6||score('self-harm')>0.3||score('self-harm/intent')>0.3||score('self-harm/instructions')>0.3;
- return {status:blocked?'rejected':'approved'};
+ return {status:blocked?'rejected':'approved',reason:null};
 }
 // The daily quiz seed is derived from this secret, so the daily cannot be
 // computed in the browser. Set ANILOOP_DAILY_SECRET to rotate it independently.

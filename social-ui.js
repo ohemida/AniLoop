@@ -1,10 +1,11 @@
 import {CATEGORIES,totalScore} from './core.js';
+import {FRAMES} from './assets/appearance.js';
 export function createSocial(ctx){
  const {esc,button:btn,fmt}=ctx;
  let room=null,rewards=null,poll=null,pollBusy=false,busy=false,rewardBusy=false,joinDraft='',local={frame:0,music:'audio'},error='',rewardError='';
  const active=()=>ctx.getView()==='room'&&room?.session;
  const fire='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2c1 6-5 6-3 11 1-3 3-3 4-5 5 4 6 7 4 11-3 5-11 3-12-2-1-4 1-7 4-9-1 4 0 5 1 5-1-4 3-6 2-11Z" fill="currentColor"/></svg>';
- const frameClass=()=>['silver','orbit','starlit','fern','ink','lunar'].includes(rewards?.equipped)?'frame-'+rewards.equipped:'';
+ const frameClass=()=>rewards?.equipped&&rewards.equipped!=='classic'&&FRAMES.some(f=>f.id===rewards.equipped)?'frame-'+rewards.equipped:'';
  function streakMarkup(){return `<span class="streak-flame">${fire}</span><strong>${rewards?.streak||0}</strong><span>day streak</span>`;}
  function sidebar(){return `<button type="button" class="daily-sidebar" data-action="rewards"><span>${streakMarkup()}</span><span class="shard-balance">◇ ${fmt(rewards?.balance||0)}</span></button>`;}
  function daysMarkup(){const today=rewards?.today||new Date().toISOString().slice(0,10),date=new Date(today+'T12:00:00Z');return Array.from({length:7},(_,i)=>{const d=new Date(date);d.setUTCDate(d.getUTCDate()-6+i);const key=d.toISOString().slice(0,10),claimed=rewards?.history.some(h=>h.day===key);return `<div class="daily-day ${claimed?'claimed':''} ${i===6?'today':''}"><span>${d.toLocaleDateString('en-US',{weekday:'short',timeZone:'UTC'})}</span><strong>${claimed?'✓':i===6?'◇':'·'}</strong><small>${d.getUTCDate()}</small></div>`;}).join('');}

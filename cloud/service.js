@@ -12,6 +12,9 @@ const PICTURE_TYPES={png:'iVBORw0KGgo',jpeg:'/9j/',webp:'UklGR'};
 const pictureUrl=a=>a?.picture?`data:image/${a.pictureType||'png'};base64,${a.picture}`:null;
 const publicPicture=a=>a?.pictureStatus==='approved'?pictureUrl(a):null;
 const pictureStatus=a=>a?.picture?(a.pictureStatus||'private'):null;
+const FRAME_IDS=new Set(['classic',...COSMETICS.map(c=>c.id)]);
+const frameOf=a=>FRAME_IDS.has(a?.equipped)?a.equipped:'classic';
+const lookOf=a=>({pictureUrl:publicPicture(a),frame:frameOf(a)});
 const PICTURE_UPLOADS_PER_DAY=10;
 export class CloudService{
  constructor(repository,pack,options={}){this.repo=repository;this.pack=pack;this.dailySecret=options.dailySecret||'';this.moderateImage=options.moderateImage||null;}
@@ -63,10 +66,27 @@ export class CloudService{
    throw error;
   }
  }
- async picturesFor(ids){
-  if(typeof this.repo.pictures==='function')return this.repo.pictures(ids);
-  const rows=await Promise.all(ids.map(async id=>[id,(await this.repo.getRuntime('account:'+id))?.value]));
-  return new Map(rows.map(([id,a])=>[id,publicPicture(a)]).filter(([,url])=>url));
+ // Public look of other players: equipped frame, and the picture only if approved.
+ async looksFor(ids){
+  if(typeof this.repo.looks==='function')return new Map((await this.repo.looks(ids)).map(r=>[r.owner_id,lookOf(r)]));
+  const rows=await Promise.all([...new Set(ids)].map(async id=>[id,(await this.repo.getRuntime('account:'+id))?.value]));
+  return new Map(rows.filter(([,a])=>a).map(([id,a])=>[id,lookOf(a)]));
+ }
+ async acceptedFriends(actor){
+  const index=await this.repo.getRuntime('friends:'+actor),ids=(index?.value?.ids||[]).slice(0,200);
+  const rows=await Promise.all(ids.map(id=>this.repo.getRuntime('friend:'+pairKey(actor,id))));
+  return [actor,...ids.filter((id,i)=>rows[i]?.value?.status==='accepted')];
+ }
+ // Friends leaderboard: same ranking rules as the global board, limited to you and your accepted friends.
+ async friendsLeaderboard(actor,mode,period){
+  check(!!actor,'Sign in to see your friends leaderboard.',401);
+  const ids=await this.acceptedFriends(actor),since=period==='all'?null:period==='week'?new Date(Date.now()-7*86400000).toISOString():today()+'T00:00:00Z';
+  const [rows,profiles,looks]=await Promise.all([typeof this.repo.scoreRows==='function'?this.repo.scoreRows(ids,mode,since):[],Promise.all(ids.map(id=>this.repo.profile(id))),this.looksFor(ids).catch(()=>new Map())]);
+  const stats=new Map();for(const r of rows){const s=stats.get(r.user_id)||{best:-1,rounds:0,first:r.created_at};s.rounds++;if(r.score>s.best){s.best=r.score;}stats.set(r.user_id,s);}
+  const names=new Map(profiles.filter(Boolean).map(p=>[p.id,p.username]));
+  const entries=ids.map(id=>({userId:id,username:names.get(id)||'Player',score:stats.get(id)?.best??null,rounds:stats.get(id)?.rounds||0,first:stats.get(id)?.first||'',isSelf:id===actor,...(looks.get(id)||{pictureUrl:null,frame:'classic'})}));
+  entries.sort((a,b)=>(a.score===null)-(b.score===null)||(b.score||0)-(a.score||0)||b.rounds-a.rounds||String(a.first).localeCompare(String(b.first))||a.username.localeCompare(b.username));
+  let rank=0;return {scope:'friends',entries:entries.map(e=>{const {first,...rest}=e;return {...rest,rank:e.score===null?null:++rank};})};
  }
  async ensureAccount(actor){return transaction(this.repo,actor,async tx=>{let account=await tx.get('account:'+actor);if(!account){account={shards:0,equipped:'classic',owned:[],scores:[],claims:[],picture:null};await tx.put('account:'+actor,account,actor);}return account;});}
  async ensureProfile(actor,metadata={}){
@@ -78,9 +98,9 @@ export class CloudService{
  async current(actor,user){
   if(!actor)return {user:null};
   const profile=await this.ensureProfile(actor,user?.user_metadata||{});const account=await this.ensureAccount(actor);const admin=await this.repo.isAdmin(actor);
-  return {user:{id:actor,username:profile.username,email:user.email,provider:'supabase',isAdmin:admin,hasPicture:!!account.picture,pictureUrl:pictureUrl(account),pictureStatus:pictureStatus(account)}};
+  return {user:{id:actor,username:profile.username,email:user.email,provider:'supabase',isAdmin:admin,hasPicture:!!account.picture,pictureUrl:pictureUrl(account),pictureStatus:pictureStatus(account),pictureCheck:account.picture&&account.pictureStatus!=='approved'?account.pictureCheck||null:null,frame:frameOf(account)}};
  }
- async leaderboard(q){const mode=q.get('mode')||'infinity',period=q.get('period')||'all';check(['daily','infinity'].includes(mode)&&['all','week','today'].includes(period),'Invalid leaderboard filter.');const rows=await this.repo.request('/rest/v1/rpc/aniloop_cloud_leaderboard',{p_mode:mode,p_period:period});const pictures=rows.length?await this.picturesFor(rows.map(r=>r.userId).filter(validId)).catch(()=>new Map()):new Map();return {entries:rows.map((r,i)=>({...r,rank:i+1,pictureUrl:pictures.get(r.userId)||null}))};}
+ async leaderboard(q,actor=null){const mode=q.get('mode')||'infinity',period=q.get('period')||'all',scope=q.get('scope')||'global';check(['daily','infinity'].includes(mode)&&['all','week','today'].includes(period)&&['global','friends'].includes(scope),'Invalid leaderboard filter.');if(scope==='friends')return this.friendsLeaderboard(actor,mode,period);const rows=await this.repo.request('/rest/v1/rpc/aniloop_cloud_leaderboard',{p_mode:mode,p_period:period});const looks=rows.length?await this.looksFor(rows.map(r=>r.userId).filter(validId)).catch(()=>new Map()):new Map();return {scope:'global',entries:rows.map((r,i)=>({...r,rank:i+1,pictureUrl:null,frame:'classic',...(looks.get(r.userId)||{}),isSelf:r.userId===actor}))};}
  async submit(actor,round){const score=recalculate(round,this.pack);check(score.mode!=='daily','Daily results are saved automatically when you finish the daily quiz.');const result=await transaction(this.repo,actor,async tx=>{tx.score={mode:score.mode,seed:score.seed,score:score.score,breakdown:score.breakdown};return {score:score.score,breakdown:score.breakdown};});return result;}
  async rewards(actor){return {rewards:rewards(await this.ensureAccount(actor))};}
  // Rewards are normally granted automatically when the server-side daily is
@@ -96,14 +116,15 @@ export class CloudService{
   const other=payload.userId;check(validId(other)&&other!==actor,'Choose another player.');const key='friend:'+pairKey(actor,other);
   return transaction(this.repo,actor,async tx=>{const row=await tx.get(key);check(row,'This friend request or friendship no longer exists.',404);if(action==='accept'||action==='decline')check(row.status==='pending'&&row.requestedBy!==actor,'Only the recipient can '+action+' a pending request.',403);if(action==='cancel')check(row.status==='pending'&&row.requestedBy===actor,'Only the sender can cancel a pending request.',403);if(action==='remove')check(row.status==='accepted','This player is not on your friend list.',409);if(action==='accept'){row.status='accepted';row.accepted=timestamp();await tx.put(key,row);}else{await tx.remove(key);for(const id of [actor,other]){const index=await tx.get('friends:'+id);await tx.put('friends:'+id,{ids:(index?.ids||[]).filter(x=>x!==(id===actor?other:actor))},id);}}return {ok:true};});
  }
- async friends(actor,dayValue){const day=dayValue||today(),date=dayDate(day);check(date&&date.getTime()>=Date.now()-366*86400000&&date.getTime()<=Date.now()+86400000,'Choose a valid quiz date within the past year.');const index=await this.repo.getRuntime('friends:'+actor);const ids=[actor,...(index?.value?.ids||[])].slice(0,201);const rows=await Promise.all(ids.map(async id=>({id,row:await this.repo.getRuntime('friend:'+pairKey(actor,id))})));const accepted=rows.filter(x=>x.id===actor||x.row?.value?.status==='accepted').map(x=>x.id);const profiles=await Promise.all(ids.map(id=>this.repo.profile(id)));const names=new Map(profiles.filter(Boolean).map(p=>[p.id,p.username]));const scores=await this.repo.request('/rest/v1/rpc/aniloop_cloud_friend_scores',{p_ids:accepted,p_day:day});const result=new Map(scores.map(x=>[x.id,x]));const days=Array.from({length:7},(_,i)=>{const d=new Date(date);d.setUTCDate(d.getUTCDate()-6+i);return d.toISOString().slice(0,10);});const incomingIds=rows.filter(x=>x.id!==actor&&x.row?.value?.status==='pending'&&x.row.value.requestedBy!==actor).map(x=>x.id);const [pictures,own]=await Promise.all([this.picturesFor([...accepted.filter(id=>id!==actor),...incomingIds]).catch(()=>new Map()),this.repo.getRuntime('account:'+actor)]);pictures.set(actor,pictureUrl(own?.value));const incoming=[],outgoing=[];for(const x of rows){if(x.id===actor||x.row?.value?.status!=='pending')continue;const mine=x.row.value.requestedBy===actor,p={userId:x.id,username:names.get(x.id)||'Player',pictureUrl:mine?null:pictures.get(x.id)||null};(mine?outgoing:incoming).push(p);}const players=accepted.map(id=>{const p=result.get(id)||{};const record=(p.daily||[]).find(r=>r.day===day);const dailyMap=new Map((p.daily||[]).map(r=>[r.day,r]));return {userId:id,username:names.get(id)||'Player',isSelf:id===actor,pictureUrl:pictures.get(id)||null,dailyScore:record?.score??null,breakdown:record?.breakdown??null,bestInfinity:p.bestInfinity??null,infinityRounds:p.infinityRounds||0,history:days.map(d=>({day:d,score:dailyMap.get(d)?.score??null}))};});players.sort((a,b)=>(a.dailyScore===null)-(b.dailyScore===null)||(b.dailyScore||0)-(a.dailyScore||0)||a.username.localeCompare(b.username));return {day,days,incoming,outgoing,players,friendCount:players.filter(p=>!p.isSelf).length};}
+ async friends(actor,dayValue){const day=dayValue||today(),date=dayDate(day);check(date&&date.getTime()>=Date.now()-366*86400000&&date.getTime()<=Date.now()+86400000,'Choose a valid quiz date within the past year.');const index=await this.repo.getRuntime('friends:'+actor);const ids=[actor,...(index?.value?.ids||[])].slice(0,201);const rows=await Promise.all(ids.map(async id=>({id,row:await this.repo.getRuntime('friend:'+pairKey(actor,id))})));const accepted=rows.filter(x=>x.id===actor||x.row?.value?.status==='accepted').map(x=>x.id);const profiles=await Promise.all(ids.map(id=>this.repo.profile(id)));const names=new Map(profiles.filter(Boolean).map(p=>[p.id,p.username]));const scores=await this.repo.request('/rest/v1/rpc/aniloop_cloud_friend_scores',{p_ids:accepted,p_day:day});const result=new Map(scores.map(x=>[x.id,x]));const days=Array.from({length:7},(_,i)=>{const d=new Date(date);d.setUTCDate(d.getUTCDate()-6+i);return d.toISOString().slice(0,10);});const incomingIds=rows.filter(x=>x.id!==actor&&x.row?.value?.status==='pending'&&x.row.value.requestedBy!==actor).map(x=>x.id);const [looks,own]=await Promise.all([this.looksFor([...accepted.filter(id=>id!==actor),...incomingIds]).catch(()=>new Map()),this.repo.getRuntime('account:'+actor)]);looks.set(actor,{pictureUrl:pictureUrl(own?.value),frame:frameOf(own?.value)});const look=id=>looks.get(id)||{pictureUrl:null,frame:'classic'};const incoming=[],outgoing=[];for(const x of rows){if(x.id===actor||x.row?.value?.status!=='pending')continue;const mine=x.row.value.requestedBy===actor,p={userId:x.id,username:names.get(x.id)||'Player',...(mine?{pictureUrl:null,frame:'classic'}:look(x.id))};(mine?outgoing:incoming).push(p);}const players=accepted.map(id=>{const p=result.get(id)||{};const record=(p.daily||[]).find(r=>r.day===day);const dailyMap=new Map((p.daily||[]).map(r=>[r.day,r]));return {userId:id,username:names.get(id)||'Player',isSelf:id===actor,...look(id),dailyScore:record?.score??null,breakdown:record?.breakdown??null,bestInfinity:p.bestInfinity??null,infinityRounds:p.infinityRounds||0,history:days.map(d=>({day:d,score:dailyMap.get(d)?.score??null}))};});players.sort((a,b)=>(a.dailyScore===null)-(b.dailyScore===null)||(b.dailyScore||0)-(a.dailyScore||0)||a.username.localeCompare(b.username));return {day,days,incoming,outgoing,players,friendCount:players.filter(p=>!p.isSelf).length};}
  async createRoom(actor,user,mode){check(['party','coop'].includes(mode),'Choose Party or Co-op Infinity.');for(let i=0;i<5;i++){const code=Math.random().toString(36).slice(2,8).toUpperCase().replace(/[01]/g,'A');try{return await transaction(this.repo,actor,async tx=>{check(!await tx.get('membership:'+actor),'Leave your current room first.',409);const room=makeRoom(code,{id:actor,username:user.username},mode);await tx.put('room:'+code,room,null);await tx.put('membership:'+actor,{code},actor);return {room:roomView(room,actor)};});}catch(e){if(e.status!==409||e.message==='Leave your current room first.')throw e;}}throw new GameError('Could not create a room. Try again.',503);}
  async joinRoom(actor,user,code){code=cleanText(code,6).toUpperCase();check(/^[A-Z2-9]{6}$/.test(code),'Enter a valid six-character room code.');return transaction(this.repo,actor,async tx=>{check(!await tx.get('membership:'+actor),'Leave your current room first.',409);const room=await tx.get('room:'+code);check(room&&room.updated+86400>timestamp(),'Room not found or expired.',404);check(room.state.phase==='lobby'&&room.members.length<8,'This room is full or has already started.',409);room.members.push({id:actor,username:user.username,joined:timestamp()});room.revision++;room.updated=timestamp();await tx.put('room:'+code,room,null);await tx.put('membership:'+actor,{code},actor);return {room:roomView(room,actor)};});}
  async roomCurrent(actor){const m=await this.repo.getRuntime('membership:'+actor);if(!m?.value)return {room:null};const r=await this.repo.getRuntime('room:'+m.value.code);return {room:r?.value?roomView(r.value,actor):null};}
  async roomGet(actor,code){const row=await this.repo.getRuntime('room:'+cleanText(code,6).toUpperCase());check(row?.value&&row.value.updated+86400>timestamp(),'Room not found or expired.',404);return {room:roomView(row.value,actor)};}
  async roomMutate(actor,code,data){code=cleanText(code,6).toUpperCase();return transaction(this.repo,actor,async tx=>{const room=await tx.get('room:'+code);check(room&&room.updated+86400>timestamp(),'Room not found or expired.',404);roomAction(room,actor,data,this.pack);if(!room.members.some(m=>m.id===actor))await tx.remove('membership:'+actor);else await tx.put('membership:'+actor,{code},actor);if(!room.members.length)await tx.remove('room:'+code);else await tx.put('room:'+code,room,null);return {room:room.members.some(m=>m.id===actor)?roomView(room,actor):null};});}
  async picture(actor,payload){
-  const raw=payload?.image,saved=a=>({hasPicture:!!a.picture,pictureUrl:pictureUrl(a),pictureStatus:pictureStatus(a)});
+  const raw=payload?.image,saved=a=>({hasPicture:!!a.picture,pictureUrl:pictureUrl(a),pictureStatus:pictureStatus(a),pictureCheck:a.pictureStatus==='approved'?null:a.pictureCheck||null});
+  if(payload?.share===true)return this.sharePicture(actor,saved);
   if(raw===null)return transaction(this.repo,actor,async tx=>{const a=await tx.get('account:'+actor)||newAccount();Object.assign(a,{picture:null,pictureType:null,pictureStatus:null});await tx.put('account:'+actor,a,actor);return saved(a);});
   const match=typeof raw==='string'?/^data:image\/(png|jpeg|webp);base64,([A-Za-z0-9+/]+={0,2})$/.exec(raw):null;
   check(match&&match[2].length<=470_000&&match[2].startsWith(PICTURE_TYPES[match[1]]),'The prepared profile picture could not be saved. Choose a PNG, JPEG or WebP image up to 8 MB.');
@@ -112,10 +133,23 @@ export class CloudService{
   // Safety filter (nudity, sexual content, graphic violence, self-harm). If no
   // filter is configured or it is unreachable, fail closed: the picture stays
   // visible only to its owner until an administrator approves it.
-  let verdict={status:'pending'};
-  if(this.moderateImage){try{verdict=await this.moderateImage(raw)||verdict;}catch{verdict={status:'pending'};}}
+  const verdict=await this.checkPicture(raw);
   if(verdict.status==='rejected'){await transaction(this.repo,actor,async tx=>{const a=await tx.get('account:'+actor)||newAccount();a.pictureUploads={day,count:uploads+1};await tx.put('account:'+actor,a,actor);});throw new GameError('This picture was blocked by the safety filter. Profile pictures must not show nudity, sexual content, graphic violence or self-harm.',422);}
-  return transaction(this.repo,actor,async tx=>{const a=await tx.get('account:'+actor)||newAccount();Object.assign(a,{picture:match[2],pictureType:match[1],pictureStatus:verdict.status==='approved'?'approved':'pending',pictureChecked:timestamp(),pictureUploads:{day,count:uploads+1}});await tx.put('account:'+actor,a,actor);return saved(a);});
+  return transaction(this.repo,actor,async tx=>{const a=await tx.get('account:'+actor)||newAccount();Object.assign(a,{picture:match[2],pictureType:match[1],pictureStatus:verdict.status==='approved'?'approved':'pending',pictureCheck:verdict.reason||null,pictureChecked:timestamp(),pictureUploads:{day,count:uploads+1}});await tx.put('account:'+actor,a,actor);return saved(a);});
+ }
+ async checkPicture(dataUrl){
+  if(!this.moderateImage)return {status:'pending',reason:'not-configured'};
+  try{return await this.moderateImage(dataUrl)||{status:'pending',reason:'unreachable'};}catch{return {status:'pending',reason:'unreachable'};}
+ }
+ // Share an already stored picture (uploaded while pictures were private) or retry a failed check.
+ async sharePicture(actor,saved){
+  const day=today(),current=(await this.repo.getRuntime('account:'+actor))?.value;
+  check(current?.picture,'Upload a profile picture first.',404);if(current.pictureStatus==='approved')return saved(current);
+  const uploads=current.pictureUploads?.day===day?current.pictureUploads.count:0;check(uploads<PICTURE_UPLOADS_PER_DAY,'You checked your profile picture too often today. Try again tomorrow.',429);
+  const verdict=await this.checkPicture(pictureUrl(current));
+  const result=await transaction(this.repo,actor,async tx=>{const a=await tx.get('account:'+actor)||newAccount();check(a.picture===current.picture,'Your picture changed meanwhile. Try again.',409);a.pictureUploads={day,count:uploads+1};a.pictureChecked=timestamp();if(verdict.status==='rejected')Object.assign(a,{picture:null,pictureType:null,pictureStatus:null,pictureCheck:null});else Object.assign(a,{pictureStatus:verdict.status==='approved'?'approved':'pending',pictureCheck:verdict.reason||null});await tx.put('account:'+actor,a,actor);return saved(a);});
+  if(verdict.status==='rejected')throw new GameError('This picture was blocked by the safety filter and has been removed. Profile pictures must not show nudity, sexual content, graphic violence or self-harm.',422);
+  return result;
  }
  async exportAccount(actor,jwt){const data=await this.repo.request('/rest/v1/rpc/aniloop_export_own_account',{},jwt);const own=await this.repo.getRuntime('account:'+actor);const rows=await this.repo.request('/rest/v1/aniloop_runtime?'+new URLSearchParams({owner_id:'eq.'+actor,select:'key,value,revision'}));return {cloud:data,privateData:{account:own?.value||null,records:rows.filter(r=>r.key!=='account:'+actor)}};}
  async deleteAccount(actor,jwt){await this.repo.request('/rest/v1/rpc/aniloop_delete_own_account',{},jwt);return {ok:true};}
@@ -123,7 +157,7 @@ export class CloudService{
  async handle(actor,user,method,path,payload,jwt){
   const route=path.split('?')[0],query=new URLSearchParams(path.split('?')[1]||'');
   if(route==='/api/config')return {supabaseEnabled:true,gameDataStorage:'supabase'};
-  if(route==='/api/leaderboard')return this.leaderboard(query);
+  if(route==='/api/leaderboard')return this.leaderboard(query,actor);
   if(route==='/api/account'&&!actor)return {user:null};
   if(route==='/api/bugs')throw new GameError('Bug report intake is not configured yet.',503);
   if(route==='/api/hints')throw new GameError('This clip has no preprocessed protected hint asset configured in Supabase Storage yet.',503);

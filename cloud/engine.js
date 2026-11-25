@@ -8,7 +8,7 @@ export const timestamp=()=>Math.floor(Date.now()/1000);
 export const normalize=v=>String(v??'').normalize('NFKD').replace(/\p{M}/gu,'').toLowerCase().replace(/[^\p{L}\p{N}]/gu,'');
 export const matches=(value,options)=>!!normalize(value)&&options.some(v=>normalize(v)===normalize(value));
 export const titleMatches=(value,a)=>matches(value,[a.title,...(a.aliases||[])]);
-export const COSMETICS=[['silver','Silver lining',250],['orbit','Mauve orbit',500],['starlit','Starlit loop',1000],['fern','Night bloom',450],['ink','Ink panel',750],['lunar','Lunar arc',1250]].map(([id,name,price])=>({id,name,price,description:'A cosmetic profile frame.'}));
+export const COSMETICS=[['silver','Silver lining',250],['orbit','Mauve orbit',500],['starlit','Starlit loop',1000],['fern','Night bloom',450],['ink','Ink panel',750],['lunar','Lunar arc',1250],['sakura','Sakura drift',900],['neon','Neon pulse',1500],['ember','Ember crown',1750],['aurora','Aurora veil',2000],['holo','Holo foil',2500],['galaxy','Galaxy loop',3000]].map(([id,name,price])=>({id,name,price,description:'A cosmetic profile frame.'}));
 export function recalculate(run,pack){
  check(run&&run.packKey===pack.key,'Only complete rounds from the default pool can enter the leaderboard.');
  let {mode,seed}=run;check(['daily','infinity'].includes(mode)&&typeof seed==='string'&&seed.length>0&&seed.length<=200,'Invalid round identity.');

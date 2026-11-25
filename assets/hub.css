@@ -107,8 +107,8 @@
 .toolbar .round-label { max-width:none; }
 
 /* Player avatars (approved profile pictures or an initial) */
-.player-avatar{flex:none;display:inline-grid;place-items:center;width:34px;height:34px;border-radius:50%;overflow:hidden;background:var(--paper,#111217);border:1px solid var(--line,#2a2a2a);color:var(--muted,#b9b9b9);font-weight:700;font-size:.85rem;line-height:1}
-.player-avatar img{display:block;width:100%;height:100%;object-fit:cover}
+.player-avatar{position:relative;flex:none;display:inline-grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--paper,#111217);border:1px solid var(--line,#2a2a2a);color:var(--muted,#b9b9b9);font-weight:700;font-size:.85rem;line-height:1}
+.player-avatar img{display:block;width:100%;height:100%;object-fit:cover;border-radius:50%}
 .friend-score-heading .player-avatar{width:40px;height:40px}
 .friend-request-name,.leaderboard-player{display:flex;align-items:center;gap:10px;min-width:0}
 .friend-request-name strong{display:inline}
@@ -116,3 +116,29 @@
 .picture-status{margin-top:12px;font-size:.85rem;color:var(--muted,#b9b9b9)}
 .picture-status.ok{color:#c9b4d4}
 .daily-gate .hero-copy{max-width:640px}
+
+/* Leaderboard podium + polish */
+.podium{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:end;gap:14px;padding:26px 22px 22px;background:radial-gradient(ellipse at 50% 0,var(--accent-wash,#27202d),transparent 70%);border-bottom:1px solid #302b34}
+.podium-card{position:relative;display:flex;flex-direction:column;align-items:center;gap:8px;min-width:0;padding:22px 14px 18px;border:1px solid #3a3340;border-radius:16px;background:linear-gradient(180deg,#19161c,#121014);text-align:center;transition:transform .2s ease,border-color .2s ease}
+.podium-card:hover{transform:translateY(-3px);border-color:var(--accent,#9b83a5)}
+.podium-card.place-1{padding-top:30px;padding-bottom:26px;border-color:color-mix(in srgb,var(--accent,#9b83a5) 70%,#3a3340);box-shadow:0 18px 40px -24px var(--accent,#9b83a5)}
+.podium-card.is-you{outline:2px solid var(--accent,#9b83a5);outline-offset:2px}
+.podium-card .player-avatar{width:58px;height:58px;font-size:1.2rem;margin:4px 0 6px}
+.podium-card.place-1 .player-avatar{width:74px;height:74px;font-size:1.45rem}
+.podium-card h3{display:flex;align-items:center;gap:6px;max-width:100%;font-size:.95rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.podium-card strong{font-size:1.35rem;letter-spacing:-.02em;color:var(--accent-soft,#d0bdd8)}
+.podium-card.place-1 strong{font-size:1.7rem}
+.podium-card small{color:var(--muted,#9393a7);font-size:.72rem}
+.podium-medal{position:absolute;top:12px;left:12px;display:grid;place-items:center;width:26px;height:26px;border-radius:50%;font-size:.78rem;font-weight:700;color:#111;background:#cdb9d6}
+.podium-spot{min-height:1px}
+.place-1 .podium-medal{background:#ffd77a}.place-2 .podium-medal{background:#dfe3ea}.place-3 .podium-medal{background:#e0a774}
+.leaderboard-table tbody tr{transition:background-color .15s ease}
+.leaderboard-table tbody tr:hover{background:#17141a}
+.leaderboard-table tbody tr.your-rank{background:var(--accent-wash,#27202d)}
+.leaderboard-toolbar .segmented+.segmented{margin-right:auto}
+.friend-score-card{transition:border-color .2s ease,transform .2s ease}
+.friend-score-card:hover{border-color:var(--accent,#9b83a5)}
+.hub-card{transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease}
+.hub-card:hover{transform:translateY(-3px);box-shadow:0 18px 40px -26px var(--accent,#9b83a5)}
+@media(max-width:640px){.podium{grid-template-columns:1fr;padding:18px}.podium-spot{display:none}.podium-card.place-1{order:-1}.leaderboard-toolbar .segmented+.segmented{margin-right:0}}
+@media(prefers-reduced-motion:reduce){.podium-card,.hub-card,.friend-score-card{transition:none}.podium-card:hover,.hub-card:hover{transform:none}}

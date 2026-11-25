@@ -14,6 +14,7 @@ class FakeRepo{
  isAdmin(id){return Promise.resolve(this.admins.has(id));}
  getRuntime(key){const row=this.docs.get(key);return Promise.resolve(row?{key,...structuredClone(row)}:null);}
  transaction(actor){return new FakeTransaction(this,actor);}
+ async scoreRows(ids,mode,since){return this.scores.filter(x=>ids.includes(x.user||x.actor||x.user_id)&&x.mode===mode).map(x=>({user_id:x.user||x.actor||x.user_id,score:x.score,created_at:x.created||'2026-01-01T00:00:00Z'}));}
  async request(path,payload){if(path.includes('friend_scores')){const ids=payload.p_ids;return ids.map(id=>({id,bestInfinity:null,infinityRounds:0,daily:[]}));}throw new Error('Unexpected repository request: '+path);}
 }
 class FakeTransaction{
@@ -137,4 +138,44 @@ test('profile pictures must pass the safety filter before friends can see them',
  assert.equal((await broken.picture(users.one,{image:jpeg})).pictureStatus,'pending','filter outages fail closed');
  view=await broken.friends(users.two);assert.equal(view.players.find(p=>p.userId===users.one).pictureUrl,null);
  await assert.rejects(checked.picture(users.one,{image:'data:image/jpeg;base64,iVBORw0KGgo'}),/could not be saved/);
+});
+
+test('friends leaderboard ranks only you and accepted friends, with frames and approved pictures',async()=>{
+ const repo=new FakeRepo(),api=new CloudService(repo,pack,{moderateImage:async()=>({status:'approved'})});
+ await assert.rejects(api.leaderboard(new URLSearchParams('scope=friends'),null),/Sign in/);
+ await api.friendChange(users.one,'request',{username:'Kitsune'});
+ let board=await api.leaderboard(new URLSearchParams('scope=friends&mode=infinity'),users.one);
+ assert.deepEqual(board.entries.map(e=>e.userId),[users.one],'pending friends are not on the board');
+ await api.friendChange(users.two,'accept',{userId:users.one});
+ const run=validRun();await api.submit(users.two,run);
+ repo.docs.set('account:'+users.two,{value:{...repo.docs.get('account:'+users.two)?.value,shards:0,equipped:'galaxy',owned:['galaxy'],claims:[],scores:[],picture:'/9j/4AAQ',pictureType:'jpeg',pictureStatus:'approved'},revision:9,owner:users.two});
+ board=await api.leaderboard(new URLSearchParams('scope=friends&mode=infinity'),users.one);
+ assert.equal(board.entries[0].userId,users.two);assert.equal(board.entries[0].rank,1);assert.equal(board.entries[0].frame,'galaxy');
+ assert.equal(board.entries[0].pictureUrl,'data:image/jpeg;base64,/9j/4AAQ');
+ assert.equal(board.entries[1].userId,users.one);assert.equal(board.entries[1].score,null);assert.equal(board.entries[1].rank,null);
+});
+
+test('stored private pictures can be shared later and failed checks explain why',async()=>{
+ const repo=new FakeRepo();
+ repo.docs.set('account:'+users.one,{value:{shards:0,equipped:'classic',owned:[],claims:[],scores:[],picture:'iVBORw0KGgoAAAA'},revision:1,owner:users.one});
+ const offline=new CloudService(repo,pack);
+ assert.equal((await offline.current(users.one,{email:'a@example.com'})).user.pictureStatus,'private');
+ const pending=await offline.picture(users.one,{share:true});
+ assert.equal(pending.pictureStatus,'pending');assert.equal(pending.pictureCheck,'not-configured');
+ const quota=new CloudService(repo,pack,{moderateImage:async()=>({status:'pending',reason:'openai-429'})});
+ assert.equal((await quota.picture(users.one,{share:true})).pictureCheck,'openai-429');
+ const ok=new CloudService(repo,pack,{moderateImage:async()=>({status:'approved',reason:null})});
+ const shared=await ok.picture(users.one,{share:true});assert.equal(shared.pictureStatus,'approved');assert.equal(shared.pictureCheck,null);
+ const blocked=new CloudService(repo,pack,{moderateImage:async()=>({status:'rejected'})});
+ repo.docs.set('account:'+users.two,{value:{shards:0,equipped:'classic',owned:[],claims:[],scores:[],picture:'iVBORw0KGgoBBBB'},revision:1,owner:users.two});
+ await assert.rejects(blocked.picture(users.two,{share:true}),/blocked/);
+ assert.equal((await blocked.current(users.two,{email:'b@example.com'})).user.hasPicture,false);
+});
+
+test('new premium frames can be bought and equipped',async()=>{
+ const repo=new FakeRepo(),api=new CloudService(repo,pack);
+ repo.docs.set('account:'+users.one,{value:{shards:5000,equipped:'classic',owned:[],claims:[],scores:[],picture:null},revision:1,owner:users.one});
+ const result=await api.cosmetic(users.one,'galaxy',false);
+ assert.equal(result.rewards.balance,2000);assert.equal(result.rewards.equipped,'galaxy');
+ await assert.rejects(api.cosmetic(users.one,'holo',true),/Unlock/);
 });

@@ -139,3 +139,14 @@ REVOKE ALL ON FUNCTION public.aniloop_cloud_scrub_user() FROM PUBLIC,anon,authen
 DROP TRIGGER IF EXISTS aniloop_cloud_scrub_deleted_user ON auth.users;
 CREATE TRIGGER aniloop_cloud_scrub_deleted_user BEFORE DELETE ON auth.users FOR EACH ROW EXECUTE FUNCTION public.aniloop_cloud_scrub_user();
 COMMIT;
+
+-- Profile frames (safe to rerun): allow the frames added after the first setup.
+DO $$ DECLARE c record; BEGIN
+ FOR c IN SELECT conname,conrelid::regclass AS tbl FROM pg_constraint
+  WHERE contype='c' AND conrelid IN ('public.aniloop_wallets'::regclass,'public.aniloop_cosmetics'::regclass)
+  AND (pg_get_constraintdef(oid) LIKE '%equipped%' OR pg_get_constraintdef(oid) LIKE '%item%') LOOP
+  EXECUTE format('ALTER TABLE %s DROP CONSTRAINT %I',c.tbl,c.conname);
+ END LOOP;
+END $$;
+ALTER TABLE public.aniloop_wallets ADD CONSTRAINT aniloop_wallets_equipped_known CHECK(equipped IN ('classic','silver','orbit','starlit','fern','ink','lunar','sakura','neon','ember','aurora','holo','galaxy'));
+ALTER TABLE public.aniloop_cosmetics ADD CONSTRAINT aniloop_cosmetics_item_known CHECK(item IN ('silver','orbit','starlit','fern','ink','lunar','sakura','neon','ember','aurora','holo','galaxy'));
