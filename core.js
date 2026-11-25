@@ -14,7 +14,7 @@ export function eligible(entry,category) {
  if(category==='screenshot') return Boolean(entry.screenshots?.length);
  if(category==='character') return Boolean(entry.characters?.length||entry.characterImage&&entry.character);
  if(category==='opening'||category==='ending') return Boolean(entry[category]?.audio||entry[category]?.video||entry[category]?.demo);
- return Number.isFinite(entry.year)&&Number.isFinite(entry.score)&&Boolean(entry.studio)&&Boolean(entry.source)&&Boolean(entry.genres?.length)&&Boolean(entry.cover)&&Boolean(entry.synopsis)&&Boolean(entry.popularCharacter);
+ return Number.isFinite(entry.year)&&Number.isFinite(entry.score)&&Boolean(entry.studio)&&Boolean(entry.source)&&Boolean(entry.genres?.length)&&Boolean(entry.cover)&&Boolean(entry.synopsis||entry.hasSynopsis)&&Boolean(entry.popularCharacter);
 }
 export function poolCounts(entries) {return Object.fromEntries(CATEGORIES.map(c=>[c.id,LEVELS.map(level=>c.id==='character'?new Set(entries.flatMap(a=>(a.characters||[]).filter(v=>v.difficulty===level).map(v=>v.id))).size:entries.filter(a=>eligible(a,c.id)&&(a[c.id]?.difficulty||a.difficulty?.[c.id])===level).length)]));}
 export function createSession(mode, number, seed, items, packKey='starter', previous=null) {

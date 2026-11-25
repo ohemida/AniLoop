@@ -9,7 +9,7 @@ test('appearance defaults and malformed settings stay safe',()=>{
 test('palettes, original presets and frames have unique stable IDs',()=>{
  for(const items of [THEMES,BACKGROUNDS,FRAMES])assert.equal(new Set(items.map(x=>x.id)).size,items.length);
  assert.deepEqual(FRAMES.slice(0,4).map(f=>[f.id,f.price]),[['classic',0],['silver',250],['orbit',500],['starlit',1000]]);
- assert.equal(THEMES.length,4);assert.equal(FRAMES.length,13);
+ assert.equal(THEMES.length,9);assert.equal(FRAMES.length,13);
 });
 test('blocked or corrupted browser storage returns defaults',()=>{
  globalThis.localStorage={getItem(){throw Error('blocked');}};assert.deepEqual(readAppearance(),DEFAULT_APPEARANCE);

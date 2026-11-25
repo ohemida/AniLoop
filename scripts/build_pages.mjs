@@ -1,6 +1,7 @@
 import { cp, mkdir, readFile, readdir, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { splitPool } from './split_pool.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const out = path.resolve(process.argv[2] || path.join(root, 'pages-build'));
@@ -47,6 +48,9 @@ await cp(path.join(root, 'assets'), path.join(out, 'assets'), {
 });
 await mkdir(path.join(out, 'data'));
 await writeFile(path.join(out, 'data/pool.json'), JSON.stringify(pool));
+const {lite, synopses} = splitPool(pool);
+await writeFile(path.join(out, 'data/pool-lite.json'), JSON.stringify(lite));
+await writeFile(path.join(out, 'data/synopsis.json'), JSON.stringify(synopses));
 for (const name of ['media-index.json', 'media-sources.json']) await cp(path.join(root, 'data', name), path.join(out, 'data', name));
 const runtime = {
   mode: 'supabase', supabaseUrl: config.url, publishableKey: config.publishableKey,

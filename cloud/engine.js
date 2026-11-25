@@ -8,7 +8,18 @@ export const timestamp=()=>Math.floor(Date.now()/1000);
 export const normalize=v=>String(v??'').normalize('NFKD').replace(/\p{M}/gu,'').toLowerCase().replace(/[^\p{L}\p{N}]/gu,'');
 export const matches=(value,options)=>!!normalize(value)&&options.some(v=>normalize(v)===normalize(value));
 export const titleMatches=(value,a)=>matches(value,[a.title,...(a.aliases||[])]);
-export const COSMETICS=[['silver','Silver lining',250],['orbit','Mauve orbit',500],['starlit','Starlit loop',1000],['fern','Night bloom',450],['ink','Ink panel',750],['lunar','Lunar arc',1250],['sakura','Sakura drift',900],['neon','Neon pulse',1500],['ember','Ember crown',1750],['aurora','Aurora veil',2000],['holo','Holo foil',2500],['galaxy','Galaxy loop',3000]].map(([id,name,price])=>({id,name,price,description:'A cosmetic profile frame.'}));
+// Cosmetic catalogue (ids and prices are authoritative here; the client mirrors
+// names in assets/appearance.js and assets/cosmetics.js). Cosmetics never affect scoring.
+const item=type=>([id,name,price])=>({id,name,price,type,description:'A cosmetic '+type+'.'});
+export const SLOT_TYPES=['title','name','banner','effect'];
+export const COSMETICS=[
+ ...[['silver','Silver lining',250],['orbit','Mauve orbit',500],['starlit','Starlit loop',1000],['fern','Night bloom',450],['ink','Ink panel',750],['lunar','Lunar arc',1250],['sakura','Sakura drift',900],['neon','Neon pulse',1500],['ember','Ember crown',1750],['aurora','Aurora veil',2000],['holo','Holo foil',2500],['galaxy','Galaxy loop',3000]].map(item('frame')),
+ ...[['title-rookie','Rookie Looper',150],['title-sleuth','Scene Sleuth',600],['title-oracle','Opening Oracle',600],['title-otaku','Certified Otaku',900],['title-sensei','Anime Sensei',1500],['title-legend','Loop Legend',2500]].map(item('title')),
+ ...[['name-sakura','Sakura pink',400],['name-ice','Glacier blue',400],['name-gold','Gold leaf',800],['name-sunset','Sunset gradient',1200],['name-aurora','Aurora shimmer',2000]].map(item('name')),
+ ...[['banner-dusk','Mauve dusk',500],['banner-sakura','Sakura night',800],['banner-manga','Manga panel',1000],['banner-city','Neon city',1200],['banner-stars','Starfield',1500]].map(item('banner')),
+ ...[['effect-sparkle','Sparkle burst',600],['effect-sakura','Petal storm',900],['effect-confetti','Confetti',1200],['effect-fireworks','Fireworks',2000]].map(item('effect'))
+];
+export function normalizeSlots(value){const slots=value&&typeof value==='object'?value:{};return Object.fromEntries(SLOT_TYPES.map(type=>[type,COSMETICS.some(c=>c.type===type&&c.id===slots[type])?slots[type]:null]));}
 export function recalculate(run,pack){
  check(run&&run.packKey===pack.key,'Only complete rounds from the default pool can enter the leaderboard.');
  let {mode,seed}=run;check(['daily','infinity'].includes(mode)&&typeof seed==='string'&&seed.length>0&&seed.length<=200,'Invalid round identity.');
@@ -35,12 +46,12 @@ export function recalculate(run,pack){
  }}catch(e){if(e instanceof GameError)throw e;throw new GameError('This round is incomplete or uses an older save format. Complete a new round.');}
  const score=Object.values(breakdown).reduce((a,b)=>a+b,0);check(score>=0&&score<=100000,'Invalid score.');return {mode,seed,score,breakdown,created:timestamp()};
 }
-export function newAccount(){return {shards:0,equipped:'classic',owned:[],scores:[],claims:[],picture:null};}
+export function newAccount(){return {shards:0,equipped:'classic',owned:[],scores:[],claims:[],picture:null,slots:normalizeSlots()};}
 export function rewards(account){
  const rows=[...account.claims].sort((a,b)=>a.day.localeCompare(b.day));let best=0,chain=0,previous=null;
  for(const row of rows){chain=previous&&Date.parse(row.day)-Date.parse(previous)===86400000?chain+1:1;best=Math.max(best,chain);previous=row.day;}
  const date=today(),streak=previous&&Date.parse(previous)>=Date.parse(date)-86400000?chain:0;
- return {today:date,resetAt:new Date(Date.parse(date)+86400000).toISOString(),streak,bestStreak:best,claimedToday:rows.at(-1)?.day===date,balance:account.shards,equipped:account.equipped,owned:account.owned,history:rows.slice(-35),cosmetics:COSMETICS,milestones:[[3,'First spark'],[7,'Weekly regular'],[14,'Unbroken loop'],[30,'Daily devotee']].map(([days,name])=>({days,name,unlocked:best>=days}))};
+ return {today:date,resetAt:new Date(Date.parse(date)+86400000).toISOString(),streak,bestStreak:best,claimedToday:rows.at(-1)?.day===date,balance:account.shards,equipped:account.equipped,slots:normalizeSlots(account.slots),owned:account.owned,history:rows.slice(-35),cosmetics:COSMETICS,milestones:[[3,'First spark'],[7,'Weekly regular'],[14,'Unbroken loop'],[30,'Daily devotee']].map(([days,name])=>({days,name,unlocked:best>=days}))};
 }
 export const STEPS=CATEGORIES.flatMap(c=>Array.from({length:c.rounds},(_,i)=>[c.id,i]));
 export function roomView(room,userId){

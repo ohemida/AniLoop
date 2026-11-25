@@ -142,3 +142,51 @@
 .hub-card:hover{transform:translateY(-3px);box-shadow:0 18px 40px -26px var(--accent,#9b83a5)}
 @media(max-width:640px){.podium{grid-template-columns:1fr;padding:18px}.podium-spot{display:none}.podium-card.place-1{order:-1}.leaderboard-toolbar .segmented+.segmented{margin-right:0}}
 @media(prefers-reduced-motion:reduce){.podium-card,.hub-card,.friend-score-card{transition:none}.podium-card:hover,.hub-card:hover{transform:none}}
+
+/* Name colours and titles */
+.player-name-wrap{display:inline-flex;flex-direction:column;align-items:flex-start;gap:2px;min-width:0;line-height:1.2}
+.player-name{overflow-wrap:anywhere}
+.player-title{display:block;font-size:.62rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent-soft,#d0bdd8);opacity:.9}
+.podium-card .player-name-wrap{align-items:center}
+.name-sakura{color:#ffb3d1}
+.name-ice{color:#9fe8ff}
+.name-gold,.name-sunset,.name-aurora{-webkit-background-clip:text;background-clip:text;color:transparent}
+.name-gold{background-image:linear-gradient(90deg,#ffe9a8,#e0b04a,#fff2c4,#c8973b)}
+.name-sunset{background-image:linear-gradient(90deg,#ffb06b,#ff5f9e,#a77bff)}
+.name-aurora{background-image:linear-gradient(90deg,#3ee6b0,#6f8bff,#c47bff,#3ee6b0);background-size:300% 100%;animation:name-aurora 6s linear infinite}
+@keyframes name-aurora{to{background-position:300% 0}}
+
+/* Banners behind cards */
+.has-banner{background:linear-gradient(180deg,rgba(8,8,10,.2),rgba(8,8,10,.62)),var(--banner)!important;background-size:auto,cover!important}
+.banner-dusk{--banner:radial-gradient(ellipse at 85% 0,#6b4b7a,transparent 60%),linear-gradient(135deg,#1a1320,#2b1d33)}
+.banner-sakura{--banner:radial-gradient(circle at 18% 30%,#ffb7d544 0 5px,transparent 6px),radial-gradient(circle at 72% 58%,#ffb7d544 0 4px,transparent 5px),radial-gradient(circle at 46% 82%,#ffb7d533 0 3px,transparent 4px),radial-gradient(circle at 88% 18%,#ffb7d533 0 4px,transparent 5px),radial-gradient(ellipse at 80% 0,#7a2f55,transparent 60%),linear-gradient(160deg,#2a1020,#12080f)}
+.banner-manga{--banner:radial-gradient(circle,#ffffff1c 1px,transparent 1.6px) 0 0/8px 8px,repeating-linear-gradient(115deg,transparent 0 16px,#ffffff0a 16px 18px),linear-gradient(135deg,#17191e,#262a32)}
+.banner-city{--banner:repeating-linear-gradient(90deg,#0d0818 0 12px,#170f2b 12px 20px,#0b0714 20px 31px,#1a1131 31px 37px) bottom/100% 38% no-repeat,radial-gradient(ellipse at 50% 100%,#ff4fd855,transparent 60%),linear-gradient(180deg,#140a26,#2a0f3d 70%,#3a1240)}
+.banner-stars{--banner:radial-gradient(circle at 10% 20%,#fff 0 1px,transparent 1.6px),radial-gradient(circle at 68% 28%,#fff 0 1px,transparent 1.6px),radial-gradient(circle at 38% 72%,#cfd8ff 0 1px,transparent 1.6px),radial-gradient(circle at 86% 78%,#fff 0 1px,transparent 1.6px),radial-gradient(circle at 54% 46%,#fff 0 .6px,transparent 1.2px),radial-gradient(ellipse at 30% 40%,#3b2a7a99,transparent 60%),linear-gradient(160deg,#05050c,#0d0b1f)}
+
+/* Cosmetic previews in Appearance */
+.cosmetic-sample{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:1.15rem;font-weight:700}
+.cosmetic-sample .player-title{font-size:.7rem}
+.banner-sample{display:grid;place-items:center;width:min(240px,90%);height:84px;border-radius:12px;border:1px solid #3a3340;font-weight:700}
+.effect-sample{font-size:2.4rem;line-height:1;color:var(--accent-soft,#d0bdd8);text-shadow:0 0 18px var(--accent,#9b83a5)}
+.profile-showcase.has-banner{border-color:#4a3f52}
+.showcase-name{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+.showcase-name .player-name-wrap{align-items:center}
+
+/* Celebration effects */
+.celebration{position:fixed;inset:0;z-index:9999;overflow:hidden;pointer-events:none}
+.celebration span{position:absolute;top:-6vh;left:var(--x);font-size:var(--size);line-height:1;opacity:0;animation:celebrate-fall 2s cubic-bezier(.2,.6,.4,1) var(--delay) forwards;text-shadow:0 0 8px currentColor}
+.celebration.effect-sparkle span,.celebration.effect-fireworks span{top:42vh;left:50vw;animation-name:celebrate-burst;animation-duration:1.4s}
+@keyframes celebrate-fall{0%{opacity:0;transform:translate(0,0) rotate(0)}10%{opacity:1}100%{opacity:0;transform:translate(var(--dx),108vh) rotate(var(--spin))}}
+@keyframes celebrate-burst{0%{opacity:0;transform:translate(-50%,-50%) scale(.2)}15%{opacity:1}100%{opacity:0;transform:translate(calc(var(--dx) * 1.6),calc((var(--x) - 50vw) * .7)) scale(1.15) rotate(var(--spin))}}
+@media(prefers-reduced-motion:reduce){.celebration{display:none}.name-aurora{animation:none}}
+
+/* Admin + footer help links */
+.admin-nav-link{display:inline-flex;align-items:center;justify-content:center;padding:8px 12px;border:1px solid var(--accent,#9b83a5);border-radius:10px;color:var(--accent-soft,#d0bdd8);font-size:.7rem;font-weight:700;text-decoration:none}
+.admin-nav-link:hover{background:var(--accent-wash,#27202d)}
+.footer-help-links a{white-space:nowrap}
+.showcase-name .player-name-wrap{display:flex!important;flex-direction:column;align-items:center}
+.showcase-name .player-title{display:block;position:static;vertical-align:baseline;margin-top:6px;font-size:.62rem;line-height:1.2}
+.showcase-action,.frame-item-actions>span:has(+.btn){display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap}
+.equipped-label+.btn{margin-left:8px}
+.friend-name .player-name-wrap{margin-bottom:2px}

@@ -45,11 +45,11 @@ CREATE TABLE public.aniloop_wallets (
     user_id uuid PRIMARY KEY REFERENCES public.aniloop_profiles(id) ON DELETE CASCADE,
     shards integer NOT NULL DEFAULT 0 CHECK(shards >= 0),
     equipped text NOT NULL DEFAULT 'classic'
-      CHECK(equipped IN ('classic','silver','orbit','starlit','fern','ink','lunar','sakura','neon','ember','aurora','holo','galaxy'))
+      CHECK(equipped ~ '^[a-z][a-z0-9-]{1,39}$')
 );
 CREATE TABLE public.aniloop_cosmetics (
     user_id uuid NOT NULL REFERENCES public.aniloop_profiles(id) ON DELETE CASCADE,
-    item text NOT NULL CHECK(item IN ('silver','orbit','starlit','fern','ink','lunar','sakura','neon','ember','aurora','holo','galaxy')),
+    item text NOT NULL CHECK(item ~ '^[a-z][a-z0-9-]{1,39}$'),
     PRIMARY KEY(user_id,item)
 );
 CREATE TABLE public.aniloop_daily_claims (

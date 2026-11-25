@@ -179,3 +179,19 @@ test('new premium frames can be bought and equipped',async()=>{
  assert.equal(result.rewards.balance,2000);assert.equal(result.rewards.equipped,'galaxy');
  await assert.rejects(api.cosmetic(users.one,'holo',true),/Unlock/);
 });
+
+test('titles, name colours, banners and effects use their own slots and show to friends',async()=>{
+ const repo=new FakeRepo(),api=new CloudService(repo,pack);
+ repo.docs.set('account:'+users.two,{value:{shards:6000,equipped:'classic',owned:[],claims:[],scores:[],picture:null},revision:1,owner:users.two});
+ await api.cosmetic(users.two,'title-legend',false);await api.cosmetic(users.two,'name-aurora',false);
+ const bought=await api.cosmetic(users.two,'banner-stars',false);
+ assert.deepEqual(bought.rewards.slots,{title:'title-legend',name:'name-aurora',banner:'banner-stars',effect:null});
+ assert.equal(bought.rewards.equipped,'classic','slot items never replace the frame');
+ await assert.rejects(api.cosmetic(users.two,'effect-fireworks',true),/Unlock/);
+ await assert.rejects(api.cosmetic(users.two,'title-fake',false),/Unknown cosmetic/);
+ const cleared=await api.cosmetic(users.two,'name-none',true);assert.equal(cleared.rewards.slots.name,null);
+ await api.cosmetic(users.two,'name-aurora',true);
+ await api.friendChange(users.one,'request',{username:'Kitsune'});await api.friendChange(users.two,'accept',{userId:users.one});
+ const friend=(await api.friends(users.one)).players.find(p=>p.userId===users.two);
+ assert.equal(friend.title,'title-legend');assert.equal(friend.nameStyle,'name-aurora');assert.equal(friend.banner,'banner-stars');
+});

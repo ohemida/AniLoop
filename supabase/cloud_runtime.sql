@@ -140,7 +140,8 @@ DROP TRIGGER IF EXISTS aniloop_cloud_scrub_deleted_user ON auth.users;
 CREATE TRIGGER aniloop_cloud_scrub_deleted_user BEFORE DELETE ON auth.users FOR EACH ROW EXECUTE FUNCTION public.aniloop_cloud_scrub_user();
 COMMIT;
 
--- Profile frames (safe to rerun): allow the frames added after the first setup.
+-- Cosmetics (safe to rerun): ids are validated by the Edge Function; the database
+-- only checks their shape so new frames, titles, name colours, banners and effects need no migration.
 DO $$ DECLARE c record; BEGIN
  FOR c IN SELECT conname,conrelid::regclass AS tbl FROM pg_constraint
   WHERE contype='c' AND conrelid IN ('public.aniloop_wallets'::regclass,'public.aniloop_cosmetics'::regclass)
@@ -148,5 +149,5 @@ DO $$ DECLARE c record; BEGIN
   EXECUTE format('ALTER TABLE %s DROP CONSTRAINT %I',c.tbl,c.conname);
  END LOOP;
 END $$;
-ALTER TABLE public.aniloop_wallets ADD CONSTRAINT aniloop_wallets_equipped_known CHECK(equipped IN ('classic','silver','orbit','starlit','fern','ink','lunar','sakura','neon','ember','aurora','holo','galaxy'));
-ALTER TABLE public.aniloop_cosmetics ADD CONSTRAINT aniloop_cosmetics_item_known CHECK(item IN ('silver','orbit','starlit','fern','ink','lunar','sakura','neon','ember','aurora','holo','galaxy'));
+ALTER TABLE public.aniloop_wallets ADD CONSTRAINT aniloop_wallets_equipped_shape CHECK(equipped ~ '^[a-z][a-z0-9-]{1,39}$');
+ALTER TABLE public.aniloop_cosmetics ADD CONSTRAINT aniloop_cosmetics_item_shape CHECK(item ~ '^[a-z][a-z0-9-]{1,39}$');

@@ -37,8 +37,11 @@ async function register(payload){
  const response=await fetch(url+'/auth/v1/signup?'+qs,{method:'POST',headers:{apikey:anon,Authorization:'Bearer '+anon,'Content-Type':'application/json'},body:JSON.stringify({email,password,data:{username,adultConfirmed:true,noticeVersion:'2026-11-24.5',privacyAcknowledged:payload.privacyAcknowledged===true}})});
  const data=await response.json().catch(()=>null);if(!response.ok)throw new GameError(data?.msg||data?.message||data?.error_description||'Supabase could not create this account.',response.status===429?429:400);return {session:data.session||null,requiresConfirmation:!data.session};
 }
-async function identity(request){const token=request.headers.get('Authorization')?.replace(/^Bearer\s+/i,'')||'';if(!token)return {token:'',user:null};
- const response=await fetch(url+'/auth/v1/user',{headers:{apikey:anon,Authorization:'Bearer '+token}});if(!response.ok)return {token:'',user:null};const user=await response.json();return {token,user};
+// Guests send the publishable key; only real user JWTs are verified. A temporary Auth
+// outage must not look like a sign-out, so it returns 503 instead of an anonymous user.
+async function identity(request){const token=request.headers.get('Authorization')?.replace(/^Bearer\s+/i,'')||'';if(!token||token===anon||token.split('.').length!==3)return {token:'',user:null};
+ let response;try{response=await fetch(url+'/auth/v1/user',{headers:{apikey:anon,Authorization:'Bearer '+token},signal:AbortSignal.timeout(8000)});}catch{throw new GameError('Sign-in check is temporarily unavailable. Please try again.',503);}
+ if(response.status===401||response.status===403)throw new GameError('Your session expired. Sign in again.',401);if(!response.ok)throw new GameError('Sign-in check is temporarily unavailable. Please try again.',503);const user=await response.json();return {token,user};
 }
 async function bugDigest(request){const raw=request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()||request.headers.get('cf-connecting-ip')||'unknown';const key=await crypto.subtle.importKey('raw',new TextEncoder().encode(serviceKey),{name:'HMAC',hash:'SHA-256'},false,['sign']);const bytes=new Uint8Array(await crypto.subtle.sign('HMAC',key,new TextEncoder().encode(raw)));return [...bytes].map(x=>x.toString(16).padStart(2,'0')).join('');}
 Deno.serve(async request=>{
