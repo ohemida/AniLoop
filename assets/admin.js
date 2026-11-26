@@ -103,6 +103,29 @@ async function load(){
  status.textContent=`Signed in as administrator · ${data.players.length} player(s) shown`;
  render();document.querySelector('#content').hidden=false;
 }
+const NAMES={screenshot:'▧ Screenshots',character:'♙ Characters',opening:'♫ Openings',ending:'♪ Endings',anidle:'◈ Anidle'};
+const thumb=src=>{if(!src||!/^https:\/\//.test(src))return null;const img=node('img');img.loading='lazy';img.alt='';img.src=/^https:\/\/(cms\.aniguessr\.com|medias\.aniguessr\.com|cdn\.myanimelist\.net|s4\.anilist\.co)\//.test(src)?`https://wsrv.nl/?url=${encodeURIComponent(src)}&w=160&output=webp`:src;img.addEventListener('error',()=>{if(img.src!==src)img.src=src;},{once:true});return img;};
+async function showDaily(button){
+ const box=document.querySelector('#daily-answers');
+ if(!box.hidden){box.hidden=true;button.textContent='Show answers';return;}
+ button.disabled=true;
+ try{
+  const result=await request('/api/admin/daily');box.replaceChildren(node('p',`Daily for ${result.day} (UTC)`,'muted small'));
+  for(const category of result.categories){
+   const group=node('div',null,'daily-category');group.append(node('h3',NAMES[category.id]||category.id));
+   category.rounds.forEach((round,i)=>{
+    const row=node('div',null,'daily-round');row.append(node('span',`Q${i+1}${round.level?' · '+round.level:''}`,'muted small'));
+    if(round.characters){const list=node('div',null,'daily-characters');for(const c of round.characters){const item=node('div',null,'daily-character'),img=thumb(c.image);if(img)item.append(img);item.append(node('strong',c.name),node('small',c.anime));list.append(item);}row.append(list);}
+    else{const img=thumb(round.image),text=node('div');text.append(node('strong',round.anime));const sub=[round.original!==round.anime?round.original:'',round.detail||(round.year?String(round.year):'')].filter(Boolean).join(' · ');if(sub)text.append(node('small',sub));if(img)row.append(img);row.append(text);}
+    group.append(row);
+   });
+   box.append(group);
+  }
+  box.hidden=false;button.textContent='Hide answers';
+ }catch(error){status.textContent=error.message;}
+ finally{button.disabled=false;}
+}
+document.querySelector('#daily-toggle').addEventListener('click',e=>showDaily(e.currentTarget));
 let timer;
 document.querySelector('#player-search').addEventListener('input',e=>{search=e.target.value.trim();clearTimeout(timer);timer=setTimeout(()=>load().catch(error=>{status.textContent=error.message;}),300);});
 try{await load();}catch(error){status.textContent=error.message;document.querySelector('#content').hidden=true;}

@@ -221,3 +221,14 @@ test('administrators can give and take cosmetics, adjust shards and moderate pic
  await assert.rejects(api.adminAction(users.two,{action:'grant-item',userId:users.two,item:'galaxy'}),/Administrator access required/);
  await assert.rejects(api.adminAction(users.one,{action:'set-admin',userId:users.one,admin:false}),/your own/);
 });
+
+test('administrators can see today’s daily answers, players cannot',async()=>{
+ const repo=new FakeRepo(),api=new CloudService(repo,pack,{dailySecret:'test-secret'});
+ const answers=await api.adminDailyAnswers(users.one);
+ const mine=await api.daily(users.two);
+ assert.equal(answers.categories.find(c=>c.id==='screenshot').rounds.length,3);
+ const firstId=mine.session?.games?.screenshot?.questions?.[0];
+ if(firstId){const a=pack.anime.find(x=>x.id===firstId);assert.equal(answers.categories.find(c=>c.id==='screenshot').rounds[0].anime,a.englishTitle||a.alternativeTitle||a.title);}
+ assert.equal(answers.categories.find(c=>c.id==='character').rounds[0].characters.length,4);
+ await assert.rejects(api.adminDailyAnswers(users.two),/Administrator access required/);
+});
