@@ -6,45 +6,103 @@ await privacyGate();
 const cloud=cloudMode?createCloudRuntime(runtimeConfig):null;
 if(cloud)await cloud.start();
 const status=document.querySelector('#status');
-function node(tag,text){const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;}
+let search='',openPlayer=null,data=null;
+function node(tag,text,cls){const n=document.createElement(tag);if(text!==undefined&&text!==null)n.textContent=text;if(cls)n.className=cls;return n;}
+function btn(text,onClick,cls=''){const b=node('button',text,cls);b.type='button';b.addEventListener('click',()=>onClick(b));return b;}
 async function request(path,payload){
  if(cloudMode)return cloud.api(path,payload);
  const response=await fetch(path,{credentials:'same-origin',cache:'no-store',...(payload?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}:{})});
- const data=await response.json();
- if(!response.ok)throw new Error(response.status===401?'Sign in to your administrator account in AniLoop first.':response.status===403?'This account does not have administrator access.':data.error||'Unable to complete this action.');
- return data;
+ const result=await response.json();
+ if(!response.ok)throw new Error(response.status===401?'Sign in to your administrator account in AniLoop first.':response.status===403?'This account does not have administrator access.':result.error||'Unable to complete this action.');
+ return result;
 }
-async function write(payload,button){
- button.disabled=true;
- try{await request('/api/admin/action',payload);await load();status.textContent='Changes saved.';}
+async function write(payload,button,message='Changes saved.'){
+ if(button)button.disabled=true;
+ try{const result=await request('/api/admin/action',payload);await load();status.textContent=typeof message==='function'?message(result):message;return result;}
  catch(error){status.textContent=error.message;}
- finally{button.disabled=false;}
+ finally{if(button)button.disabled=false;}
+}
+const fmt=n=>n===null||n===undefined?'—':Number(n).toLocaleString('en-US');
+const PICTURE={approved:'Approved',pending:'Waiting for review',private:'Not shared yet'};
+
+function overview(){
+ const box=document.querySelector('#overview');box.replaceChildren();
+ const players=data.players,admins=players.filter(p=>p.role==='admin').length,pending=(data.pictures||[]).length;
+ for(const [label,value] of [['Players shown',players.length],['Admins',admins],['Pictures waiting',pending],['Bug reports',data.reports.length]]){const card=node('div',null,'stat');card.append(node('strong',fmt(value)),node('span',label));box.append(card);}
+ const filter=document.querySelector('#filter-state');
+ filter.className='filter-state '+(data.moderation==='configured'?'ok':'warn');
+ filter.textContent=data.moderation==='configured'?'✓ Automatic picture safety filter is configured (OpenAI moderation). New pictures are checked on upload.':'⚠ The automatic picture safety filter is NOT configured. Every new profile picture waits here until you approve it, so nobody else can see it yet. Add the OPENAI_API_KEY secret to the Supabase Edge Function to check pictures automatically.';
+}
+
+function playerCard(player){
+ const card=node('article',null,'player'+(openPlayer===player.id?' open':'')),head=node('button',null,'player-head');head.type='button';
+ head.setAttribute('aria-expanded',String(openPlayer===player.id));
+ head.append(node('strong',player.username),node('span',player.role==='admin'?'Admin':'','badge'+(player.role==='admin'?' admin':'')),node('span',`◇ ${fmt(player.shards)}`,'muted'),node('span',`∞ ${fmt(player.bestInfinity)} · Daily ${fmt(player.bestDaily)}`,'muted'),node('span',player.pictureStatus?PICTURE[player.pictureStatus]||player.pictureStatus:'No picture','muted'));
+ head.addEventListener('click',()=>{openPlayer=openPlayer===player.id?null:player.id;render();});card.append(head);
+ if(openPlayer!==player.id)return card;
+ const body=node('div',null,'player-body');
+ // shards
+ const shards=node('form',null,'row'),input=node('input'),save=node('button','Set balance'),add=node('input'),addBtn=node('button','Add / remove');
+ input.type='number';input.min='0';input.max='1000000000';input.value=player.shards;input.setAttribute('aria-label','Shard balance');save.type='submit';
+ add.type='number';add.placeholder='+500 or -200';add.setAttribute('aria-label','Shards to add');addBtn.type='button';
+ shards.addEventListener('submit',e=>{e.preventDefault();write({action:'set-shards',userId:player.id,shards:Number(input.value)},save);});
+ addBtn.addEventListener('click',()=>{const amount=Number(add.value);if(!Number.isSafeInteger(amount)||!amount){status.textContent='Enter a whole number like 500 or -200.';return;}write({action:'add-shards',userId:player.id,amount},addBtn,r=>`Balance is now ◇ ${fmt(r.shards)}.`);});
+ shards.append(node('label','Loop Shards'),input,save,add,addBtn);body.append(shards);
+ // cosmetics
+ const items=node('div',null,'row'),select=node('select');select.setAttribute('aria-label','Cosmetic');
+ for(const id of data.cosmetics||[]){const o=node('option',(player.owned.includes(id)?'✓ ':'')+id);o.value=id;select.append(o);}
+ items.append(node('label','Cosmetics'),select,btn('Give item',b=>write({action:'grant-item',userId:player.id,item:select.value},b,`Gave ${select.value} to ${player.username}.`)),btn('Take away',b=>write({action:'revoke-item',userId:player.id,item:select.value},b,`Removed ${select.value} from ${player.username}.`),'ghost'));
+ body.append(items,node('p',`Owns ${player.owned.length} item(s): ${player.owned.join(', ')||'none'} · Frame: ${player.frame}`,'muted small'));
+ // account
+ const rename=node('div',null,'row'),name=node('input');name.value=player.username;name.setAttribute('aria-label','New username');name.maxLength=24;
+ rename.append(node('label','Username'),name,btn('Rename',b=>write({action:'rename',userId:player.id,username:name.value.trim()},b,'Username changed.')));body.append(rename);
+ const tools=node('div',null,'row wrap');tools.append(node('label','Tools'));
+ tools.append(btn(player.role==='admin'?'Remove admin':'Make admin',b=>{if(confirm(`${player.role==='admin'?'Remove':'Give'} administrator access ${player.role==='admin'?'from':'to'} ${player.username}?`))write({action:'set-admin',userId:player.id,admin:player.role!=='admin'},b);},player.isSelf&&player.role==='admin'?'ghost hidden':'ghost'));
+ tools.append(btn('Reset today’s daily',b=>{if(confirm(`Let ${player.username} play today’s daily again? Today’s daily score is removed.`))write({action:'reset-daily',userId:player.id},b,'Today’s daily was reset.');},'ghost'));
+ if(player.pictureStatus){if(player.pictureStatus!=='approved')tools.append(btn('Approve picture',b=>write({action:'picture-approve',userId:player.id},b,'Picture approved.'),'ghost'));tools.append(btn('Delete picture',b=>{if(confirm('Delete this profile picture?'))write({action:'remove-picture',userId:player.id},b,'Picture deleted.');},'ghost danger'));}
+ for(const [mode,label] of [['infinity','Clear Infinity scores'],['daily','Clear daily scores'],['all','Clear all scores']])tools.append(btn(label,b=>{if(confirm(`${label} for ${player.username}? This removes them from the leaderboards and cannot be undone.`))write({action:'clear-scores',userId:player.id,mode},b,'Scores removed.');},'ghost danger'));
+ body.append(tools,node('p',`Account id ${player.id}${player.created?' · joined '+player.created.slice(0,10):''}`,'muted small'));
+ card.append(body);return card;
+}
+
+function pictures(){
+ const box=document.querySelector('#pictures');box.replaceChildren();
+ const list=(data.pictures||[]).filter(p=>/^data:image\/(png|jpeg|webp);base64,/.test(p.pictureUrl));
+ const actions=document.querySelector('#picture-actions');actions.replaceChildren();
+ if(list.length){
+  actions.append(btn(`Approve all (${list.length})`,b=>{if(confirm('Approve every picture shown here? Only do this after looking at them.'))write({action:'picture-approve-all'},b,r=>`${r.approved} picture(s) approved.`);}));
+  if(data.moderation==='configured')actions.append(btn('Run safety filter again',b=>write({action:'picture-recheck'},b,r=>`${r.approved} approved · ${r.rejected} removed · ${r.waiting} still waiting.`),'ghost'));
+ }
+ for(const picture of list){
+  const article=node('article',null,'picture'),image=node('img');
+  image.src=picture.pictureUrl;image.alt=`Profile picture of ${picture.username}`;image.width=96;image.height=96;
+  article.append(image,node('h3',picture.username),btn('Approve',b=>write({action:'picture-approve',userId:picture.userId},b,'Picture approved.')),btn('Reject',b=>{if(confirm('Delete this profile picture?'))write({action:'picture-reject',userId:picture.userId},b,'Picture deleted.');},'ghost danger'));
+  box.append(article);
+ }
+ if(!list.length)box.append(node('p','No pictures are waiting for review.','muted'));
+}
+
+function reports(){
+ const box=document.querySelector('#reports');box.replaceChildren();
+ for(const report of data.reports){
+  const article=node('article',null,'report');article.append(node('h3',report.title),node('p',`${report.id} · ${report.category} · ${new Date(report.created*1000).toISOString().slice(0,10)}`,'muted small'));
+  for(const [label,key] of [['Steps','steps'],['Expected','expected'],['Actual','actual']])article.append(node('h4',label),node('p',report[key]));
+  article.append(btn('Delete report',b=>{if(confirm('Permanently delete this bug report?'))write({action:'delete-report',reportId:report.id},b);},'ghost danger'));box.append(article);
+ }
+ if(!data.reports.length)box.append(node('p','No bug reports.','muted'));
+}
+
+function render(){
+ overview();
+ const list=document.querySelector('#players');list.replaceChildren(...data.players.map(playerCard));
+ if(!data.players.length)list.append(node('p','No players match this search.','muted'));
+ pictures();reports();
 }
 async function load(){
- const data=await request('/api/admin');
- status.textContent=`${data.accountCount} registered server profiles · Read / write administration`;
- document.querySelector('#players').replaceChildren();document.querySelector('#reports').replaceChildren();document.querySelector('#pictures')?.replaceChildren();
- for(const player of data.players){
-  const tr=node('tr'),cell=node('td'),form=node('form'),input=node('input'),save=node('button','Save');
-  form.className='shard-form';input.type='number';input.min='0';input.max='1000000000';input.step='1';input.required=true;input.value=player.shards;input.setAttribute('aria-label',`${player.username} shard balance`);save.type='submit';
-  form.append(input,save);form.addEventListener('submit',event=>{event.preventDefault();if(form.reportValidity())write({action:'set-shards',userId:player.id,shards:Number(input.value)},save);});cell.append(form);
-  tr.append(node('td',player.username),node('td',player.role==='admin'?'Read / write':'None'),cell);document.querySelector('#players').append(tr);
- }
- for(const report of data.reports){
-  const article=node('article');article.append(node('h3',report.title),node('p',`${report.id} · ${report.category} · ${new Date(report.created*1000).toISOString().slice(0,10)}`));
-  for(const [label,key] of [['Steps','steps'],['Expected','expected'],['Actual','actual']])article.append(node('h4',label),node('p',report[key]));
-  const remove=node('button','Delete report');remove.type='button';remove.addEventListener('click',()=>{if(confirm('Permanently delete this bug report?'))write({action:'delete-report',reportId:report.id},remove);});article.append(remove);document.querySelector('#reports').append(article);
- }
- for(const picture of data.pictures||[]){
-  if(!/^data:image\/(png|jpeg|webp);base64,/.test(picture.pictureUrl))continue;
-  const article=node('article'),image=node('img'),approve=node('button','Approve'),reject=node('button','Reject and delete');
-  image.src=picture.pictureUrl;image.alt=`Profile picture of ${picture.username}`;image.width=96;image.height=96;approve.type=reject.type='button';
-  approve.addEventListener('click',()=>write({action:'picture-approve',userId:picture.userId},approve));
-  reject.addEventListener('click',()=>{if(confirm('Delete this profile picture?'))write({action:'picture-reject',userId:picture.userId},reject);});
-  article.append(image,node('h3',picture.username),approve,reject);document.querySelector('#pictures')?.append(article);
- }
- if(!(data.pictures||[]).length)document.querySelector('#pictures')?.append(node('p','No pictures are waiting for review.'));
- if(!data.reports.length)document.querySelector('#reports').append(node('p','No bug reports.'));
- document.querySelector('#content').hidden=false;
+ data=await request('/api/admin'+(search?'?'+new URLSearchParams({q:search}):''));data.players=data.players.map(p=>({owned:[],frame:'classic',bestInfinity:null,bestDaily:null,pictureStatus:null,...p}));
+ status.textContent=`Signed in as administrator · ${data.players.length} player(s) shown`;
+ render();document.querySelector('#content').hidden=false;
 }
+let timer;
+document.querySelector('#player-search').addEventListener('input',e=>{search=e.target.value.trim();clearTimeout(timer);timer=setTimeout(()=>load().catch(error=>{status.textContent=error.message;}),300);});
 try{await load();}catch(error){status.textContent=error.message;document.querySelector('#content').hidden=true;}

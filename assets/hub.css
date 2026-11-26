@@ -273,3 +273,8 @@
 @media(max-width:720px){.pool-totals{grid-template-columns:repeat(4,1fr);width:100%;gap:5px}.pool-totals div{min-width:0;padding:9px 4px}.pool-totals strong{font-size:.95rem}.pool-totals span{font-size:.6rem}.pool-grid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}.pool-select{flex:1 1 140px}.pool-detail-hero{flex-direction:column;align-items:flex-start;padding:20px}.pool-detail-cover img,.pool-detail-cover .cover-placeholder{width:96px}.pool-detail-body{padding:18px 20px 22px}}
 @media(prefers-reduced-motion:reduce){.pool-card,.pool-cover img,.pool-detail,.pool-detail-backdrop{transition:none;animation:none}}
 .pool-search-field input,.pool-search-field input:focus,.pool-search-field input:focus-visible{border:0!important;outline:none!important;box-shadow:none!important;background:none!important}
+
+/* Game heading actions: new loop / fresh round next to the rules button */
+.game-heading-actions{position:absolute;right:0;top:30px;display:flex;gap:8px;align-items:center}
+.game-heading-actions .btn{min-height:40px}
+@media(max-width:720px){.game-heading-actions{position:static;justify-content:center;margin-top:12px}.game-heading{flex-direction:column;align-items:center}}

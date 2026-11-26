@@ -7,6 +7,10 @@ export class CloudRepository{
   if(!response.ok){if(data?.code==='23505')throw new GameError('This record already exists.',409);throw new GameError(response.status>=500?'Cloud service temporarily unavailable.':data?.message?.includes('Administrator')?'Administrator access required.':'Cloud request failed. Check the installed AniLoop SQL.',response.status===403?403:503);}
   return data;
  }
+ // PATCH / DELETE / plain INSERT for administrator tools (service role only).
+ async mutate(method,path,payload){const response=await this.fetcher(this.url+path,{method,headers:{apikey:this.secret,Authorization:'Bearer '+this.secret,'Content-Type':'application/json',Prefer:'return=minimal'},...(payload===undefined?{}:{body:JSON.stringify(payload)})});if(!response.ok){const data=await response.json().catch(()=>null);if(data?.code==='23505')throw new GameError('This name or record already exists.',409);throw new GameError('Cloud request failed. Check the installed AniLoop SQL.',503);}return true;}
+ async accountBriefs(ids){const unique=[...new Set(ids)].filter(id=>/^[0-9a-f-]{36}$/i.test(id)).slice(0,250);if(!unique.length)return [];return this.request('/rest/v1/aniloop_runtime?'+new URLSearchParams({key:'in.('+unique.map(id=>`"account:${id}"`).join(',')+')',select:'owner_id,equipped:value->>equipped,owned:value->owned,pictureStatus:value->>pictureStatus,hasPicture:value->>pictureType'}));}
+ async bestScores(ids){const unique=[...new Set(ids)].filter(id=>/^[0-9a-f-]{36}$/i.test(id));if(!unique.length)return [];return this.request('/rest/v1/aniloop_scores?'+new URLSearchParams({user_id:'in.('+unique.join(',')+')',select:'user_id,mode,score',order:'score.desc',limit:'5000'}));}
  async profile(id){return (await this.request('/rest/v1/aniloop_profiles?'+new URLSearchParams({id:'eq.'+id,select:'id,username,created_at'})))[0]||null;}
  async findProfile(name){return (await this.request('/rest/v1/aniloop_profiles?'+new URLSearchParams({username:'eq.'+name,select:'id,username,created_at'})))[0]||null;}
  async isAdmin(id){return (await this.request('/rest/v1/aniloop_admins?'+new URLSearchParams({user_id:'eq.'+id,select:'user_id'}))).length>0;}
@@ -15,7 +19,7 @@ export class CloudRepository{
  // Public look (equipped frame + picture fields) of many players in one query.
  async looks(ids){const unique=[...new Set(ids)].filter(id=>/^[0-9a-f-]{36}$/i.test(id)).slice(0,250);if(!unique.length)return [];return this.request('/rest/v1/aniloop_runtime?'+new URLSearchParams({key:'in.('+unique.map(id=>`"account:${id}"`).join(',')+')',select:'owner_id,equipped:value->>equipped,slots:value->slots,pictureStatus:value->>pictureStatus,pictureType:value->>pictureType,picture:value->>picture'}));}
  async scoreRows(ids,mode,since){const unique=[...new Set(ids)].filter(id=>/^[0-9a-f-]{36}$/i.test(id));if(!unique.length)return [];const params=new URLSearchParams({user_id:'in.('+unique.join(',')+')',mode:'eq.'+mode,select:'user_id,score,created_at',order:'created_at.asc',limit:'20000'});if(since)params.set('created_at','gte.'+since);return this.request('/rest/v1/aniloop_scores?'+params);}
- async pendingPictures(limit=50){return this.request('/rest/v1/aniloop_runtime?'+new URLSearchParams({key:'like.account:%','value->>pictureStatus':'eq.pending',select:'owner_id,picture:value->>picture,pictureType:value->>pictureType',order:'updated_at.desc',limit:String(limit)}));}
+ async pendingPictures(limit=50){return this.request('/rest/v1/aniloop_runtime?'+new URLSearchParams({key:'like.account:%','value->>pictureStatus':'in.(pending,private)',select:'owner_id,picture:value->>picture,pictureType:value->>pictureType',order:'updated_at.desc',limit:String(limit)}));}
  transaction(actor){return new CloudTransaction(this,actor);}
 }
 export class CloudTransaction{

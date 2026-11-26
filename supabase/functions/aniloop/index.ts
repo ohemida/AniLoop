@@ -25,7 +25,7 @@ async function moderateImage(dataUrl:string){
 }
 // The daily quiz seed is derived from this secret, so the daily cannot be
 // computed in the browser. Set ANILOOP_DAILY_SECRET to rotate it independently.
-const service=new CloudService(repository,pool,{dailySecret:Deno.env.get('ANILOOP_DAILY_SECRET')||serviceKey,moderateImage});
+const service=new CloudService(repository,pool,{dailySecret:Deno.env.get('ANILOOP_DAILY_SECRET')||serviceKey,moderateImage,moderationConfigured:!!openaiKey});
 const json=(body,status=200,headers={})=>new Response(JSON.stringify(body),{status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store',...headers}});
 function cors(origin){return {'Access-Control-Allow-Origin':origin,'Access-Control-Allow-Headers':'authorization, apikey, content-type','Access-Control-Allow-Methods':'POST, OPTIONS','Vary':'Origin'};}
 async function register(payload){

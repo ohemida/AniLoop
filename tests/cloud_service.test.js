@@ -205,3 +205,19 @@ test('theme and backdrop are saved with the account and come back on sign-in',as
  await assert.rejects(api.saveAppearance(users.one,{theme:'url(x)',background:'none'}),/Invalid appearance/);
  assert.equal(repo.docs.get('account:'+users.one).value.appearance.theme,'ocean');
 });
+
+test('administrators can give and take cosmetics, adjust shards and moderate pictures',async()=>{
+ const repo=new FakeRepo(),api=new CloudService(repo,pack);
+ repo.docs.set('account:'+users.two,{value:{shards:100,equipped:'galaxy',owned:['galaxy'],slots:{title:'title-legend'},claims:[],scores:[],picture:'AAAA',pictureType:'jpeg',pictureStatus:'pending'},revision:1,owner:users.two});
+ repo.pendingPictures=async()=>[{owner_id:users.two,picture:'AAAA',pictureType:'jpeg'}];
+ await api.adminAction(users.one,{action:'grant-item',userId:users.two,item:'title-legend'});
+ await api.adminAction(users.one,{action:'revoke-item',userId:users.two,item:'galaxy'});
+ let a=repo.docs.get('account:'+users.two).value;assert.deepEqual(a.owned,['title-legend']);assert.equal(a.equipped,'classic');
+ await assert.rejects(api.adminAction(users.one,{action:'grant-item',userId:users.two,item:'nope'}),/Unknown cosmetic/);
+ const added=await api.adminAction(users.one,{action:'add-shards',userId:users.two,amount:-500});assert.equal(added.shards,0);
+ const result=await api.adminAction(users.one,{action:'picture-approve-all'});assert.equal(result.approved,1);
+ assert.equal(repo.docs.get('account:'+users.two).value.pictureStatus,'approved');
+ await api.adminAction(users.one,{action:'remove-picture',userId:users.two});assert.equal(repo.docs.get('account:'+users.two).value.picture,null);
+ await assert.rejects(api.adminAction(users.two,{action:'grant-item',userId:users.two,item:'galaxy'}),/Administrator access required/);
+ await assert.rejects(api.adminAction(users.one,{action:'set-admin',userId:users.one,admin:false}),/your own/);
+});
