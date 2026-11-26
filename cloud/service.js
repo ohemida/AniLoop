@@ -13,6 +13,8 @@ const pictureUrl=a=>a?.picture?`data:image/${a.pictureType||'png'};base64,${a.pi
 const publicPicture=a=>a?.pictureStatus==='approved'?pictureUrl(a):null;
 const pictureStatus=a=>a?.picture?(a.pictureStatus||'private'):null;
 const FRAME_IDS=new Set(['classic',...COSMETICS.filter(c=>c.type==='frame').map(c=>c.id)]);
+const LOOK_ID=/^[a-z][a-z0-9-]{1,23}$/;
+export function normalizeLook(v){if(!v||typeof v!=='object'||!LOOK_ID.test(v.theme)||!LOOK_ID.test(v.background))return null;const dim=Number(v.dim);return {theme:v.theme,background:v.background,dim:Number.isFinite(dim)?Math.max(35,Math.min(90,Math.round(dim))):70,inGame:v.inGame===true,position:['center','top','bottom'].includes(v.position)?v.position:'center',savedAt:Number.isSafeInteger(v.savedAt)&&v.savedAt>0?v.savedAt:0};}
 const frameOf=a=>FRAME_IDS.has(a?.equipped)?a.equipped:'classic';
 // What other players see: approved picture, frame, title, name colour and banner.
 const lookOf=a=>{const slots=normalizeSlots(a?.slots);return {pictureUrl:publicPicture(a),frame:frameOf(a),title:slots.title,nameStyle:slots.name,banner:slots.banner};};
@@ -100,8 +102,10 @@ export class CloudService{
  async current(actor,user){
   if(!actor)return {user:null};
   const profile=await this.ensureProfile(actor,user?.user_metadata||{});const account=await this.ensureAccount(actor);const admin=await this.repo.isAdmin(actor);
-  return {user:{id:actor,username:profile.username,email:user.email,provider:'supabase',isAdmin:admin,hasPicture:!!account.picture,pictureUrl:pictureUrl(account),pictureStatus:pictureStatus(account),pictureCheck:account.picture&&account.pictureStatus!=='approved'?account.pictureCheck||null:null,frame:frameOf(account),slots:normalizeSlots(account.slots)}};
+  return {user:{id:actor,username:profile.username,email:user.email,provider:'supabase',isAdmin:admin,hasPicture:!!account.picture,pictureUrl:pictureUrl(account),pictureStatus:pictureStatus(account),pictureCheck:account.picture&&account.pictureStatus!=='approved'?account.pictureCheck||null:null,frame:frameOf(account),slots:normalizeSlots(account.slots),appearance:normalizeLook(account.appearance)}};
  }
+ // Theme and backdrop follow the account, so they survive new devices, cleared storage and updates.
+ async saveAppearance(actor,payload){const look=normalizeLook({...payload,savedAt:Date.now()});check(look,'Invalid appearance.');return transaction(this.repo,actor,async tx=>{const a=await tx.get('account:'+actor)||newAccount();const previous=normalizeLook(a.appearance);if(previous&&previous.savedAt>=look.savedAt)look.savedAt=previous.savedAt+1;a.appearance=look;await tx.put('account:'+actor,a,actor);return {appearance:look};});}
  async leaderboard(q,actor=null){const mode=q.get('mode')||'infinity',period=q.get('period')||'all',scope=q.get('scope')||'global';check(['daily','infinity'].includes(mode)&&['all','week','today'].includes(period)&&['global','friends'].includes(scope),'Invalid leaderboard filter.');if(scope==='friends')return this.friendsLeaderboard(actor,mode,period);const rows=await this.repo.request('/rest/v1/rpc/aniloop_cloud_leaderboard',{p_mode:mode,p_period:period});const looks=rows.length?await this.looksFor(rows.map(r=>r.userId).filter(validId)).catch(()=>new Map()):new Map();return {scope:'global',entries:rows.map((r,i)=>({...r,rank:i+1,...DEFAULT_LOOK,...(looks.get(r.userId)||{}),isSelf:r.userId===actor}))};}
  async submit(actor,round){const score=recalculate(round,this.pack);check(score.mode!=='daily','Daily results are saved automatically when you finish the daily quiz.');const result=await transaction(this.repo,actor,async tx=>{tx.score={mode:score.mode,seed:score.seed,score:score.score,breakdown:score.breakdown};return {score:score.score,breakdown:score.breakdown};});return result;}
  async rewards(actor){return {rewards:rewards(await this.ensureAccount(actor))};}
@@ -187,6 +191,7 @@ export class CloudService{
   if(route==='/api/daily')return this.daily(actor);
   if(route==='/api/daily/action')return this.dailyAct(actor,payload);
   if(route==='/api/scores')return this.submit(actor,payload.round);
+  if(route==='/api/appearance')return this.saveAppearance(actor,payload||{});
   if(route==='/api/rewards')return this.rewards(actor);
   if(route==='/api/rewards/claim')return this.claim(actor);
   if(route==='/api/rewards/buy'||route==='/api/rewards/equip')return this.cosmetic(actor,payload.item,route.endsWith('/equip'));

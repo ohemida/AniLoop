@@ -84,6 +84,8 @@ ANILOOP_URL=http://localhost:8098 .tools/qa/bin/python tests/interface.py
 ANILOOP_URL=http://localhost:8098 .tools/qa/bin/python tests/hint_failures.py
 ```
 
+After changing any `.js` or `.css` file, run `node scripts/stamp_assets.mjs`. It gives every script and stylesheet a content hash in `index.html`/`admin.html` (plus an import map for nested imports), so browsers never mix old and new files after an update. `tests/asset_versions.test.js` fails when the stamps are stale. After a pool update, also run `node scripts/split_pool.mjs`.
+
 Python media tests use actual ffmpeg output to check clipped durations, full-length opening hints, derivative cover files, and rejected sources. Browser checks require Playwright/Chromium; `.tools/qa` is the existing local QA environment. Screenshots are stored under `qa/`.
 
 ## Accounts, community leaderboards, and original branding

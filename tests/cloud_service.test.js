@@ -195,3 +195,13 @@ test('titles, name colours, banners and effects use their own slots and show to 
  const friend=(await api.friends(users.one)).players.find(p=>p.userId===users.two);
  assert.equal(friend.title,'title-legend');assert.equal(friend.nameStyle,'name-aurora');assert.equal(friend.banner,'banner-stars');
 });
+
+test('theme and backdrop are saved with the account and come back on sign-in',async()=>{
+ const repo=new FakeRepo(),api=new CloudService(repo,pack);
+ repo.docs.set('account:'+users.one,{value:{shards:0,equipped:'classic',owned:[],claims:[],scores:[],picture:null},revision:1,owner:users.one});
+ const saved=await api.saveAppearance(users.one,{theme:'sakura',background:'nebula',dim:200,inGame:true,position:'top',savedAt:1});
+ assert.equal(saved.appearance.theme,'sakura');assert.equal(saved.appearance.dim,90);assert.ok(saved.appearance.savedAt>1,'the server sets the time');
+ const again=await api.saveAppearance(users.one,{theme:'ocean',background:'none'});assert.ok(again.appearance.savedAt>saved.appearance.savedAt);
+ await assert.rejects(api.saveAppearance(users.one,{theme:'url(x)',background:'none'}),/Invalid appearance/);
+ assert.equal(repo.docs.get('account:'+users.one).value.appearance.theme,'ocean');
+});
