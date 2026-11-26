@@ -122,7 +122,7 @@ async function showDaily(button){
    box.append(group);
   }
   box.hidden=false;button.textContent='Hide answers';
- }catch(error){status.textContent=error.message;}
+ }catch(error){status.textContent=error.message;box.replaceChildren(node('p','Could not load the answers: '+error.message,'filter-state warn'));box.hidden=false;}
  finally{button.disabled=false;}
 }
 document.querySelector('#daily-toggle').addEventListener('click',e=>showDaily(e.currentTarget));

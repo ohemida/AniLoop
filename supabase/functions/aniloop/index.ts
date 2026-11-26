@@ -54,7 +54,7 @@ Deno.serve(async request=>{
   const body=JSON.parse(raw);if(!body||typeof body!=='object'||Array.isArray(body))throw new GameError('Expected a JSON request.');
   const path=String(body.path||'');if(!path.startsWith('/api/'))throw new GameError('Unknown endpoint.',404);
   const route=path.split('?')[0],method=body.method||'POST';
-  const reads=new Set(['/api/config','/api/account','/api/account/export','/api/leaderboard','/api/rooms/current','/api/rooms/view','/api/rewards','/api/friends','/api/admin','/api/daily']);
+  const reads=new Set(['/api/config','/api/account','/api/account/export','/api/leaderboard','/api/rooms/current','/api/rooms/view','/api/rewards','/api/friends','/api/admin','/api/admin/daily','/api/daily']);
   if(route==='/api/account/save'||route==='/api/account/picture'? !['GET','POST'].includes(method):reads.has(route)?method!=='GET':method!=='POST')throw new GameError('Wrong method for this endpoint.',405);
   if(route==='/api/register')return json(await register(body.payload),200,headers);
   if(route==='/api/bugs'){
