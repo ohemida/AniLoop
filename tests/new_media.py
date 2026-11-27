@@ -18,7 +18,7 @@ with sync_playwright() as pw:
     duration=page.locator('audio').evaluate('(a)=>{a.pause();return a.duration;}')
     page.locator('[data-action="hint:1"]').click();page.wait_for_function('()=>document.querySelector("video")?.dataset.positioned==="true"')
     actual=page.locator('video').evaluate('(v)=>v.duration');assert abs(actual-duration*.3)<1
-    page.locator('[data-action="media-toggle"]').click();page.wait_for_function('()=>document.querySelector("video").currentTime>.1')
+    page.locator('button[data-action="media-toggle"]').click();page.wait_for_function('()=>document.querySelector("video").currentTime>.1')
     page.screenshot(path=str(ROOT/'qa/new-opening.png'),full_page=True)
     print('PASS: new catalog covers decode; new opening audio and physically limited protected video play:',pack[item['id']]['title'])
     browser.close()

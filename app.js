@@ -181,7 +181,7 @@ async function prepareHints() {
     return;
   }
   const jobs = hintJobs,
-    play = app.querySelector('[data-action="media-toggle"]');
+    play = app.querySelector('button[data-action="media-toggle"]');
   if (play && jobs.some((j) => j.kind !== 'cover' && !document.getElementById(j.id)?.getAttribute('src')))
     play.disabled = true;
   await Promise.all(
@@ -760,17 +760,15 @@ function anidleSummaryView(g, target) {
             ? [`≤ ${b.upper}`, 'near']
             : ['?', 'unknown'];
   const one = (list) => (list.length ? [list.map(esc).join(' / '), 'hit'] : ['?', 'unknown']);
-  const [year, yearState] = range(data.year),
-    [score, scoreState] = range(data.score),
-    [studio, studioState] = one(data.studios),
-    [source, sourceState] = one(data.sources);
-  return `<section class="anidle-known" aria-label="What you know so far"><div class="anidle-tiles">${anidleTile('Year', year, yearState)}${anidleTile('Studio', studio, studioState)}${anidleTile('Source', source, sourceState)}${anidleTile('Rating', score, scoreState)}</div>${anidleChips(
-    'Genres',
-    data.genres.map((t) => [t, 'hit']),
-  )}${anidleChips(
-    'Tags',
-    data.tags.map((t) => [t.value, t.match === 'primary' ? 'hit' : 'near']),
-  )}</section>`;
+  const cell = ([value, stateName]) => `<td>${anidlePill(value, stateName)}</td>`;
+  return `<tbody id="anidle-summary" class="anidle-known-row" ${state.showSummary === false ? 'hidden' : ''}><tr><th scope="row"><span class="known-label">What you know</span></th>${cell(range(data.year))}${cell(one(data.studios))}${cell(one(data.sources))}${cell(range(data.score))}<td>${anidleChipList(data.genres.map((t) => [t, 'hit']))}</td><td>${anidleChipList(data.tags.map((t) => [t.value, t.match === 'primary' ? 'hit' : 'near']))}</td></tr></tbody>`;
+}
+/** Paints the played / chosen part of a range slider (read by CSS as --fill). */
+function fillRange(input) {
+  const min = Number(input.min || 0),
+    max = Number(input.max || 100),
+    pct = max > min ? ((Number(input.value) - min) / (max - min)) * 100 : 0;
+  input.style.setProperty('--fill', pct.toFixed(1) + '%');
 }
 function prepareVideo() {
   const video = app.querySelector('.quiz-video');
@@ -782,7 +780,7 @@ function prepareVideo() {
   const seek = app.querySelector('#video-seek'),
     volume = app.querySelector('#video-volume'),
     time = app.querySelector('#video-time'),
-    play = app.querySelector('[data-action="media-toggle"]');
+    play = app.querySelector('button[data-action="media-toggle"]');
   let bounds = {start: 0, end: 0},
     correcting = false;
   const clock = (v) => `${Math.floor(v / 60)}:${String(Math.floor(v % 60)).padStart(2, '0')}`;
@@ -802,6 +800,7 @@ function prepareVideo() {
       seek.value = String(
         Math.max(0, Math.min(1000, ((video.currentTime - bounds.start) / (bounds.end - bounds.start)) * 1000)),
       );
+      fillRange(seek);
       time.textContent =
         clock(video.currentTime + Number(video.dataset.offset || 0)) +
         ' / ' +
@@ -811,6 +810,7 @@ function prepareVideo() {
     play.setAttribute('aria-label', video.paused ? 'Play video' : 'Pause video');
   };
   video.volume = Number(volume.value);
+  fillRange(volume);
   const ready = () => {
     if (!video.dataset.positioned && Number.isFinite(video.duration)) {
       try {
@@ -1047,7 +1047,7 @@ function characterView(g) {
 function mediaElement(m, videoUnlocked, mode = 'audio', cover = null) {
   if (!m) return '<p class="media-error">No clip is available for this question.</p>';
   if (mode === 'video' && videoUnlocked && m.video)
-    return `<div class="video-hint-layout ${selected === 'ending' ? 'with-cover' : ''}">${selected === 'ending' && cover ? `<figure class="ending-cover"><img id="${hintResource(cover, 'cover')}" alt="Blurred cover clue"><figcaption>Cover clue</figcaption></figure>` : ''}<div class="media-player"><div class="video-viewport"><video class="quiz-video" preload="metadata" playsinline data-start="zero" id="${hintResource(m.video, selected, selected === 'opening' ? m.videoWindow : undefined)}" aria-label="Blurred video clue"></video></div><p class="hint-processing" role="status">Preparing video… You can keep listening to the full audio.</p><div class="video-controls">${button('media-toggle', '▶', 'media-play', 'aria-label="Play video"')}<input id="video-seek" type="range" min="0" max="1000" step="1" value="0" aria-label="Video position"><span id="video-time" class="media-time">0:00</span><label class="volume-label" for="video-volume" aria-label="Video volume">♪</label><input id="video-volume" type="range" min="0" max="1" step="0.01" value="0.7" aria-label="Video volume">${button('media-fullscreen', '⛶', 'media-fullscreen', 'aria-label="Fullscreen video"')}</div>${selected === 'opening' ? '<p class="video-window-note" role="status">Loading video window…</p>' : ''}</div></div>`;
+    return `<div class="video-hint-layout ${selected === 'ending' ? 'with-cover' : ''}">${selected === 'ending' && cover ? `<figure class="ending-cover"><img id="${hintResource(cover, 'cover')}" alt="Blurred cover clue"><figcaption>Cover clue</figcaption></figure>` : ''}<div class="media-player"><div class="video-viewport" data-action="media-toggle" title="Click to play or pause"><video class="quiz-video" preload="metadata" playsinline data-start="zero" id="${hintResource(m.video, selected, selected === 'opening' ? m.videoWindow : undefined)}" aria-label="Blurred video clue"></video></div><p class="hint-processing" role="status">Preparing video… You can keep listening to the full audio.</p><div class="video-controls">${button('media-toggle', '▶', 'media-play', 'aria-label="Play video"')}<input id="video-seek" type="range" min="0" max="1000" step="1" value="0" aria-label="Video position"><span id="video-time" class="media-time">0:00</span><label class="volume-label" for="video-volume" aria-label="Video volume">♪</label><input id="video-volume" type="range" min="0" max="1" step="0.01" value="0.7" aria-label="Video volume">${button('media-fullscreen', '⛶', 'media-fullscreen', 'aria-label="Fullscreen video"')}</div>${selected === 'opening' ? '<p class="video-window-note" role="status">Loading video window…</p>' : ''}</div></div>`;
   return `<div class="music-stage full-audio" id="music-stage"><audio controls preload="metadata" controlslist="nodownload" src="${esc(m.audio || m.video)}" aria-label="Full music track"></audio></div>`;
 }
 function musicView(g) {
@@ -1092,24 +1092,21 @@ function anidleTrack(g) {
   }).join('');
   return `<div class="anidle-track"><ol aria-hidden="true">${cells}</ol><p>${caption}</p></div>`;
 }
-function anidleTile(label, value, state, note = '') {
-  const said = {hit: 'match', near: 'partly known', miss: 'no match', unknown: 'unknown'}[state] || '';
-  return `<div class="anidle-tile is-${state}"><span class="tile-label">${label}</span><strong>${value}</strong>${note ? `<small>${note}</small>` : ''}<span class="sr-only">${said}</span></div>`;
+/** One rounded value pill; `state` is hit (match), near (close / narrowed), miss or unknown. */
+function anidlePill(value, state, hint = '', said = '') {
+  return `<span class="anidle-pill is-${state}">${value}${hint ? `<b aria-hidden="true">${hint}</b>` : ''}${said ? `<span class="sr-only"> ${said}</span>` : ''}</span>`;
 }
-function anidleChips(label, items) {
-  return `<div class="anidle-chips"><span class="chip-label">${label}</span>${items.length ? items.map(([text, state]) => `<span class="chip is-${state}">${esc(text)}</span>`).join('') : '<span class="chip-empty">Nothing confirmed yet</span>'}</div>`;
+function anidleChipList(items) {
+  return items.length
+    ? `<div class="anidle-chip-list">${items.map(([text, state]) => `<span class="anidle-pill small is-${state}">${esc(text)}</span>`).join('')}</div>`
+    : '<span class="anidle-none">—</span>';
 }
-function anidleGuessCard(guess, target) {
+function anidleGuessRow(guess, target) {
   const a = anime(guess.id),
     r = compareAnime(a, target),
-    arrow = (sign, up, down) => (sign > 0 ? `▲ ${up}` : sign < 0 ? `▼ ${down}` : '✓ exact');
-  return `<li class="anidle-guess ${a.id === target.id ? 'is-correct' : ''}"><div class="guess-head"><span class="guess-no">#${guess.attempt}</span>${titleMarkup(a)}</div><div class="anidle-tiles">${anidleTile('Year', a.year ?? '—', r.year === 0 ? 'hit' : 'miss', a.year ? arrow(r.year, 'later', 'earlier') : '')}${anidleTile('Studio', esc(a.studio || '—'), r.studio ? 'hit' : 'miss')}${anidleTile('Source', esc(a.source || '—'), r.source ? 'hit' : 'miss')}${anidleTile('Rating', a.score ?? '—', r.score === null ? 'unknown' : r.score === 0 ? 'hit' : 'miss', r.score === null ? 'no rating' : arrow(r.score, 'higher', 'lower'))}</div>${anidleChips(
-    'Genres',
-    r.genres.map((t) => [t.value, t.match ? 'hit' : 'miss']),
-  )}${anidleChips(
-    'Tags',
-    r.tags.map((t) => [t.value, t.match === 'primary' ? 'hit' : t.match === 'secondary' ? 'near' : 'miss']),
-  )}</li>`;
+    arrow = (sign) => (sign > 0 ? '▲' : sign < 0 ? '▼' : ''),
+    dir = (sign, up, down) => (sign > 0 ? `target is ${up}` : sign < 0 ? `target is ${down}` : 'exact match');
+  return `<tr class="anidle-row ${a.id === target.id ? 'is-correct' : ''}"><th scope="row"><span class="guess-no">#${guess.attempt}</span>${titleMarkup(a)}</th><td>${anidlePill(a.year ?? '—', r.year === 0 ? 'hit' : 'miss', arrow(r.year), dir(r.year, 'later', 'earlier'))}</td><td>${anidlePill(esc(a.studio || '—'), r.studio ? 'hit' : 'miss')}</td><td>${anidlePill(esc(a.source || '—'), r.source ? 'hit' : 'miss')}</td><td>${r.score === null ? anidlePill(a.score ?? '—', 'unknown') : anidlePill(a.score, r.score === 0 ? 'hit' : 'miss', arrow(r.score), dir(r.score, 'higher', 'lower'))}<small class="score-source">${esc(a.scoreSource || 'MyAnimeList')}</small></td><td>${anidleChipList(r.genres.map((t) => [t.value, t.match ? 'hit' : 'miss']))}</td><td>${anidleChipList(r.tags.map((t) => [t.value, t.match === 'primary' ? 'hit' : t.match === 'secondary' ? 'near' : 'miss']))}</td></tr>`;
 }
 function anidleView(g) {
   const target = anime(g.questions[0]),
@@ -1117,18 +1114,17 @@ function anidleView(g) {
   const form = done
     ? ''
     : `<form class="answer-form anidle-form" data-form="anidle"><div class="form-line">${field('answer', 'Which anime is it?')}<button type="submit" class="btn">Guess</button></div><div class="form-actions">${g.attempt > 3 && clueTarget(g.attempt) ? button('skip-anidle', `Skip to ${g.attempt < 13 ? 'first' : g.attempt < 18 ? 'next' : 'last'} clue <small>guess ${clueTarget(g.attempt)}</small>`, 'btn secondary small') : '<span></span>'}${button('giveup', 'Give up', 'btn ghost small')}</div></form>`;
-  const guesses = g.guesses.length
-    ? `<section class="anidle-history" aria-label="Your guesses"><div class="anidle-history-head"><h3>Your guesses</h3><div class="anidle-legend" aria-label="Colour key"><span><i class="is-hit"></i>Match</span><span><i class="is-near"></i>Close tag</span><span><i class="is-miss"></i>No match</span></div></div><ol class="anidle-guesses">${[
-        ...g.guesses,
-      ]
-        .reverse()
-        .map((guess) => anidleGuessCard(guess, target))
-        .join('')}</ol></section>`
-    : `<p class="anidle-empty">Start with any anime you know. Each guess shows how close it is to the answer.</p>`;
-  const known = g.guesses.length
-    ? `<div class="summary-toggle"><button type="button" data-action="toggle-summary" role="switch" aria-checked="${state.showSummary !== false}" aria-controls="anidle-summary">Show what you know <span class="switch ${state.showSummary !== false ? 'on' : ''}"></span></button></div><div id="anidle-summary" ${state.showSummary === false ? 'hidden' : ''}>${anidleSummaryView(g, target)}</div>`
-    : '';
-  return `${anidleTrack(g)}${g.attempt >= 13 ? anidleClues(g, target) : ''}${form}${known}${guesses}`;
+  if (!g.guesses.length)
+    return `${anidleTrack(g)}${g.attempt >= 13 ? anidleClues(g, target) : ''}${form}<p class="anidle-empty">Start with any anime you know. Each guess shows how close it is to the answer.</p>`;
+  const head = ['Anime', 'Year', 'Studio', 'Source', 'Rating', 'Genres', 'Tags']
+    .map((t) => `<th scope="col">${t}</th>`)
+    .join('');
+  return `${anidleTrack(g)}${g.attempt >= 13 ? anidleClues(g, target) : ''}${form}<div class="anidle-table-head"><div class="anidle-legend" aria-label="Colour key"><span><i class="is-hit"></i>Match</span><span><i class="is-near"></i>Close tag / narrowed</span><span><i class="is-miss"></i>No match</span><span>▲ later · higher&nbsp;&nbsp;▼ earlier · lower</span></div><div class="summary-toggle"><button type="button" data-action="toggle-summary" role="switch" aria-checked="${state.showSummary !== false}" aria-controls="anidle-summary">What you know <span class="switch ${state.showSummary !== false ? 'on' : ''}"></span></button></div></div><div class="anidle-table-wrap"><table class="anidle-table"><caption class="sr-only">Your guesses compared with the target anime</caption><thead><tr>${head}</tr></thead>${anidleSummaryView(g, target)}<tbody>${[
+    ...g.guesses,
+  ]
+    .reverse()
+    .map((guess) => anidleGuessRow(guess, target))
+    .join('')}</tbody></table></div>`;
 }
 function nextCategory() {
   const s = session(),
@@ -1589,6 +1585,8 @@ async function handleAction(action) {
     return;
   }
   if (action === 'media-toggle') {
+    // The video itself is clickable too; respect the play button's disabled state while the clue loads.
+    if (app.querySelector('button[data-action="media-toggle"]')?.disabled) return;
     const video = app.querySelector('.quiz-video');
     if (video) {
       if (video.paused) await video.play();
@@ -2239,6 +2237,7 @@ app.addEventListener('input', (e) => {
     }, 180);
     return;
   }
+  if (e.target.matches?.('input[type="range"]')) fillRange(e.target);
   const video = app.querySelector('.quiz-video');
   if (!video) return;
   if (e.target.id === 'video-seek' && Number.isFinite(video.duration))

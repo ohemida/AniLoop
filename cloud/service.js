@@ -47,6 +47,9 @@ export function normalizeLook(v) {
     profileX: Number.isFinite(v.profileX) ? Math.max(0, Math.min(100, v.profileX)) : 50,
     profileY: Number.isFinite(v.profileY) ? Math.max(0, Math.min(100, v.profileY)) : 50,
     profileZoom: Number.isFinite(v.profileZoom) ? Math.max(1, Math.min(3, v.profileZoom)) : 1,
+    bgZoom: Number.isFinite(v.bgZoom) ? Math.max(1, Math.min(3, v.bgZoom)) : 1,
+    bgX: Number.isFinite(v.bgX) ? Math.max(0, Math.min(100, v.bgX)) : 50,
+    bgY: Number.isFinite(v.bgY) ? Math.max(0, Math.min(100, v.bgY)) : 50,
     savedAt: Number.isSafeInteger(v.savedAt) && v.savedAt > 0 ? v.savedAt : 0,
   };
 }

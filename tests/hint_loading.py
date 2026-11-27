@@ -18,6 +18,6 @@ with sync_playwright() as pw:
  count=len([c for c in calls if c['kind']=='ending']);start=time.monotonic();p.locator('[data-action="hint:1"]').click();p.wait_for_function('()=>document.querySelector("video")?.readyState>=2')
  elapsed=time.monotonic()-start
  assert len([c for c in calls if c['kind']=='ending'])==count
- p.locator('[data-action="media-toggle"]').click();p.wait_for_function('()=>document.querySelector("video").currentTime>.1')
+ p.locator('button[data-action="media-toggle"]').click();p.wait_for_function('()=>document.querySelector("video").currentTime>.1')
  print('PASS: background hint prepared without unlock/point charge; unlock reused request; video ready in',round(elapsed,2),'seconds; playback works')
  b.close()

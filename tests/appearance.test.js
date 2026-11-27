@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import {THEMES,BACKGROUNDS,FRAMES,DEFAULT_APPEARANCE,normalizeAppearance,readAppearance,profileCrop,moveProfileCrop} from '../assets/appearance.js';
 test('appearance defaults and malformed settings stay safe',()=>{
  for(const value of [null,{},'bad',{theme:'url(x)',background:'https://x',dim:NaN,inGame:'true',position:'left'}])assert.deepEqual(normalizeAppearance(value),DEFAULT_APPEARANCE);
- assert.deepEqual(normalizeAppearance({theme:'forest',background:'custom',dim:10,inGame:true,position:'top'}),{theme:'forest',background:'custom',dim:35,inGame:true,position:'top',profileX:50,profileY:50,profileZoom:1});
+ assert.deepEqual(normalizeAppearance({theme:'forest',background:'custom',dim:10,inGame:true,position:'top'}),{theme:'forest',background:'custom',dim:35,inGame:true,position:'top',profileX:50,profileY:50,profileZoom:1,bgZoom:1,bgX:50,bgY:0});
+ assert.deepEqual([normalizeAppearance({bgZoom:9,bgX:-5,bgY:40}).bgZoom,normalizeAppearance({bgZoom:9,bgX:-5}).bgX,normalizeAppearance({position:'bottom'}).bgY],[3,0,100]);
  assert.equal(normalizeAppearance({dim:100}).dim,90);
 });
 test('palettes, original presets and frames have unique stable IDs',()=>{

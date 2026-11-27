@@ -241,8 +241,8 @@ test('titles, name colours, banners and effects use their own slots and show to 
 test('theme and backdrop are saved with the account and come back on sign-in',async()=>{
  const repo=new FakeRepo(),api=new CloudService(repo,pack);
  repo.docs.set('account:'+users.one,{value:{shards:0,equipped:'classic',owned:[],claims:[],scores:[],picture:null},revision:1,owner:users.one});
- const saved=await api.saveAppearance(users.one,{theme:'sakura',background:'nebula',dim:200,inGame:true,position:'top',profileX:22,profileY:81,profileZoom:2.1,savedAt:1});
- assert.equal(saved.appearance.theme,'sakura');assert.equal(saved.appearance.dim,90);assert.equal(saved.appearance.profileX,22);assert.equal(saved.appearance.profileY,81);assert.equal(saved.appearance.profileZoom,2.1);assert.ok(saved.appearance.savedAt>1,'the server sets the time');
+ const saved=await api.saveAppearance(users.one,{theme:'sakura',background:'nebula',dim:200,inGame:true,position:'top',profileX:22,profileY:81,profileZoom:2.1,bgZoom:5,bgX:30,bgY:70,savedAt:1});
+ assert.equal(saved.appearance.theme,'sakura');assert.equal(saved.appearance.dim,90);assert.equal(saved.appearance.profileX,22);assert.equal(saved.appearance.profileY,81);assert.equal(saved.appearance.profileZoom,2.1);assert.deepEqual([saved.appearance.bgZoom,saved.appearance.bgX,saved.appearance.bgY],[3,30,70]);assert.ok(saved.appearance.savedAt>1,'the server sets the time');
  const again=await api.saveAppearance(users.one,{theme:'ocean',background:'none'});assert.ok(again.appearance.savedAt>saved.appearance.savedAt);
  await assert.rejects(api.saveAppearance(users.one,{theme:'url(x)',background:'none'}),/Invalid appearance/);
  assert.equal(repo.docs.get('account:'+users.one).value.appearance.theme,'ocean');

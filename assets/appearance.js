@@ -89,6 +89,9 @@ export const DEFAULT_APPEARANCE = {
   profileX: 50,
   profileY: 50,
   profileZoom: 1,
+  bgZoom: 1,
+  bgX: 50,
+  bgY: 50,
 };
 export function normalizeAppearance(value = {}) {
   return {
@@ -100,6 +103,16 @@ export function normalizeAppearance(value = {}) {
     profileX: Number.isFinite(value?.profileX) ? Math.max(0, Math.min(100, value.profileX)) : 50,
     profileY: Number.isFinite(value?.profileY) ? Math.max(0, Math.min(100, value.profileY)) : 50,
     profileZoom: Number.isFinite(value?.profileZoom) ? Math.max(1, Math.min(3, value.profileZoom)) : 1,
+    // Page background fit: zoom 1–3, focus point in percent. Older saves map their top/center/bottom choice.
+    bgZoom: Number.isFinite(value?.bgZoom) ? Math.max(1, Math.min(3, value.bgZoom)) : 1,
+    bgX: Number.isFinite(value?.bgX) ? Math.max(0, Math.min(100, value.bgX)) : 50,
+    bgY: Number.isFinite(value?.bgY)
+      ? Math.max(0, Math.min(100, value.bgY))
+      : value?.position === 'top'
+        ? 0
+        : value?.position === 'bottom'
+          ? 100
+          : 50,
   };
 }
 const PREF_KEY = 'aniloop-appearance-v1';
@@ -460,7 +473,8 @@ export function createAppearance(ctx) {
     root.dataset.background = prefs.background === 'custom' && !uploadUrl ? 'none' : prefs.background;
     root.dataset.backgroundInGame = String(prefs.inGame);
     root.style.setProperty('--background-dim', String(prefs.dim / 100));
-    root.style.setProperty('--background-position', prefs.position);
+    root.style.setProperty('--background-position', `${prefs.bgX}% ${prefs.bgY}%`);
+    root.style.setProperty('--background-zoom', String(prefs.bgZoom));
     root.style.setProperty('--profile-bg-x', prefs.profileX + '%');
     root.style.setProperty('--profile-bg-y', prefs.profileY + '%');
     root.style.setProperty('--profile-bg-zoom', String(prefs.profileZoom));
@@ -610,7 +624,20 @@ export function createAppearance(ctx) {
   }
   function backgroundsView() {
     if (upload && uploadUrl && prefs.background === 'custom') queueMicrotask(renderBackdropCrop);
-    return `<section class="appearance-section"><div class="appearance-section-head"><div><h2>Set the scene.</h2><p>Start with an original backdrop or bring an image of your own.</p></div><span class="appearance-free">${shared ? 'Saved with your account' : 'Saved on this device'}</span></div><div class="background-collection">${BACKGROUNDS.map((b) => `<button type="button" class="background-option ${prefs.background === b.id ? 'is-selected' : ''}" data-action="appearance:background:${b.id}" aria-pressed="${prefs.background === b.id}"><span class="background-sample backdrop-${b.id}"></span><strong>${b.name}</strong><small>${prefs.background === b.id ? '✓ Selected' : b.description}</small></button>`).join('')}${upload ? `<button type="button" class="background-option ${prefs.background === 'custom' ? 'is-selected' : ''}" data-action="appearance:background:custom" aria-pressed="${prefs.background === 'custom'}"><span class="background-sample backdrop-custom"></span><strong>Your image</strong><small>${esc(upload.name)}</small></button>` : ''}</div><div class="background-upload"><div><h3>Your image, your space.</h3><p>PNG, JPEG, or WebP, up to 8 MB. Images are resized for faster loading and stay in this browser.</p></div><label class="btn secondary ${busy ? 'is-disabled' : ''}" for="appearance-background-file">${busy ? 'Preparing image…' : upload ? 'Replace image' : 'Upload image'}</label><input type="file" id="appearance-background-file" accept="image/png,image/jpeg,image/webp" ${busy ? 'disabled' : ''}>${upload ? btn('appearance:remove-upload', 'Remove upload', 'btn ghost small', busy ? 'disabled' : '') : ''}</div><div class="background-settings"><div class="background-dim-field"><label for="appearance-dim">Dim background <output id="appearance-dim-value">${prefs.dim}%</output></label><input id="appearance-dim" type="range" min="35" max="90" step="5" value="${prefs.dim}"><p>Keep the page readable while letting your background show through.</p></div><div class="field"><label for="appearance-position">Image position</label><select id="appearance-position">${['top', 'center', 'bottom'].map((v) => `<option value="${v}" ${prefs.position === v ? 'selected' : ''}>${v[0].toUpperCase() + v.slice(1)}</option>`).join('')}</select></div><label class="appearance-check"><input type="checkbox" id="appearance-in-game" ${prefs.inGame ? 'checked' : ''}><span>Show backgrounds during quiz questions<small>Off by default, so the question stays in focus.</small></span></label></div>${upload && uploadUrl && prefs.background === 'custom' ? `<section class="profile-backdrop-editor"><h2>Position your profile background</h2><p class="subtle">Drag the box to move the image on your profile card; drag its corner to zoom. Your page background stays separate.</p><div class="profile-crop-stage"><div class="profile-crop-source-wrap"><img id="backdrop-crop-source" src="${esc(uploadUrl)}" alt="Your uploaded background"><div id="backdrop-crop-selection" tabindex="0" role="group" aria-label="Profile background crop. Drag or use arrow keys to move; drag the corner or use plus and minus to resize."><span class="profile-crop-handle" aria-hidden="true"></span></div></div><small>Drag to move · drag the corner to resize</small></div>${btn('appearance:reset-profile-background', 'Reset profile position', 'btn ghost small')}</section>` : ''}</section>`;
+    return `<section class="appearance-section"><div class="appearance-section-head"><div><h2>Set the scene.</h2><p>Start with an original backdrop or bring an image of your own.</p></div><span class="appearance-free">${shared ? 'Saved with your account' : 'Saved on this device'}</span></div><div class="background-collection">${BACKGROUNDS.map((b) => `<button type="button" class="background-option ${prefs.background === b.id ? 'is-selected' : ''}" data-action="appearance:background:${b.id}" aria-pressed="${prefs.background === b.id}"><span class="background-sample backdrop-${b.id}"></span><strong>${b.name}</strong><small>${prefs.background === b.id ? '✓ Selected' : b.description}</small></button>`).join('')}${upload ? `<button type="button" class="background-option ${prefs.background === 'custom' ? 'is-selected' : ''}" data-action="appearance:background:custom" aria-pressed="${prefs.background === 'custom'}"><span class="background-sample backdrop-custom"></span><strong>Your image</strong><small>${esc(upload.name)}</small></button>` : ''}</div><div class="background-upload"><div><h3>Your image, your space.</h3><p>PNG, JPEG, or WebP, up to 8 MB. Images are resized for faster loading and stay in this browser.</p></div><label class="btn secondary ${busy ? 'is-disabled' : ''}" for="appearance-background-file">${busy ? 'Preparing image…' : upload ? 'Replace image' : 'Upload image'}</label><input type="file" id="appearance-background-file" accept="image/png,image/jpeg,image/webp" ${busy ? 'disabled' : ''}>${upload ? btn('appearance:remove-upload', 'Remove upload', 'btn ghost small', busy ? 'disabled' : '') : ''}</div><div class="background-settings"><div class="background-dim-field"><label for="appearance-dim">Dim background <output id="appearance-dim-value">${prefs.dim}%</output></label><input id="appearance-dim" type="range" min="35" max="90" step="5" value="${prefs.dim}"><p>Keep the page readable while letting your background show through.</p></div>${
+      prefs.background !== 'none'
+        ? `<div class="background-fit"><div class="background-fit-head"><h3>Fit your background</h3>${btn('appearance:fit-reset', 'Reset fit', 'btn ghost small')}</div>${[
+            ['appearance-zoom', 'Zoom', 100, 300, 5, Math.round(prefs.bgZoom * 100), '%'],
+            ['appearance-x', 'Horizontal position', 0, 100, 1, prefs.bgX, '%'],
+            ['appearance-y', 'Vertical position', 0, 100, 1, prefs.bgY, '%'],
+          ]
+            .map(
+              ([id, label, min, max, step, value, unit]) =>
+                `<div class="background-dim-field"><label for="${id}">${label} <output id="${id}-value">${value}${unit}</output></label><input id="${id}" type="range" min="${min}" max="${max}" step="${step}" value="${value}"></div>`,
+            )
+            .join('')}<p>Changes preview live across the whole site.</p></div>`
+        : ''
+    }</div>${upload && uploadUrl && prefs.background === 'custom' ? `<section class="profile-backdrop-editor"><h2>Position your profile background</h2><p class="subtle">Drag the box to move the image on your profile card; drag its corner to zoom. Your page background stays separate.</p><div class="profile-crop-stage"><div class="profile-crop-source-wrap"><img id="backdrop-crop-source" src="${esc(uploadUrl)}" alt="Your uploaded background"><div id="backdrop-crop-selection" tabindex="0" role="group" aria-label="Profile background crop. Drag or use arrow keys to move; drag the corner or use plus and minus to resize."><span class="profile-crop-handle" aria-hidden="true"></span></div></div><small>Drag to move · drag the corner to resize</small></div>${btn('appearance:reset-profile-background', 'Reset profile position', 'btn ghost small')}</section>` : ''}</section>`;
   }
   function view() {
     const selected = itemDef(preview) || {...FRAMES[0], type: 'frame'},
@@ -618,6 +645,11 @@ export function createAppearance(ctx) {
     return `<section class="appearance-heading"><div><h1>Make the loop yours.</h1><p>Frames, titles, name colours, banners and effects. Your friends see them next to your name.</p></div>${btn('rewards', 'Daily rewards', 'btn ghost small')}</section><div class="appearance-layout"><aside class="appearance-showcase"><div class="profile-showcase${bannerClass(look)}"><span class="showcase-caption">Your profile preview</span><div class="profile-showcase-avatar">${avatar(selected.type === 'frame' ? selected.id : equipped(), 'large')}</div><h2 class="showcase-name">${nameMarkup(ctx.user()?.username || 'Your anime alias', look, esc)}</h2><p>Your next great guess starts here.</p><span class="showcase-frame-name">${esc(selected.name)}</span><div class="showcase-action">${itemAction(selected, false)}</div></div><div class="appearance-wallet"><span>Loop Shards</span><strong>${ctx.user() ? (loading && !wallet() ? '…' : '◇ ' + fmt(wallet()?.balance || 0)) : '◇ 0'}</strong><p>${ctx.user() ? 'Finish daily quizzes and claim your rewards to collect new frames.' : 'Create an account to earn shards through daily play.'}</p>${btn(ctx.user() ? 'rewards' : 'register', ctx.user() ? 'Earn more shards' : 'Create account', 'btn ghost small')}</div><p class="appearance-local-note">${shared ? 'Themes, backdrops and cosmetics are saved with your account. Uploaded images stay on this device.' : 'Themes and uploaded backgrounds are personal to this browser. Owned frames stay with your account.'}</p></aside><div class="appearance-workspace"><div class="appearance-tabs" role="group" aria-label="Appearance section">${[['frames', 'Frames'], ...COSMETIC_TYPES.map((t) => [t.tab, t.label]), ['picture', 'Picture'], ['themes', 'Themes'], ['backgrounds', 'Backgrounds']].map(([id, name]) => btn('appearance:tab:' + id, name, tab === id ? 'selected' : '', 'aria-pressed="' + (tab === id) + '"')).join('')}</div>${error ? `<p class="media-error" role="alert">${esc(error)}</p>` : ''}${status ? `<p class="appearance-status" role="status">${esc(status)}</p>` : ''}${tab === 'frames' ? framesView() : TYPE_BY_TAB[tab] ? itemsView(TYPE_BY_TAB[tab]) : tab === 'picture' ? pictureView() : tab === 'themes' ? themesView() : backgroundsView()}<div class="appearance-reset">${btn('appearance:reset', 'Reset theme & background', 'btn ghost small')}<span>Returns to Midnight mauve and Pure black. Your frame collection and uploaded image stay saved.</span></div></div></div>`;
   }
   async function action(name) {
+    if (name === 'appearance:fit-reset') {
+      setPreferences({bgZoom: 1, bgX: 50, bgY: 50});
+      refreshPage();
+      return true;
+    }
     if (name === 'appearance') {
       preview = equipped();
       ctx.go('appearance');
@@ -817,6 +849,9 @@ export function createAppearance(ctx) {
         'appearance-dim',
         'appearance-position',
         'appearance-in-game',
+        'appearance-zoom',
+        'appearance-x',
+        'appearance-y',
       ].includes(target.id)
     )
       return false;
@@ -870,6 +905,9 @@ export function createAppearance(ctx) {
         }
       } else if (target.id === 'appearance-dim') setPreferences({dim: Number(target.value)});
       else if (target.id === 'appearance-position') setPreferences({position: target.value});
+      else if (target.id === 'appearance-zoom') setPreferences({bgZoom: Number(target.value) / 100});
+      else if (target.id === 'appearance-x') setPreferences({bgX: Number(target.value)});
+      else if (target.id === 'appearance-y') setPreferences({bgY: Number(target.value)});
       else setPreferences({inGame: target.checked});
       refreshPage();
     } catch (cause) {
@@ -879,6 +917,15 @@ export function createAppearance(ctx) {
     return true;
   }
   function input(target) {
+    if (['appearance-zoom', 'appearance-x', 'appearance-y'].includes(target.id)) {
+      const root = document.documentElement.style,
+        read = (id, fallback) => Number(document.querySelector('#' + id)?.value ?? fallback);
+      root.setProperty('--background-zoom', String(read('appearance-zoom', 100) / 100));
+      root.setProperty('--background-position', `${read('appearance-x', 50)}% ${read('appearance-y', 50)}%`);
+      const output = document.querySelector('#' + target.id + '-value');
+      if (output) output.value = target.value + '%';
+      return;
+    }
     if (target.id !== 'appearance-dim') return;
     const dim = Math.max(35, Math.min(90, Number(target.value)));
     document.documentElement.style.setProperty('--background-dim', String(dim / 100));

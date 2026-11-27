@@ -6555,9 +6555,6 @@ body::before {
 .backdrop-custom {
   --app-backdrop: var(--custom-background, none);
 }
-:root[data-quiz-active='true'][data-background-in-game='false'] body::before {
-  background-image: none;
-}
 :root[data-theme] .sidebar {
   background: var(--paper);
   border-color: var(--line);
@@ -10654,97 +10651,6 @@ body {
   color: var(--muted);
 }
 
-/* Shared tile + chip vocabulary. */
-.anidle-tiles {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
-}
-.anidle-tile {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 2px;
-  min-height: 84px;
-  padding: 10px 8px;
-  border-radius: 14px;
-  background: var(--miss-bg);
-  box-shadow: 0 4px 0 rgb(0 0 0 / 0.45);
-  text-align: center;
-}
-.anidle-tile .tile-label {
-  font-size: 0.66rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  opacity: 0.75;
-}
-.anidle-tile strong {
-  font-size: 1.05rem;
-  font-weight: 800;
-  line-height: 1.15;
-  overflow-wrap: anywhere;
-}
-.anidle-tile small {
-  font-size: 0.74rem;
-  font-weight: 700;
-}
-.anidle-tile.is-hit {
-  background: var(--hit);
-  color: var(--hit-ink);
-  box-shadow: 0 4px 0 color-mix(in srgb, var(--hit) 45%, #000);
-}
-.anidle-tile.is-near {
-  background: var(--near);
-  color: var(--near-ink);
-  box-shadow: 0 4px 0 color-mix(in srgb, var(--near) 45%, #000);
-}
-.anidle-tile.is-miss small {
-  color: var(--near);
-}
-.anidle-tile.is-unknown {
-  border: 2px dashed color-mix(in srgb, #fff 14%, transparent);
-  background: transparent;
-  box-shadow: none;
-  color: var(--muted);
-}
-.anidle-chips {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px;
-  margin-top: 12px;
-}
-.chip-label {
-  min-width: 58px;
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-.chip {
-  padding: 5px 11px;
-  border-radius: 999px;
-  font-size: 0.78rem;
-  font-weight: 600;
-  background: var(--miss-bg);
-  color: color-mix(in srgb, var(--ink) 70%, transparent);
-}
-.chip.is-hit {
-  background: var(--hit);
-  color: var(--hit-ink);
-}
-.chip.is-near {
-  background: var(--near);
-  color: var(--near-ink);
-}
-.chip-empty {
-  font-size: 0.8rem;
-  color: var(--muted);
-}
-
 /* What you know. */
 .summary-toggle {
   display: flex;
@@ -10759,32 +10665,6 @@ body {
   font-size: 0.82rem;
   font-weight: 600;
   color: var(--muted);
-}
-.anidle-known {
-  max-width: 880px;
-  margin: 0 auto 30px;
-  padding: 18px;
-  border-radius: var(--radius);
-  background: color-mix(in srgb, var(--cat) 9%, var(--tile));
-  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--cat) 30%, transparent);
-}
-
-/* Guess history. */
-.anidle-history {
-  max-width: 880px;
-  margin: 0 auto;
-}
-.anidle-history-head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  margin-bottom: 12px;
-}
-.anidle-history-head h3 {
-  margin: 0;
-  font-size: 1.05rem;
 }
 .anidle-legend {
   display: flex;
@@ -10810,38 +10690,6 @@ body {
 .anidle-legend i.is-near {
   background: var(--near);
 }
-.anidle-guesses {
-  display: grid;
-  gap: 14px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-.anidle-guess {
-  padding: 16px;
-  border-radius: var(--radius);
-  background: var(--tile);
-  animation: guess-in 0.28s ease both;
-}
-.anidle-guess.is-correct {
-  box-shadow: inset 0 0 0 2px var(--hit);
-}
-.anidle-guess .guess-head {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-  margin-bottom: 12px;
-}
-.anidle-guess .guess-head .anime-title {
-  font-size: 1rem;
-  font-weight: 700;
-}
-.anidle-guess .guess-head .anime-japanese-title {
-  display: block;
-  font-size: 0.76rem;
-  font-weight: 400;
-  color: var(--muted);
-}
 .guess-no {
   flex: none;
   padding: 3px 9px;
@@ -10858,9 +10706,6 @@ body {
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .anidle-guess {
-    animation: none;
-  }
   .btn,
   .category-grid .hub-game-card {
     transition: none;
@@ -10882,19 +10727,6 @@ body {
 }
 
 @media (max-width: 600px) {
-  .anidle-tiles {
-    gap: 6px;
-  }
-  .anidle-tile {
-    min-height: 72px;
-    padding: 8px 4px;
-  }
-  .anidle-tile strong {
-    font-size: 0.88rem;
-  }
-  .anidle-tile small {
-    font-size: 0.68rem;
-  }
   .anidle-track ol {
     gap: 2px;
   }
@@ -10905,39 +10737,6 @@ body {
   .anidle-track li span {
     font-size: 0.6rem;
   }
-  .anidle-guess,
-  .anidle-known {
-    padding: 12px;
-  }
-  .chip-label {
-    width: 100%;
-  }
-}
-
-/* Anidle polish */
-.anidle-tile {
-  color: var(--ink);
-}
-.anidle-tile strong {
-  overflow-wrap: break-word;
-  word-break: normal;
-  hyphens: auto;
-}
-.anidle-known {
-  background: var(--tile);
-  box-shadow: inset 0 0 0 2px color-mix(in srgb, #fff 8%, transparent);
-}
-.anidle-known .anidle-tile.is-unknown {
-  border-color: color-mix(in srgb, #fff 18%, transparent);
-}
-.anidle-guess .guess-head {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-  margin-bottom: 12px;
-  padding: 0;
-  border: 0;
-  background: none;
 }
 .anidle-track li.is-milestone::after {
   top: -9px;
@@ -10946,15 +10745,6 @@ body {
   right: 0;
 }
 @media (max-width: 600px) {
-  .anidle-tiles {
-    grid-template-columns: 0.8fr 1.25fr 1.25fr 0.8fr;
-  }
-  .anidle-tile strong {
-    font-size: 0.82rem;
-  }
-  .anidle-tile .tile-label {
-    font-size: 0.6rem;
-  }
   .anidle-track li span {
     top: 16px;
   }
@@ -10968,10 +10758,6 @@ body {
   right: auto;
   left: 50%;
   transform: translateX(-50%);
-}
-/* Inside the game panel, nested surfaces sit darker so they read as separate tiles. */
-:root[data-theme] .game-panel :is(.answer-form, .anidle-guess, .anidle-known) {
-  background: color-mix(in srgb, var(--paper) 55%, var(--tile));
 }
 .category-grid .hub-game-card .category-icon {
   background: var(--cat) !important;
@@ -11015,4 +10801,393 @@ body {
 }
 :root[data-theme] .milestone {
   box-shadow: 0 5px 0 rgb(0 0 0 / 0.4);
+}
+
+/* ===================== Anidle: rounded comparison table ===================== */
+.anidle-table-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 20px;
+  margin: 6px 0 4px;
+}
+.anidle-table-head .summary-toggle {
+  margin: 0;
+  max-width: none;
+}
+.anidle-table-wrap {
+  overflow-x: auto;
+  margin: 0 -6px;
+  padding: 0 6px 6px;
+}
+.anidle-table {
+  width: 100%;
+  min-width: 860px;
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 0 8px;
+}
+.anidle-table thead th {
+  padding: 4px 12px;
+  background: none;
+  border: 0;
+  text-align: left;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.anidle-table th:nth-child(1) {
+  width: 21%;
+}
+.anidle-table th:nth-child(2) {
+  width: 9%;
+}
+.anidle-table th:nth-child(3) {
+  width: 13%;
+}
+.anidle-table th:nth-child(4) {
+  width: 12%;
+}
+.anidle-table th:nth-child(5) {
+  width: 9%;
+}
+.anidle-table th:nth-child(6) {
+  width: 17%;
+}
+.anidle-table tbody :is(td, th) {
+  padding: 12px;
+  border: 0;
+  vertical-align: middle;
+  text-align: left;
+  background: color-mix(in srgb, var(--paper) 50%, var(--tile));
+}
+.anidle-table tbody tr > :first-child {
+  border-radius: 18px 0 0 18px;
+}
+.anidle-table tbody tr > :last-child {
+  border-radius: 0 18px 18px 0;
+}
+.anidle-table tbody th[scope='row'] {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+}
+.anidle-table .anidle-row.is-correct > * {
+  background: color-mix(in srgb, var(--hit) 18%, var(--tile));
+}
+.anidle-table .anidle-known-row > tr > * {
+  background: color-mix(in srgb, var(--accent) 14%, var(--tile));
+}
+.known-label {
+  font-size: 0.86rem;
+  font-weight: 800;
+  color: var(--accent-soft);
+}
+.anidle-row .guess-no {
+  display: inline-block;
+  margin: 0 0 6px;
+}
+.anidle-row .anime-title {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--ink);
+}
+.anidle-row .anime-japanese-title {
+  display: block;
+  margin-top: 3px;
+  font-size: 0.74rem;
+  font-weight: 400;
+  color: var(--muted);
+}
+.anidle-table .score-source {
+  display: block;
+  margin-top: 5px;
+  font-size: 0.68rem;
+  color: var(--muted);
+}
+
+/* Value pills: curved, high contrast. */
+.anidle-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--miss-bg);
+  color: var(--ink);
+  font-size: 0.84rem;
+  font-weight: 700;
+  line-height: 1.25;
+  overflow-wrap: break-word;
+}
+.anidle-pill b {
+  font-size: 0.78rem;
+  color: var(--near);
+}
+.anidle-pill.small {
+  padding: 4px 10px;
+  font-size: 0.76rem;
+  font-weight: 600;
+}
+.anidle-pill.is-hit {
+  background: var(--hit);
+  color: var(--hit-ink);
+}
+.anidle-pill.is-hit b {
+  color: var(--hit-ink);
+}
+.anidle-pill.is-near {
+  background: var(--near);
+  color: var(--near-ink);
+}
+.anidle-pill.is-near b {
+  color: var(--near-ink);
+}
+.anidle-pill.is-unknown {
+  background: transparent;
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, #fff 18%, transparent);
+  color: var(--muted);
+}
+.anidle-chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.anidle-none {
+  color: var(--muted);
+}
+
+/* ===================== Video and audio players ===================== */
+:root[data-theme] .media-player {
+  border: 0;
+  border-radius: 18px;
+  background: var(--tile);
+}
+.video-viewport {
+  border-radius: 18px 18px 0 0;
+  cursor: pointer;
+}
+:root[data-theme] .video-controls {
+  gap: 12px;
+  padding: 12px 16px;
+  background: transparent;
+}
+:root[data-theme] .video-controls button {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--tile-2);
+  color: var(--ink);
+  box-shadow: 0 3px 0 rgb(0 0 0 / 0.5);
+}
+:root[data-theme] .video-controls .media-play {
+  background: var(--accent);
+  color: #0b0b0b;
+  box-shadow: 0 3px 0 var(--press);
+}
+.video-controls input[type='range'] {
+  appearance: none;
+  height: 8px;
+  border-radius: 999px;
+  background: linear-gradient(to right, var(--accent) var(--fill, 0%), var(--tile-2) var(--fill, 0%));
+  cursor: pointer;
+}
+.video-controls input[type='range']::-webkit-slider-thumb {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--ink);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 45%, transparent);
+}
+.video-controls input[type='range']::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--ink);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 45%, transparent);
+}
+.video-controls input[type='range']::-moz-range-track {
+  background: transparent;
+}
+.media-time {
+  font-size: 0.8rem;
+  color: color-mix(in srgb, var(--ink) 85%, transparent);
+}
+.volume-label {
+  color: var(--muted);
+}
+:root[data-theme] .video-window-note {
+  padding: 0 16px 14px;
+  background: transparent;
+  text-align: center;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+:root[data-theme] .music-stage.full-audio,
+:root[data-theme] .ending-cover {
+  border: 0;
+  border-radius: 18px;
+  background: var(--tile);
+}
+.media-player:fullscreen {
+  background: #000;
+}
+
+/* ===================== Readability ===================== */
+:root[data-theme] .daily-day {
+  color: color-mix(in srgb, var(--ink) 78%, transparent);
+}
+:root[data-theme] .daily-day.claimed,
+:root[data-theme] .daily-day.claimed.today {
+  background: var(--hit);
+  color: var(--hit-ink);
+}
+:root[data-theme] .daily-day.claimed.today {
+  box-shadow:
+    inset 0 0 0 3px color-mix(in srgb, #fff 70%, transparent),
+    0 3px 0 color-mix(in srgb, var(--hit) 45%, #000);
+}
+:root[data-theme] .daily-day.today:not(.claimed) {
+  color: var(--ink);
+}
+:root[data-theme] .daily-day :is(strong, small, span) {
+  color: inherit;
+}
+
+@media (max-width: 600px) {
+  .anidle-table {
+    min-width: 760px;
+  }
+  .anidle-table th:nth-child(1) {
+    width: 150px;
+  }
+  .video-controls #video-volume,
+  .volume-label {
+    display: none;
+  }
+}
+
+/* Background fit: zoom around the chosen focus point. */
+body::before {
+  transform: scale(var(--background-zoom, 1));
+  transform-origin: var(--background-position, center);
+}
+.background-fit {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  border-radius: var(--radius);
+  background: var(--tile);
+}
+.background-fit-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.background-fit-head h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+.background-fit p {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.background-fit output,
+.background-dim-field output {
+  font-variant-numeric: tabular-nums;
+  color: var(--accent-soft);
+}
+
+/* Nested surfaces inside the game panel sit darker so they read as separate tiles. */
+:root[data-theme] .game-panel .answer-form {
+  background: color-mix(in srgb, var(--paper) 55%, var(--tile));
+}
+
+/* Anidle table: columns sized for real values; short values never break. */
+.anidle-table th:nth-child(1) {
+  width: 18%;
+}
+.anidle-table th:nth-child(2) {
+  width: 8%;
+}
+.anidle-table th:nth-child(3) {
+  width: 14%;
+}
+.anidle-table th:nth-child(4) {
+  width: 12%;
+}
+.anidle-table th:nth-child(5) {
+  width: 9%;
+}
+.anidle-table th:nth-child(6) {
+  width: 17%;
+}
+.anidle-table tbody :is(td, th) {
+  padding: 12px 8px;
+}
+.anidle-table tbody tr > :first-child {
+  padding-left: 14px;
+}
+.anidle-pill {
+  border-radius: 16px;
+  font-size: 0.8rem;
+}
+.anidle-table td:nth-child(2) .anidle-pill,
+.anidle-table td:nth-child(5) .anidle-pill {
+  white-space: nowrap;
+}
+
+/* Privacy notice: never wider than the screen. */
+.privacy-notice {
+  min-width: 0;
+  max-width: calc(100vw - 24px);
+}
+.privacy-notice-actions {
+  flex-wrap: wrap;
+  flex-shrink: 1;
+  min-width: 0;
+}
+@media (max-width: 640px) {
+  .privacy-notice-actions .btn {
+    margin-left: auto;
+  }
+}
+/* Contain absolutely positioned screen-reader text so it cannot widen the page. */
+.anidle-table-wrap {
+  position: relative;
+}
+/* Year ranges ("2003–2010") need a wider column than single years. */
+.anidle-table th:nth-child(1) {
+  width: 17%;
+}
+.anidle-table th:nth-child(2) {
+  width: 11%;
+}
+.anidle-table th:nth-child(3) {
+  width: 13%;
+}
+.anidle-table th:nth-child(4) {
+  width: 11%;
+}
+.anidle-table td:nth-child(2) .anidle-pill,
+.anidle-table td:nth-child(5) .anidle-pill {
+  padding: 5px 10px;
+}
+@media (max-width: 600px) {
+  .anidle-table {
+    min-width: 840px;
+  }
 }
