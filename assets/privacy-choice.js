@@ -44,7 +44,7 @@ export function privacyGate({force = false} = {}) {
   root.className = 'privacy-notice';
   root.setAttribute('role', 'region');
   root.setAttribute('aria-label', 'Privacy notice');
-  root.innerHTML = `<p><strong>No tracking, no ads.</strong> AniLoop only stores what the game needs in your browser (saves, settings, sign-in). Images, music and videos stream from third-party media hosts, which receive your IP address. Some anime content contains mature themes.</p><div class="privacy-notice-actions"><a href="#privacy" data-notice-link>Privacy policy</a><a href="#cookies" data-notice-link>Storage details</a><button type="button" class="btn small" data-notice-ok>Got it</button></div>`;
+  root.innerHTML = `<p><strong>No tracking, no ads.</strong> Only essential storage (saves, settings, sign-in). Media hosts see your IP address. Some anime content is mature.</p><div class="privacy-notice-actions"><a href="#privacy" data-notice-link>Privacy</a><a href="#cookies" data-notice-link>Storage</a><button type="button" class="btn small" data-notice-ok>Got it</button></div>`;
   root.addEventListener('click', (event) => {
     if (event.target.closest('[data-notice-ok]')) dismiss(root);
   });

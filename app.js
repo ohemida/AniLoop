@@ -1288,7 +1288,15 @@ function render() {
   if (heading) heading.setAttribute('tabindex', '-1');
   warmMedia();
   celebrateAnswer();
+  measureHeader();
 }
+// Sticky elements below the header (e.g. the Appearance tabs) need its live height.
+function measureHeader() {
+  const header = app.querySelector('.sidebar'),
+    pinned = header && ['sticky', 'fixed'].includes(getComputedStyle(header).position);
+  document.documentElement.style.setProperty('--header-h', pinned ? header.offsetHeight + 'px' : '0px');
+}
+addEventListener('resize', measureHeader, {passive: true});
 // On narrow screens the tab rows scroll sideways; keep the current tab visible.
 function centerActiveTabs() {
   for (const bar of app.querySelectorAll('.sidebar-links, .sidebar nav[aria-label="categories"]')) {
@@ -2337,6 +2345,10 @@ app.addEventListener(
 async function init() {
   appearance.restore();
   if (cloudMode && cloud?.signedIn && accountCache?.rewards) social.setRewards(accountCache.rewards);
+  // The pool is ~800 KB compressed; show a branded loading screen instead of a blank page meanwhile.
+  if (!app.firstElementChild)
+    app.innerHTML =
+      '<div class="boot-loading" role="status"><img src="assets/mark.svg" alt="" width="56" height="56"><strong>AniLoop</strong><span>Loading the anime library…</span><span class="boot-bar" aria-hidden="true"></span></div>';
   try {
     const response = await fetch('data/pool-lite.json');
     if (!response.ok) throw new Error('Could not load the anime pool.');

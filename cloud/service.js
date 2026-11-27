@@ -30,6 +30,14 @@ const pairKey = (a, b) => [a, b].sort().join(':');
 // Profile pictures: the owner always sees their own picture; everyone else only
 // sees it after the safety filter (or an administrator) approved it.
 const PICTURE_TYPES = {png: 'iVBORw0KGgo', jpeg: '/9j/', webp: 'UklGR'};
+const BACKGROUND_MAX_BASE64 = 1_000_000;
+const backgroundView = (b) => ({
+  url: `data:image/${b.type};base64,${b.image}`,
+  width: b.width,
+  height: b.height,
+  name: b.name,
+  savedAt: b.savedAt,
+});
 const pictureUrl = (a) => (a?.picture ? `data:image/${a.pictureType || 'png'};base64,${a.picture}` : null);
 const publicPicture = (a) => (a?.pictureStatus === 'approved' ? pictureUrl(a) : null);
 const pictureStatus = (a) => (a?.picture ? a.pictureStatus || 'private' : null);
@@ -50,6 +58,7 @@ export function normalizeLook(v) {
     bgZoom: Number.isFinite(v.bgZoom) ? Math.max(1, Math.min(3, v.bgZoom)) : 1,
     bgX: Number.isFinite(v.bgX) ? Math.max(0, Math.min(100, v.bgX)) : 50,
     bgY: Number.isFinite(v.bgY) ? Math.max(0, Math.min(100, v.bgY)) : 50,
+    bgImageAt: Number.isSafeInteger(v.bgImageAt) && v.bgImageAt > 0 ? v.bgImageAt : 0,
     savedAt: Number.isSafeInteger(v.savedAt) && v.savedAt > 0 ? v.savedAt : 0,
   };
 }
@@ -292,6 +301,49 @@ export class CloudService {
       a.appearance = look;
       await tx.put('account:' + actor, a, actor);
       return {appearance: look};
+    });
+  }
+  // Uploaded page background, kept private to its owner (never shown to other players), so it can
+  // follow the account to other devices. Stored apart from the account row to keep that row small.
+  async background(actor) {
+    const b = (await this.repo.getRuntime('background:' + actor))?.value;
+    return {background: b?.image ? backgroundView(b) : null};
+  }
+  async saveBackground(actor, payload) {
+    if (payload.image === null)
+      return transaction(this.repo, actor, async (tx) => {
+        await tx.remove('background:' + actor);
+        return {background: null};
+      });
+    const match =
+        typeof payload.image === 'string'
+          ? /^data:image\/(png|jpeg|webp);base64,([A-Za-z0-9+/]+={0,2})$/.exec(payload.image)
+          : null,
+      width = Number(payload.width),
+      height = Number(payload.height);
+    check(
+      match &&
+        match[2].length <= BACKGROUND_MAX_BASE64 &&
+        match[2].startsWith(PICTURE_TYPES[match[1]]) &&
+        Number.isInteger(width) &&
+        Number.isInteger(height) &&
+        width >= 1 &&
+        height >= 1 &&
+        width <= 4096 &&
+        height <= 4096,
+      'The background could not be saved to your account. Try a smaller image.',
+    );
+    const value = {
+      image: match[2],
+      type: match[1],
+      width,
+      height,
+      name: String(payload.name || 'Custom background').slice(0, 160),
+      savedAt: Date.now(),
+    };
+    return transaction(this.repo, actor, async (tx) => {
+      await tx.put('background:' + actor, value, actor);
+      return {background: backgroundView(value)};
     });
   }
   async leaderboard(q, actor = null) {
@@ -765,6 +817,8 @@ export class CloudService {
     if (route === '/api/daily') return this.daily(actor);
     if (route === '/api/daily/action') return this.dailyAct(actor, payload);
     if (route === '/api/scores') return this.submit(actor, payload.round);
+    if (route === '/api/appearance/background')
+      return method === 'GET' ? this.background(actor) : this.saveBackground(actor, payload || {});
     if (route === '/api/appearance') return this.saveAppearance(actor, payload || {});
     if (route === '/api/rewards') return this.rewards(actor);
     if (route === '/api/rewards/claim') return this.claim(actor);

@@ -274,3 +274,19 @@ test('administrators can see today’s daily answers, players cannot',async()=>{
  assert.equal(answers.categories.find(c=>c.id==='character').rounds[0].characters.length,4);
  await assert.rejects(api.adminDailyAnswers(users.two),/Administrator access required/);
 });
+
+test('uploaded backgrounds sync privately per account and can be removed',async()=>{
+ const repo=new FakeRepo(),api=new CloudService(repo,pack),image='data:image/webp;base64,UklGR'+'A'.repeat(64);
+ assert.deepEqual(await api.handle(users.one,null,'GET','/api/appearance/background',{}),{background:null});
+ const saved=(await api.saveBackground(users.one,{image,width:1600,height:900,name:'sky.webp'})).background;
+ assert.equal(saved.url,image);assert.equal(saved.width,1600);assert.ok(saved.savedAt>0);
+ assert.equal(repo.docs.get('background:'+users.one).owner,users.one);
+ assert.equal((await api.background(users.two)).background,null);
+ await assert.rejects(api.saveBackground(users.one,{image:'data:image/png;base64,AAAA',width:10,height:10}),/could not be saved/);
+ await assert.rejects(api.saveBackground(users.one,{image:'data:image/webp;base64,UklGR'+'A'.repeat(1_000_001),width:10,height:10}),/could not be saved/);
+ await assert.rejects(api.saveBackground(users.one,{image,width:0,height:10}),/could not be saved/);
+ assert.equal((await api.saveBackground(users.one,{image:null})).background,null);
+ assert.equal(repo.docs.has('background:'+users.one),false);
+ const look=(await api.saveAppearance(users.one,{theme:'mauve',background:'custom',bgImageAt:saved.savedAt})).appearance;
+ assert.equal(look.bgImageAt,saved.savedAt);
+});

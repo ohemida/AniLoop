@@ -92,6 +92,7 @@ export const DEFAULT_APPEARANCE = {
   bgZoom: 1,
   bgX: 50,
   bgY: 50,
+  bgImageAt: 0,
 };
 export function normalizeAppearance(value = {}) {
   return {
@@ -106,6 +107,8 @@ export function normalizeAppearance(value = {}) {
     // Page background fit: zoom 1–3, focus point in percent. Older saves map their top/center/bottom choice.
     bgZoom: Number.isFinite(value?.bgZoom) ? Math.max(1, Math.min(3, value.bgZoom)) : 1,
     bgX: Number.isFinite(value?.bgX) ? Math.max(0, Math.min(100, value.bgX)) : 50,
+    // When the uploaded image was last saved to the account (0 = never); other devices fetch it when newer.
+    bgImageAt: Number.isSafeInteger(value?.bgImageAt) && value.bgImageAt > 0 ? value.bgImageAt : 0,
     bgY: Number.isFinite(value?.bgY)
       ? Math.max(0, Math.min(100, value.bgY))
       : value?.position === 'top'
@@ -191,6 +194,30 @@ export async function prepareBackground(file) {
     bitmap.close();
   }
 }
+const blobToDataUrl = (blob) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(blob);
+  });
+/** Encodes an uploaded background for the account, shrinking it if it would exceed the server limit. */
+export async function backgroundForAccount(upload) {
+  let url = await blobToDataUrl(upload.blob),
+    {width, height} = upload;
+  if (url.length > 990_000) {
+    const bitmap = await createImageBitmap(upload.blob),
+      scale = Math.min(1, 1280 / Math.max(width, height)),
+      canvas = document.createElement('canvas');
+    canvas.width = width = Math.max(1, Math.round(width * scale));
+    canvas.height = height = Math.max(1, Math.round(height * scale));
+    canvas.getContext('2d').drawImage(bitmap, 0, 0, width, height);
+    bitmap.close();
+    url = canvas.toDataURL('image/webp', 0.72);
+    if (url.length > 990_000) throw new Error('This image is too detailed to sync. It stays on this device.');
+  }
+  return {image: url, width, height, name: upload.name};
+}
 export function profileCrop(width, height, {x = 50, y = 50, zoom = 1} = {}) {
   const clamp = (n, min, max, fallback) =>
     Number.isFinite(Number(n)) ? Math.max(min, Math.min(max, Number(n))) : fallback;
@@ -237,7 +264,14 @@ export async function prepareProfilePicture(file, {shared = false, crop = {}} = 
 }
 const shared = runtimeConfig.mode === 'supabase';
 const TYPE_BY_TAB = Object.fromEntries(COSMETIC_TYPES.map((t) => [t.tab, t]));
-const TABS = ['frames', ...COSMETIC_TYPES.map((t) => t.tab), 'picture', 'themes', 'backgrounds'];
+// Eight item kinds grouped into four tabs; each tab stacks its sections so there are no sub-tabs.
+const TAB_GROUPS = [
+  {id: 'profile', label: 'Profile', views: ['frames', 'picture']},
+  {id: 'name', label: 'Name & title', views: ['names', 'titles']},
+  {id: 'flair', label: 'Banner & effects', views: ['banners', 'effects']},
+  {id: 'look', label: 'Theme & background', views: ['themes', 'backgrounds']},
+];
+const tabGroup = (id) => TAB_GROUPS.find((g) => g.id === id || g.views.includes(id)) || TAB_GROUPS[0];
 const EFFECT_ICONS = {'effect-sparkle': '✦', 'effect-sakura': '✿', 'effect-confetti': '❖', 'effect-fireworks': '✺'};
 const PICTURE_CHECK = {
   'not-configured': 'The automatic safety check is not set up on the server yet.',
@@ -251,12 +285,117 @@ const PICTURE_STATUS = {
   pending: 'Waiting for review · only you can see this picture for now.',
   private: 'Only you can see this picture. Upload it again to share it with your friends.',
 };
+// Shared crop box: a fixed-ratio window over an image, stored as {x, y, zoom} (focus in %, zoom 1–3).
+// The same mapping matches CSS `cover` + `transform: scale(zoom)` with origin at the focus point.
+const CROP_HANDLES = ['nw', 'ne', 'sw', 'se']
+  .map((c) => `<span class="crop-handle ${c}" data-corner="${c}" aria-hidden="true"></span>`)
+  .join('');
+function cropBox(width, height, ratio, {x = 50, y = 50, zoom = 1} = {}) {
+  const baseW = Math.min(width, height * ratio),
+    w = baseW / zoom,
+    h = w / ratio;
+  return {baseW, w, h, x: ((width - w) * x) / 100, y: ((height - h) * y) / 100};
+}
+function attachCropBox({surface, selection, width, height, ratio, get, set}) {
+  const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
+  const box = () => cropBox(width, height, ratio, get());
+  const paint = () => {
+    const r = box();
+    Object.assign(selection.style, {
+      left: (r.x / width) * 100 + '%',
+      top: (r.y / height) * 100 + '%',
+      width: (r.w / width) * 100 + '%',
+      height: (r.h / height) * 100 + '%',
+    });
+  };
+  const commit = (x, y, w, final) => {
+    const {baseW} = box();
+    w = clamp(w, baseW / 3, baseW);
+    const h = w / ratio;
+    x = clamp(x, 0, width - w);
+    y = clamp(y, 0, height - h);
+    set(
+      {
+        zoom: baseW / w,
+        x: width - w > 1e-6 ? (x / (width - w)) * 100 : 50,
+        y: height - h > 1e-6 ? (y / (height - h)) * 100 : 50,
+      },
+      final,
+    );
+    paint();
+  };
+  const zoomBy = (factor) => {
+    const r = box(),
+      w = r.w / factor;
+    commit(r.x + (r.w - w) / 2, r.y + (r.h - w / ratio) / 2, w, true);
+  };
+  paint();
+  if (selection.dataset.cropReady) return paint;
+  selection.dataset.cropReady = '1';
+  let drag = null;
+  selection.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    selection.focus();
+    selection.setPointerCapture(e.pointerId);
+    drag = {id: e.pointerId, x: e.clientX, y: e.clientY, start: box(), corner: e.target.dataset?.corner};
+    selection.classList.add('dragging');
+  });
+  selection.addEventListener('pointermove', (e) => {
+    if (!drag || drag.id !== e.pointerId) return;
+    const rect = surface.getBoundingClientRect();
+    if (!rect.width || !rect.height) return;
+    const dx = ((e.clientX - drag.x) * width) / rect.width,
+      dy = ((e.clientY - drag.y) * height) / rect.height,
+      r = drag.start;
+    if (!drag.corner) return commit(r.x + dx, r.y + dy, r.w, false);
+    // Resize from the grabbed corner while the opposite corner stays put.
+    const sx = drag.corner.includes('e') ? 1 : -1,
+      sy = drag.corner.includes('s') ? 1 : -1,
+      maxW = Math.min(r.baseW, sx > 0 ? width - r.x : r.x + r.w, (sy > 0 ? height - r.y : r.y + r.h) * ratio),
+      w = clamp(r.w + (sx * dx + sy * dy * ratio) / 2, r.baseW / 3, Math.max(r.baseW / 3, maxW));
+    commit(sx > 0 ? r.x : r.x + r.w - w, sy > 0 ? r.y : r.y + r.h - w / ratio, w, false);
+  });
+  const finish = (e) => {
+    if (drag?.id !== e.pointerId) return;
+    drag = null;
+    selection.classList.remove('dragging');
+    set(get(), true);
+  };
+  selection.addEventListener('pointerup', finish);
+  selection.addEventListener('pointercancel', finish);
+  selection.addEventListener('lostpointercapture', finish);
+  selection.addEventListener(
+    'wheel',
+    (e) => {
+      e.preventDefault();
+      zoomBy(Math.exp(-e.deltaY * 0.002));
+    },
+    {passive: false},
+  );
+  selection.addEventListener('keydown', (e) => {
+    const keys = {ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1]};
+    if (keys[e.key]) {
+      e.preventDefault();
+      const r = box(),
+        step = e.shiftKey ? 0.1 : 0.02;
+      commit(r.x + keys[e.key][0] * width * step, r.y + keys[e.key][1] * height * step, r.w, true);
+    } else if (['+', '=', '-'].includes(e.key)) {
+      e.preventDefault();
+      zoomBy(e.key === '-' ? 1 / 1.15 : 1.15);
+    }
+  });
+  return paint;
+}
+function cropStage(id, source, label) {
+  return `<div class="profile-crop-stage"><div class="profile-crop-source-wrap">${source}<div id="${id}" class="crop-selection" tabindex="0" role="group" aria-label="${label}. Drag to move, drag any corner to resize, or use arrow keys and plus or minus.">${CROP_HANDLES}</div></div><small>Drag to move · drag any corner to resize · scroll to zoom</small></div>`;
+}
+export {cropBox};
 export function createAppearance(ctx) {
   const {esc, fmt, button: btn} = ctx;
   let prefs = readAppearance(),
     upload = null,
     uploadUrl = '',
-    tab = 'frames',
+    tab = 'profile',
     preview = 'classic',
     filter = 'all',
     loading = false,
@@ -281,191 +420,73 @@ export function createAppearance(ctx) {
       selection = ctx.app.querySelector('#profile-crop-selection');
     if (!preview || !source || !selection || !cropBitmap) return;
     drawProfileCrop(preview, cropBitmap, crop, shared);
-    const rect = profileCrop(cropBitmap.width, cropBitmap.height, crop);
-    Object.assign(selection.style, {
-      left: (rect.x / cropBitmap.width) * 100 + '%',
-      top: (rect.y / cropBitmap.height) * 100 + '%',
-      width: (rect.side / cropBitmap.width) * 100 + '%',
-      height: (rect.side / cropBitmap.height) * 100 + '%',
-    });
     const zoomLabel = ctx.app.querySelector('#profile-crop-zoom-label');
     if (zoomLabel) zoomLabel.textContent = Math.round(crop.zoom * 100) + '%';
     const zoomOut = ctx.app.querySelector('[data-action="appearance:crop-zoom-out"]'),
       zoomIn = ctx.app.querySelector('[data-action="appearance:crop-zoom-in"]');
     if (zoomOut) zoomOut.disabled = crop.zoom <= 1.00001;
     if (zoomIn) zoomIn.disabled = crop.zoom >= 2.99999;
-    if (source.dataset.cropReady) return;
-    source.dataset.cropReady = '1';
-    const scale = Math.min(1, 1200 / Math.max(cropBitmap.width, cropBitmap.height));
-    source.width = Math.max(1, Math.round(cropBitmap.width * scale));
-    source.height = Math.max(1, Math.round(cropBitmap.height * scale));
-    source.getContext('2d').drawImage(cropBitmap, 0, 0, source.width, source.height);
-    let drag = null;
-    const fromRect = (x, y, side) => {
-      const w = cropBitmap.width,
-        h = cropBitmap.height;
-      side = Math.max(Math.min(w, h) / 3, Math.min(Math.min(w, h), side));
-      x = Math.max(0, Math.min(w - side, x));
-      y = Math.max(0, Math.min(h - side, y));
-      return {
-        zoom: Math.min(w, h) / side,
-        x: w === side ? 50 : (x / (w - side)) * 100,
-        y: h === side ? 50 : (y / (h - side)) * 100,
-      };
-    };
-    selection.addEventListener('pointerdown', (event) => {
-      event.preventDefault();
-      selection.focus();
-      selection.setPointerCapture(event.pointerId);
-      drag = {
-        id: event.pointerId,
-        x: event.clientX,
-        y: event.clientY,
-        start: profileCrop(cropBitmap.width, cropBitmap.height, crop),
-        resize: !!event.target.closest('.profile-crop-handle'),
-      };
-      selection.classList.add('dragging');
-    });
-    selection.addEventListener('pointermove', (event) => {
-      if (!drag || drag.id !== event.pointerId || !cropBitmap) return;
-      const bounds = source.getBoundingClientRect(),
-        dx = ((event.clientX - drag.x) * cropBitmap.width) / bounds.width,
-        dy = ((event.clientY - drag.y) * cropBitmap.height) / bounds.height,
-        {x, y, side} = drag.start;
-      if (drag.resize) {
-        const limit = Math.min(cropBitmap.width - x, cropBitmap.height - y);
-        crop = fromRect(x, y, Math.min(limit, side + (dx + dy) / 2));
-      } else crop = fromRect(x + dx, y + dy, side);
-      renderCrop();
-    });
-    const finish = (event) => {
-      if (drag?.id === event.pointerId) drag = null;
-      selection.classList.remove('dragging');
-    };
-    selection.addEventListener('pointerup', finish);
-    selection.addEventListener('pointercancel', finish);
-    selection.addEventListener('lostpointercapture', finish);
-    selection.addEventListener(
-      'wheel',
-      (event) => {
-        event.preventDefault();
-        crop.zoom = Math.max(1, Math.min(3, crop.zoom * Math.exp(-event.deltaY * 0.002)));
+    if (!source.dataset.cropReady) {
+      source.dataset.cropReady = '1';
+      const scale = Math.min(1, 1200 / Math.max(cropBitmap.width, cropBitmap.height));
+      source.width = Math.max(1, Math.round(cropBitmap.width * scale));
+      source.height = Math.max(1, Math.round(cropBitmap.height * scale));
+      source.getContext('2d').drawImage(cropBitmap, 0, 0, source.width, source.height);
+    }
+    attachCropBox({
+      surface: source,
+      selection,
+      width: cropBitmap.width,
+      height: cropBitmap.height,
+      ratio: 1,
+      get: () => crop,
+      set: (next) => {
+        crop = next;
         renderCrop();
       },
-      {passive: false},
-    );
-    selection.addEventListener('keydown', (event) => {
-      const keys = {ArrowLeft: [-10, 0], ArrowRight: [10, 0], ArrowUp: [0, -10], ArrowDown: [0, 10]};
-      if (keys[event.key]) {
-        event.preventDefault();
-        const [dx, dy] = keys[event.key],
-          bounds = source.getBoundingClientRect(),
-          r = profileCrop(cropBitmap.width, cropBitmap.height, crop);
-        crop = fromRect(
-          r.x + (dx * cropBitmap.width) / bounds.width,
-          r.y + (dy * cropBitmap.height) / bounds.height,
-          r.side,
-        );
-        renderCrop();
-      }
     });
   }
-
-  function renderBackdropCrop() {
-    const image = ctx.app.querySelector('#backdrop-crop-source'),
-      selection = ctx.app.querySelector('#backdrop-crop-selection');
-    if (!image || !selection || !upload) return;
-    const width = upload.width,
-      height = upload.height,
-      card = ctx.app.querySelector('.profile-showcase'),
-      box = card?.getBoundingClientRect(),
-      ratio = box?.width && box?.height ? box.width / box.height : 0.72;
-    const bounds = () => {
-      const baseW = Math.min(width, height * ratio),
-        baseH = baseW / ratio,
-        w = baseW / prefs.profileZoom,
-        h = baseH / prefs.profileZoom;
-      return {w, h, x: ((width - w) * prefs.profileX) / 100, y: ((height - h) * prefs.profileY) / 100, baseW};
-    };
-    const paint = () => {
-      const r = bounds();
-      Object.assign(selection.style, {
-        left: (r.x / width) * 100 + '%',
-        top: (r.y / height) * 100 + '%',
-        width: (r.w / width) * 100 + '%',
-        height: (r.h / height) * 100 + '%',
-      });
-      apply();
-    };
-    paint();
-    if (selection.dataset.cropReady) return;
-    selection.dataset.cropReady = '1';
-    let drag = null;
-    selection.addEventListener('pointerdown', (e) => {
-      e.preventDefault();
-      selection.focus();
-      selection.setPointerCapture(e.pointerId);
-      drag = {
-        id: e.pointerId,
-        x: e.clientX,
-        y: e.clientY,
-        start: bounds(),
-        resize: !!e.target.closest('.profile-crop-handle'),
-      };
-      selection.classList.add('dragging');
-    });
-    selection.addEventListener('pointermove', (e) => {
-      if (!drag || drag.id !== e.pointerId) return;
-      const rect = image.getBoundingClientRect();
-      if (!rect.width || !rect.height) return;
-      const dx = ((e.clientX - drag.x) * width) / rect.width,
-        dy = ((e.clientY - drag.y) * height) / rect.height,
-        r = drag.start;
-      let w = r.w,
-        h = r.h,
-        x = r.x,
-        y = r.y;
-      if (drag.resize) {
-        w = Math.max(r.baseW / 3, Math.min(r.baseW, width - x, (height - y) * ratio, r.w + (dx + dy * ratio) / 2));
-        h = w / ratio;
-      } else {
-        x = Math.max(0, Math.min(width - w, x + dx));
-        y = Math.max(0, Math.min(height - h, y + dy));
-      }
-      prefs = {
-        ...prefs,
-        profileZoom: r.baseW / w,
-        profileX: width === w ? 50 : (x / (width - w)) * 100,
-        profileY: height === h ? 50 : (y / (height - h)) * 100,
-      };
-      paint();
-    });
-    const finish = (e) => {
-      if (drag?.id !== e.pointerId) return;
-      drag = null;
-      selection.classList.remove('dragging');
-      setPreferences({profileX: prefs.profileX, profileY: prefs.profileY, profileZoom: prefs.profileZoom});
-    };
-    selection.addEventListener('pointerup', finish);
-    selection.addEventListener('pointercancel', finish);
-    selection.addEventListener('lostpointercapture', finish);
-    selection.addEventListener('keydown', (e) => {
-      const keys = {ArrowLeft: [-2, 0], ArrowRight: [2, 0], ArrowUp: [0, -2], ArrowDown: [0, 2]};
-      if (keys[e.key]) {
-        e.preventDefault();
-        const [dx, dy] = keys[e.key];
-        setPreferences({
-          profileX: Math.max(0, Math.min(100, prefs.profileX + dx)),
-          profileY: Math.max(0, Math.min(100, prefs.profileY + dy)),
+  /** Profile card and page background editors share one uploaded image; only the box ratio differs. */
+  function renderBackdropCrops() {
+    if (!upload) return;
+    const editors = [
+      {
+        id: '#backdrop-crop-selection',
+        ratio: () => {
+          const box = ctx.app.querySelector('.profile-showcase')?.getBoundingClientRect();
+          return box?.width && box?.height ? box.width / box.height : 0.72;
+        },
+        keys: ['profileX', 'profileY', 'profileZoom'],
+      },
+      {
+        id: '#page-crop-selection',
+        ratio: () => (innerWidth && innerHeight ? innerWidth / innerHeight : 16 / 9),
+        keys: ['bgX', 'bgY', 'bgZoom'],
+      },
+    ];
+    for (const editor of editors) {
+      const selection = ctx.app.querySelector(editor.id),
+        surface = selection?.previousElementSibling;
+      if (!selection || !surface) continue;
+      const [kx, ky, kz] = editor.keys,
+        paint = attachCropBox({
+          surface,
+          selection,
+          width: upload.width,
+          height: upload.height,
+          ratio: editor.ratio(),
+          get: () => ({x: prefs[kx], y: prefs[ky], zoom: prefs[kz]}),
+          set: (s, final) => {
+            const patch = {[kx]: s.x, [ky]: s.y, [kz]: s.zoom};
+            if (final) setPreferences(patch);
+            else {
+              prefs = {...prefs, ...patch};
+              apply();
+            }
+          },
         });
-        paint();
-      } else if (['+', '=', '-'].includes(e.key)) {
-        e.preventDefault();
-        setPreferences({profileZoom: Math.max(1, Math.min(3, prefs.profileZoom * (e.key === '-' ? 1 / 1.15 : 1.15)))});
-        paint();
-      }
-    });
-    image.addEventListener('load', paint, {once: true});
+      if (surface.complete === false) surface.addEventListener('load', paint, {once: true});
+    }
   }
   function apply() {
     const root = document.documentElement;
@@ -473,8 +494,10 @@ export function createAppearance(ctx) {
     root.dataset.background = prefs.background === 'custom' && !uploadUrl ? 'none' : prefs.background;
     root.dataset.backgroundInGame = String(prefs.inGame);
     root.style.setProperty('--background-dim', String(prefs.dim / 100));
-    root.style.setProperty('--background-position', `${prefs.bgX}% ${prefs.bgY}%`);
-    root.style.setProperty('--background-zoom', String(prefs.bgZoom));
+    // Fit only applies to an uploaded image; the built-in backdrops are full-screen gradients.
+    const fitted = prefs.background === 'custom';
+    root.style.setProperty('--background-position', fitted ? `${prefs.bgX}% ${prefs.bgY}%` : '50% 50%');
+    root.style.setProperty('--background-zoom', String(fitted ? prefs.bgZoom : 1));
     root.style.setProperty('--profile-bg-x', prefs.profileX + '%');
     root.style.setProperty('--profile-bg-y', prefs.profileY + '%');
     root.style.setProperty('--profile-bg-zoom', String(prefs.profileZoom));
@@ -526,13 +549,60 @@ export function createAppearance(ctx) {
   function adoptRemote(remote, silent = false) {
     if (!remote || Number(remote.savedAt) <= readSavedAt()) return;
     const next = normalizeAppearance(remote);
-    if (next.background === 'custom' && !uploadUrl && !upload)
+    if (next.background === 'custom' && !uploadUrl && !upload && !(shared && next.bgImageAt))
       next.background = prefs.background === 'custom' ? 'none' : prefs.background;
     store(next, Number(remote.savedAt));
     if (!silent) refreshPage();
   }
+  // Local changes (tabs, previews, filters, crops) only redraw the Appearance content; anything that
+  // touches the account (picture, wallet, equipped items) also refreshes the header, so it re-renders fully.
+  let shellDirty = false;
+  const markShell = () => (shellDirty = true);
+  const setUserPatch = (patch) => (markShell(), ctx.setUserPatch(patch));
+  const setRewards = (value) => (markShell(), ctx.setRewards(value));
   function refreshPage() {
-    if (ctx.getView() === 'appearance') ctx.render();
+    if (ctx.getView() !== 'appearance') return;
+    const main = ctx.app.querySelector('#main');
+    if (shellDirty || !main?.querySelector('.appearance-layout')) {
+      shellDirty = false;
+      ctx.render();
+      return;
+    }
+    main.innerHTML = view();
+  }
+  // Uploaded backgrounds follow the account: push a local image the account lacks, pull a newer one.
+  let bgSync = null,
+    bgSyncFailedAt = 0;
+  function syncBackground() {
+    if (!shared || !ctx.user() || bgSync || Date.now() - bgSyncFailedAt < 60000) return;
+    const local = upload?.remoteAt || 0,
+      push = upload?.blob && !upload.remoteAt && prefs.background === 'custom',
+      pull = prefs.bgImageAt > local;
+    if (!push && !pull) return;
+    bgSync = (async () => {
+      if (pull) {
+        const {background: b} = await ctx.api('/api/appearance/background');
+        if (!b?.url) return;
+        const [head, base64] = b.url.split(','),
+          blob = new Blob([Uint8Array.from(atob(base64), (c) => c.charCodeAt(0))], {
+            type: head.slice(5, head.indexOf(';')),
+          });
+        upload = {blob, name: b.name, width: b.width, height: b.height, remoteAt: b.savedAt};
+        await backgroundStore('put', upload);
+        if (uploadUrl) URL.revokeObjectURL(uploadUrl);
+        uploadUrl = URL.createObjectURL(blob);
+        apply();
+        refreshPage();
+      } else await pushBackground();
+    })()
+      .catch(() => (bgSyncFailedAt = Date.now()))
+      .finally(() => (bgSync = null));
+  }
+  async function pushBackground() {
+    const {background: b} = await ctx.api('/api/appearance/background', await backgroundForAccount(upload));
+    upload = {...upload, remoteAt: b.savedAt};
+    await backgroundStore('put', upload);
+    setPreferences({bgImageAt: b.savedAt});
   }
   function restore() {
     apply();
@@ -553,6 +623,7 @@ export function createAppearance(ctx) {
   }
   function updateContext() {
     document.documentElement.dataset.quizActive = String(['game', 'room'].includes(ctx.getView()));
+    if (restorePromise) restorePromise.then(syncBackground);
   }
   const wallet = () => (ctx.user() ? ctx.rewards() : null);
   const owns = (id) => id === 'classic' || id === 'title-rookie' || /-none$/.test(id) || !!wallet()?.owned.includes(id);
@@ -590,6 +661,15 @@ export function createAppearance(ctx) {
       busy || loading || !wallet() || wallet().balance < def.price ? 'disabled' : '',
     );
   }
+  const filterControl = () =>
+    `<div class="segmented" role="group" aria-label="Collection filter">${btn('appearance:filter:all', 'All', filter === 'all' ? 'selected' : '')}${btn('appearance:filter:owned', 'My collection', filter === 'owned' ? 'selected' : '')}</div>`;
+  function sectionView(id, controls) {
+    if (id === 'frames') return framesView(controls);
+    if (id === 'picture') return pictureView();
+    if (id === 'themes') return themesView();
+    if (id === 'backgrounds') return backgroundsView();
+    return itemsView(TYPE_BY_TAB[id], controls);
+  }
   function guestBanner(what) {
     if (ctx.user()) return '';
     return `<div class="appearance-guest-banner" role="note"><div><strong>Sign in to collect ${esc(what)}</strong><span>Preview everything for free. Earn Loop Shards by finishing the daily quiz, then unlock and equip what you like.</span></div><div class="appearance-guest-actions">${btn('login', 'Sign in', 'btn small')}${btn('register', 'Create account', 'btn ghost small')}</div></div>`;
@@ -604,49 +684,47 @@ export function createAppearance(ctx) {
       return `<span class="banner-sample has-banner ${def.id}"><span class="player-name">${name}</span></span>`;
     return `<span class="effect-sample">${EFFECT_ICONS[def.id] || '✦'}</span>`;
   }
-  function itemsView(type) {
+  function itemsView(type, controls = true) {
     const items = COSMETIC_ITEMS.filter((i) => i.type === type.type && (filter === 'all' || owns(i.id)));
-    return `<section class="appearance-section"><div class="appearance-section-head"><div><h2>${esc(type.heading)}</h2><p>${esc(type.text)}</p></div><div class="segmented" role="group" aria-label="Collection filter">${btn('appearance:filter:all', 'All', filter === 'all' ? 'selected' : '')}${btn('appearance:filter:owned', 'My collection', filter === 'owned' ? 'selected' : '')}</div></div>${guestBanner(type.label.toLowerCase())}${items.length ? `<div class="frame-collection cosmetic-collection">${items.map((i) => `<article class="frame-item ${preview === i.id ? 'is-previewed' : ''}"><button type="button" class="frame-visual" data-action="appearance:preview:${i.id}" aria-label="${type.type === 'effect' ? 'Play' : 'Preview'} ${esc(i.name)}" aria-pressed="${preview === i.id}">${sample(i)}<span class="frame-state">${isEquipped(i) ? 'Equipped' : owns(i.id) ? 'Owned' : '◇ ' + fmt(i.price)}</span></button><div class="frame-item-copy"><h3>${esc(i.name)}</h3><p>${esc(i.description)}</p><div class="frame-item-actions">${btn('appearance:preview:' + i.id, type.type === 'effect' ? 'Play' : 'Preview', 'btn ghost small')}${itemAction(i)}</div></div></article>`).join('')}</div>` : '<p class="subtle">Nothing here yet. Switch to “All” to browse the collection.</p>'}<p class="appearance-help">${ctx.user() ? 'Shards are earned in-game. Cosmetics never change scores, hints, or quiz difficulty.' : 'Cosmetics never change scores, hints, or quiz difficulty.'}</p></section>`;
+    return `<section class="appearance-section"><div class="appearance-section-head"><div><h2>${esc(type.heading)}</h2><p>${esc(type.text)}</p></div>${controls ? filterControl() : ''}</div>${controls ? guestBanner(type.label.toLowerCase()) : ''}${items.length ? `<div class="frame-collection cosmetic-collection">${items.map((i) => `<article class="frame-item ${preview === i.id ? 'is-previewed' : ''}"><button type="button" class="frame-visual" data-action="appearance:preview:${i.id}" aria-label="${type.type === 'effect' ? 'Play' : 'Preview'} ${esc(i.name)}" aria-pressed="${preview === i.id}">${sample(i)}<span class="frame-state">${isEquipped(i) ? 'Equipped' : owns(i.id) ? 'Owned' : '◇ ' + fmt(i.price)}</span></button><div class="frame-item-copy"><h3>${esc(i.name)}</h3><p>${esc(i.description)}</p><div class="frame-item-actions">${btn('appearance:preview:' + i.id, type.type === 'effect' ? 'Play' : 'Preview', 'btn ghost small')}${itemAction(i)}</div></div></article>`).join('')}</div>` : '<p class="subtle">Nothing here yet. Switch to “All” to browse the collection.</p>'}<p class="appearance-help">${ctx.user() ? 'Shards are earned in-game. Cosmetics never change scores, hints, or quiz difficulty.' : 'Cosmetics never change scores, hints, or quiz difficulty.'}</p></section>`;
   }
   const equipped = () => wallet()?.equipped || 'classic';
   const avatar = (frame, classes = '') =>
     `<span class="profile-avatar appearance-avatar frame-${esc(frame)} ${classes}">${ctx.avatarImage?.() || esc(ctx.user()?.username.slice(0, 2).toUpperCase() || 'AL')}</span>`;
   function pictureView() {
     if (cropBitmap) queueMicrotask(renderCrop);
-    return `<section class="appearance-section"><h2>Your profile picture.</h2><p>${shared ? 'Choose a picture for your account. After an automatic safety check it is shown next to your username to your friends and on the leaderboard.' : 'Choose a personal image for your account. It is visible only to you, never on leaderboards or other players’ screens.'}</p><div class="profile-picture-editor">${avatar(equipped())}<div><label for="appearance-profile-file">Upload profile picture</label><input id="appearance-profile-file" type="file" accept="image/png,image/jpeg,image/webp" ${busy || !ctx.user() ? 'disabled' : ''}><p class="subtle">PNG, JPEG or WebP · Up to 8 MB. Cropped to a square and saved with your account.</p>${ctx.user()?.hasPicture ? btn('appearance:remove-picture', 'Remove picture', 'btn ghost small', busy ? 'disabled' : '') : ''}${!ctx.user() ? btn('login', 'Sign in to add a picture', 'btn secondary') : ''}</div></div>${cropFile ? `<div class="profile-crop-editor"><h3>Position your picture</h3><p class="subtle">Drag the box to move it and drag its corner to resize. Your current picture stays unchanged until you save.</p><div class="profile-crop-stage"><div class="profile-crop-source-wrap"><canvas id="profile-crop-source" aria-label="Original image"></canvas><div id="profile-crop-selection" tabindex="0" role="group" aria-label="Crop area. Drag to move or use arrow keys."><span class="profile-crop-handle" aria-hidden="true"></span></div></div><small>Drag to move · drag the corner to resize</small></div><div class="profile-crop-controls"><span class="profile-crop-caption">Final preview</span><canvas id="profile-crop-preview" width="256" height="256" aria-label="Profile picture preview"></canvas><div class="profile-crop-zoom">${btn('appearance:crop-zoom-out', '−', 'btn ghost small', 'aria-label="Zoom out"')}<span id="profile-crop-zoom-label">${Math.round(crop.zoom * 100)}%</span>${btn('appearance:crop-zoom-in', '+', 'btn ghost small', 'aria-label="Zoom in"')}</div><p class="subtle">Drag the box or use + to zoom in. At 100%, the box is as large as the image allows.</p><div class="profile-crop-actions">${btn('appearance:save-crop', 'Save picture', 'btn', busy ? 'disabled' : '')}${cropBlocked ? btn('appearance:review-crop', 'Request manual review', 'btn secondary', busy ? 'disabled' : '') : ''}${btn('appearance:cancel-crop', 'Cancel', 'btn ghost', busy ? 'disabled' : '')}</div></div></div>` : ''}${shared && ctx.user()?.hasPicture ? `<div class="picture-status ${ctx.user().pictureStatus === 'approved' ? 'ok' : ''}" role="status"><p>${PICTURE_STATUS[ctx.user().pictureStatus] || PICTURE_STATUS.private}${ctx.user().pictureStatus !== 'approved' && PICTURE_CHECK[ctx.user().pictureCheck] ? ' ' + PICTURE_CHECK[ctx.user().pictureCheck] : ''}</p>${ctx.user().pictureStatus === 'approved' ? '' : btn('appearance:share-picture', ctx.user().pictureStatus === 'pending' ? 'Check again' : 'Share with friends', 'btn secondary small', busy ? 'disabled' : '')}</div>` : ''}<p class="subtle">${shared ? 'Images are resized and metadata is removed. Every upload is checked for nudity, sexual content, graphic violence and self-harm; flagged pictures can be submitted privately for manual review. If the automatic check is unavailable, the picture stays visible only to you until it has been reviewed.' : 'Images are resized and metadata is removed. Their content is not automatically moderated; keeping them private prevents unwanted images appearing to other players.'}</p></section>`;
+    return `<section class="appearance-section"><h2>Your profile picture.</h2><p>${shared ? 'Choose a picture for your account. After an automatic safety check it is shown next to your username to your friends and on the leaderboard.' : 'Choose a personal image for your account. It is visible only to you, never on leaderboards or other players’ screens.'}</p><div class="profile-picture-editor">${avatar(equipped())}<div><label for="appearance-profile-file">Upload profile picture</label><input id="appearance-profile-file" type="file" accept="image/png,image/jpeg,image/webp" ${busy || !ctx.user() ? 'disabled' : ''}><p class="subtle">PNG, JPEG or WebP · Up to 8 MB. Cropped to a square and saved with your account.</p>${ctx.user()?.hasPicture ? btn('appearance:remove-picture', 'Remove picture', 'btn ghost small', busy ? 'disabled' : '') : ''}${!ctx.user() ? btn('login', 'Sign in to add a picture', 'btn secondary') : ''}</div></div>${cropFile ? `<div class="profile-crop-editor"><h3>Position your picture</h3><p class="subtle">Drag the box to move it and drag any corner to resize. Your current picture stays unchanged until you save.</p>${cropStage('profile-crop-selection', '<canvas id="profile-crop-source" aria-label="Original image"></canvas>', 'Profile picture crop')}<div class="profile-crop-controls"><span class="profile-crop-caption">Final preview</span><canvas id="profile-crop-preview" width="256" height="256" aria-label="Profile picture preview"></canvas><div class="profile-crop-zoom">${btn('appearance:crop-zoom-out', '−', 'btn ghost small', 'aria-label="Zoom out"')}<span id="profile-crop-zoom-label">${Math.round(crop.zoom * 100)}%</span>${btn('appearance:crop-zoom-in', '+', 'btn ghost small', 'aria-label="Zoom in"')}</div><p class="subtle">Drag a corner, scroll or use + to zoom in. At 100%, the box is as large as the image allows.</p><div class="profile-crop-actions">${btn('appearance:save-crop', 'Save picture', 'btn', busy ? 'disabled' : '')}${cropBlocked ? btn('appearance:review-crop', 'Request manual review', 'btn secondary', busy ? 'disabled' : '') : ''}${btn('appearance:cancel-crop', 'Cancel', 'btn ghost', busy ? 'disabled' : '')}</div></div></div>` : ''}${shared && ctx.user()?.hasPicture ? `<div class="picture-status ${ctx.user().pictureStatus === 'approved' ? 'ok' : ''}" role="status"><p>${PICTURE_STATUS[ctx.user().pictureStatus] || PICTURE_STATUS.private}${ctx.user().pictureStatus !== 'approved' && PICTURE_CHECK[ctx.user().pictureCheck] ? ' ' + PICTURE_CHECK[ctx.user().pictureCheck] : ''}</p>${ctx.user().pictureStatus === 'approved' ? '' : btn('appearance:share-picture', ctx.user().pictureStatus === 'pending' ? 'Check again' : 'Share with friends', 'btn secondary small', busy ? 'disabled' : '')}</div>` : ''}<p class="subtle">${shared ? 'Images are resized and metadata is removed. Every upload is checked for nudity, sexual content, graphic violence and self-harm; flagged pictures can be submitted privately for manual review. If the automatic check is unavailable, the picture stays visible only to you until it has been reviewed.' : 'Images are resized and metadata is removed. Their content is not automatically moderated; keeping them private prevents unwanted images appearing to other players.'}</p></section>`;
   }
-  function framesView() {
+  function framesView(controls = true) {
     const items = FRAMES.filter((f) => filter === 'all' || owns(f.id));
-    return `<section class="appearance-section"><div class="appearance-section-head"><div><h2>Find your signature frame.</h2><p>Earn Loop Shards through daily play. Preview a frame before you choose it.</p></div><div class="segmented" role="group" aria-label="Frame collection filter">${btn('appearance:filter:all', 'All frames', filter === 'all' ? 'selected' : '')}${btn('appearance:filter:owned', 'My collection', filter === 'owned' ? 'selected' : '')}</div></div>${guestBanner('profile frames')}<div class="frame-collection">${items.map((f) => `<article class="frame-item ${preview === f.id ? 'is-previewed' : ''}" data-frame-id="${f.id}"><button type="button" class="frame-visual" data-action="appearance:preview:${f.id}" aria-label="Preview ${esc(f.name)}" aria-pressed="${preview === f.id}">${avatar(f.id)}<span class="frame-state">${equipped() === f.id ? 'Equipped' : owns(f.id) ? 'Owned' : '◇ ' + fmt(f.price)}</span></button><div class="frame-item-copy"><h3>${esc(f.name)}</h3><p>${esc(f.description)}</p><div class="frame-item-actions">${btn('appearance:preview:' + f.id, 'Preview', 'btn ghost small')}${!ctx.user() ? '' : equipped() === f.id ? '<span class="equipped-label">✓ Equipped</span>' : owns(f.id) ? btn('appearance:equip:' + f.id, 'Equip', 'btn secondary small', busy ? 'disabled' : '') : btn('appearance:buy:' + f.id, '◇ ' + fmt(f.price) + ' · Unlock', 'btn secondary small', busy || loading || !wallet() || wallet().balance < f.price ? 'disabled' : '')}</div></div></article>`).join('')}</div><p class="appearance-help">${ctx.user() ? 'Shards are earned in-game. Cosmetics never change scores, hints, or quiz difficulty.' : 'Themes and backgrounds work without an account.'}</p></section>`;
+    return `<section class="appearance-section"><div class="appearance-section-head"><div><h2>Find your signature frame.</h2><p>Earn Loop Shards through daily play. Preview a frame before you choose it.</p></div>${controls ? filterControl() : ''}</div>${controls ? guestBanner('profile frames') : ''}<div class="frame-collection">${items.map((f) => `<article class="frame-item ${preview === f.id ? 'is-previewed' : ''}" data-frame-id="${f.id}"><button type="button" class="frame-visual" data-action="appearance:preview:${f.id}" aria-label="Preview ${esc(f.name)}" aria-pressed="${preview === f.id}">${avatar(f.id)}<span class="frame-state">${equipped() === f.id ? 'Equipped' : owns(f.id) ? 'Owned' : '◇ ' + fmt(f.price)}</span></button><div class="frame-item-copy"><h3>${esc(f.name)}</h3><p>${esc(f.description)}</p><div class="frame-item-actions">${btn('appearance:preview:' + f.id, 'Preview', 'btn ghost small')}${!ctx.user() ? '' : equipped() === f.id ? '<span class="equipped-label">✓ Equipped</span>' : owns(f.id) ? btn('appearance:equip:' + f.id, 'Equip', 'btn secondary small', busy ? 'disabled' : '') : btn('appearance:buy:' + f.id, '◇ ' + fmt(f.price) + ' · Unlock', 'btn secondary small', busy || loading || !wallet() || wallet().balance < f.price ? 'disabled' : '')}</div></div></article>`).join('')}</div><p class="appearance-help">${ctx.user() ? 'Shards are earned in-game. Cosmetics never change scores, hints, or quiz difficulty.' : 'Themes and backgrounds work without an account.'}</p></section>`;
   }
   function themesView() {
     return `<section class="appearance-section"><div class="appearance-section-head"><div><h2>A different mood. The same loop.</h2><p>Choose an accent palette. Every theme keeps the dark, quiet canvas.</p></div><span class="appearance-free">Free for everyone</span></div><div class="theme-collection">${THEMES.map((t) => `<button type="button" class="theme-option ${prefs.theme === t.id ? 'is-selected' : ''}" data-action="appearance:theme:${t.id}" aria-pressed="${prefs.theme === t.id}" style="--swatch-canvas:${t.colors[0]};--swatch-panel:${t.colors[1]};--swatch-accent:${t.colors[2]}"><span class="theme-mini"><i></i><span><b></b><b></b><b></b></span><em></em></span><span class="theme-option-copy"><strong>${t.name}</strong><small>${t.description}</small><span>${prefs.theme === t.id ? '✓ Active theme' : 'Apply theme'}</span></span></button>`).join('')}</div><p class="appearance-help">${shared ? 'Your theme is saved with your account and follows you to every device.' : 'Your theme is saved in this browser.'} It does not change your friends’ screens.</p></section>`;
   }
   function backgroundsView() {
-    if (upload && uploadUrl && prefs.background === 'custom') queueMicrotask(renderBackdropCrop);
-    return `<section class="appearance-section"><div class="appearance-section-head"><div><h2>Set the scene.</h2><p>Start with an original backdrop or bring an image of your own.</p></div><span class="appearance-free">${shared ? 'Saved with your account' : 'Saved on this device'}</span></div><div class="background-collection">${BACKGROUNDS.map((b) => `<button type="button" class="background-option ${prefs.background === b.id ? 'is-selected' : ''}" data-action="appearance:background:${b.id}" aria-pressed="${prefs.background === b.id}"><span class="background-sample backdrop-${b.id}"></span><strong>${b.name}</strong><small>${prefs.background === b.id ? '✓ Selected' : b.description}</small></button>`).join('')}${upload ? `<button type="button" class="background-option ${prefs.background === 'custom' ? 'is-selected' : ''}" data-action="appearance:background:custom" aria-pressed="${prefs.background === 'custom'}"><span class="background-sample backdrop-custom"></span><strong>Your image</strong><small>${esc(upload.name)}</small></button>` : ''}</div><div class="background-upload"><div><h3>Your image, your space.</h3><p>PNG, JPEG, or WebP, up to 8 MB. Images are resized for faster loading and stay in this browser.</p></div><label class="btn secondary ${busy ? 'is-disabled' : ''}" for="appearance-background-file">${busy ? 'Preparing image…' : upload ? 'Replace image' : 'Upload image'}</label><input type="file" id="appearance-background-file" accept="image/png,image/jpeg,image/webp" ${busy ? 'disabled' : ''}>${upload ? btn('appearance:remove-upload', 'Remove upload', 'btn ghost small', busy ? 'disabled' : '') : ''}</div><div class="background-settings"><div class="background-dim-field"><label for="appearance-dim">Dim background <output id="appearance-dim-value">${prefs.dim}%</output></label><input id="appearance-dim" type="range" min="35" max="90" step="5" value="${prefs.dim}"><p>Keep the page readable while letting your background show through.</p></div>${
-      prefs.background !== 'none'
-        ? `<div class="background-fit"><div class="background-fit-head"><h3>Fit your background</h3>${btn('appearance:fit-reset', 'Reset fit', 'btn ghost small')}</div>${[
-            ['appearance-zoom', 'Zoom', 100, 300, 5, Math.round(prefs.bgZoom * 100), '%'],
-            ['appearance-x', 'Horizontal position', 0, 100, 1, prefs.bgX, '%'],
-            ['appearance-y', 'Vertical position', 0, 100, 1, prefs.bgY, '%'],
-          ]
-            .map(
-              ([id, label, min, max, step, value, unit]) =>
-                `<div class="background-dim-field"><label for="${id}">${label} <output id="${id}-value">${value}${unit}</output></label><input id="${id}" type="range" min="${min}" max="${max}" step="${step}" value="${value}"></div>`,
-            )
-            .join('')}<p>Changes preview live across the whole site.</p></div>`
-        : ''
-    }</div>${upload && uploadUrl && prefs.background === 'custom' ? `<section class="profile-backdrop-editor"><h2>Position your profile background</h2><p class="subtle">Drag the box to move the image on your profile card; drag its corner to zoom. Your page background stays separate.</p><div class="profile-crop-stage"><div class="profile-crop-source-wrap"><img id="backdrop-crop-source" src="${esc(uploadUrl)}" alt="Your uploaded background"><div id="backdrop-crop-selection" tabindex="0" role="group" aria-label="Profile background crop. Drag or use arrow keys to move; drag the corner or use plus and minus to resize."><span class="profile-crop-handle" aria-hidden="true"></span></div></div><small>Drag to move · drag the corner to resize</small></div>${btn('appearance:reset-profile-background', 'Reset profile position', 'btn ghost small')}</section>` : ''}</section>`;
+    const custom = upload && uploadUrl && prefs.background === 'custom';
+    if (custom) queueMicrotask(renderBackdropCrops);
+    const dimStyle = `--fill:${((prefs.dim - 35) / 55) * 100}%`;
+    const fit = custom
+      ? `<div class="background-fit"><div class="background-fit-head"><div><h3>Fit your image</h3><p>Drag a box to choose what shows. Drag any corner to zoom.</p></div>${btn('appearance:fit-reset', 'Reset both', 'btn ghost small')}</div><div class="background-fit-editors"><div><span class="background-fit-label">Page background</span>${cropStage('page-crop-selection', `<img src="${esc(uploadUrl)}" alt="Your uploaded background" draggable="false">`, 'Page background area')}</div><div><span class="background-fit-label">Profile card</span>${cropStage('backdrop-crop-selection', `<img src="${esc(uploadUrl)}" alt="" draggable="false">`, 'Profile card background area')}</div></div></div>`
+      : '';
+    return `<section class="appearance-section"><div class="appearance-section-head"><div><h2>Set the scene.</h2><p>Start with an original backdrop or bring an image of your own.</p></div><span class="appearance-free">${shared ? 'Saved with your account' : 'Saved on this device'}</span></div><div class="background-collection">${BACKGROUNDS.map((b) => `<button type="button" class="background-option ${prefs.background === b.id ? 'is-selected' : ''}" data-action="appearance:background:${b.id}" aria-pressed="${prefs.background === b.id}"><span class="background-sample backdrop-${b.id}"></span><strong>${b.name}</strong><small>${prefs.background === b.id ? '✓ Selected' : b.description}</small></button>`).join('')}${upload ? `<button type="button" class="background-option ${prefs.background === 'custom' ? 'is-selected' : ''}" data-action="appearance:background:custom" aria-pressed="${prefs.background === 'custom'}"><span class="background-sample backdrop-custom"></span><strong>Your image</strong><small>${esc(upload.name)}</small></button>` : ''}</div><div class="background-upload"><div><h3>Your image, your space.</h3><p>PNG, JPEG, or WebP, up to 8 MB. Images are resized for faster loading${shared ? ' and saved privately with your account, so they follow you to other devices. Only you can see them.' : ' and stay in this browser.'}</p></div><label class="btn secondary ${busy ? 'is-disabled' : ''}" for="appearance-background-file">${busy ? 'Preparing image…' : upload ? 'Replace image' : 'Upload image'}</label><input type="file" id="appearance-background-file" accept="image/png,image/jpeg,image/webp" ${busy ? 'disabled' : ''}>${upload ? btn('appearance:remove-upload', 'Remove upload', 'btn ghost small', busy ? 'disabled' : '') : ''}</div><div class="background-settings"><div class="background-dim-field"><label for="appearance-dim">Dim background <output id="appearance-dim-value">${prefs.dim}%</output></label><input id="appearance-dim" class="range" type="range" min="35" max="90" step="5" value="${prefs.dim}" style="${dimStyle}"><p>Keep the page readable while letting your background show through.</p></div></div>${fit}</section>`;
   }
   function view() {
     const selected = itemDef(preview) || {...FRAMES[0], type: 'frame'},
       look = previewLook(selected);
-    return `<section class="appearance-heading"><div><h1>Make the loop yours.</h1><p>Frames, titles, name colours, banners and effects. Your friends see them next to your name.</p></div>${btn('rewards', 'Daily rewards', 'btn ghost small')}</section><div class="appearance-layout"><aside class="appearance-showcase"><div class="profile-showcase${bannerClass(look)}"><span class="showcase-caption">Your profile preview</span><div class="profile-showcase-avatar">${avatar(selected.type === 'frame' ? selected.id : equipped(), 'large')}</div><h2 class="showcase-name">${nameMarkup(ctx.user()?.username || 'Your anime alias', look, esc)}</h2><p>Your next great guess starts here.</p><span class="showcase-frame-name">${esc(selected.name)}</span><div class="showcase-action">${itemAction(selected, false)}</div></div><div class="appearance-wallet"><span>Loop Shards</span><strong>${ctx.user() ? (loading && !wallet() ? '…' : '◇ ' + fmt(wallet()?.balance || 0)) : '◇ 0'}</strong><p>${ctx.user() ? 'Finish daily quizzes and claim your rewards to collect new frames.' : 'Create an account to earn shards through daily play.'}</p>${btn(ctx.user() ? 'rewards' : 'register', ctx.user() ? 'Earn more shards' : 'Create account', 'btn ghost small')}</div><p class="appearance-local-note">${shared ? 'Themes, backdrops and cosmetics are saved with your account. Uploaded images stay on this device.' : 'Themes and uploaded backgrounds are personal to this browser. Owned frames stay with your account.'}</p></aside><div class="appearance-workspace"><div class="appearance-tabs" role="group" aria-label="Appearance section">${[['frames', 'Frames'], ...COSMETIC_TYPES.map((t) => [t.tab, t.label]), ['picture', 'Picture'], ['themes', 'Themes'], ['backgrounds', 'Backgrounds']].map(([id, name]) => btn('appearance:tab:' + id, name, tab === id ? 'selected' : '', 'aria-pressed="' + (tab === id) + '"')).join('')}</div>${error ? `<p class="media-error" role="alert">${esc(error)}</p>` : ''}${status ? `<p class="appearance-status" role="status">${esc(status)}</p>` : ''}${tab === 'frames' ? framesView() : TYPE_BY_TAB[tab] ? itemsView(TYPE_BY_TAB[tab]) : tab === 'picture' ? pictureView() : tab === 'themes' ? themesView() : backgroundsView()}<div class="appearance-reset">${btn('appearance:reset', 'Reset theme & background', 'btn ghost small')}<span>Returns to Midnight mauve and Pure black. Your frame collection and uploaded image stay saved.</span></div></div></div>`;
+    return `<section class="appearance-heading"><div><h1>Make the loop yours.</h1><p>Frames, titles, name colours, banners and effects. Your friends see them next to your name.</p></div>${btn('rewards', 'Daily rewards', 'btn ghost small')}</section><div class="appearance-layout"><aside class="appearance-showcase"><div class="profile-showcase${bannerClass(look)}"><span class="showcase-caption">Your profile preview</span><div class="profile-showcase-avatar">${avatar(selected.type === 'frame' ? selected.id : equipped(), 'large')}</div><h2 class="showcase-name">${nameMarkup(ctx.user()?.username || 'Your anime alias', look, esc)}</h2><p>Your next great guess starts here.</p><span class="showcase-frame-name">${esc(selected.name)}</span><div class="showcase-action">${itemAction(selected, false)}</div></div><div class="appearance-wallet"><span>Loop Shards</span><strong>${ctx.user() ? (loading && !wallet() ? '…' : '◇ ' + fmt(wallet()?.balance || 0)) : '◇ 0'}</strong><p>${ctx.user() ? 'Finish daily quizzes and claim your rewards to collect new frames.' : 'Create an account to earn shards through daily play.'}</p>${btn(ctx.user() ? 'rewards' : 'register', ctx.user() ? 'Earn more shards' : 'Create account', 'btn ghost small')}</div><p class="appearance-local-note">${shared ? 'Themes, backdrops, cosmetics and your uploaded background are saved with your account.' : 'Themes and uploaded backgrounds are personal to this browser. Owned frames stay with your account.'}</p></aside><div class="appearance-workspace"><div class="appearance-tabs" role="group" aria-label="Appearance section">${TAB_GROUPS.map((g) => btn('appearance:tab:' + g.id, g.label, tab === g.id ? 'selected' : '', 'aria-pressed="' + (tab === g.id) + '"')).join('')}</div>${error ? `<p class="media-error" role="alert">${esc(error)}</p>` : ''}${status ? `<p class="appearance-status" role="status">${esc(status)}</p>` : ''}${tabGroup(
+      tab,
+    )
+      .views.map((id, i) => sectionView(id, i === 0))
+      .join(
+        '',
+      )}<div class="appearance-reset">${btn('appearance:reset', 'Reset theme & background', 'btn ghost small')}<span>Returns to Midnight mauve and Pure black. Your frame collection and uploaded image stay saved.</span></div></div></div>`;
   }
   async function action(name) {
     if (name === 'appearance:fit-reset') {
-      setPreferences({bgZoom: 1, bgX: 50, bgY: 50});
+      setPreferences({bgZoom: 1, bgX: 50, bgY: 50, profileX: 50, profileY: 50, profileZoom: 1});
       refreshPage();
       return true;
     }
@@ -664,6 +742,7 @@ export function createAppearance(ctx) {
         } finally {
           loading = false;
           preview = equipped();
+          markShell();
           refreshPage();
         }
       }
@@ -674,11 +753,6 @@ export function createAppearance(ctx) {
     error = '';
     status = '';
     try {
-      if (operation === 'reset-profile-background') {
-        setPreferences({profileX: 50, profileY: 50, profileZoom: 1});
-        refreshPage();
-        return true;
-      }
       if (operation === 'review-crop') {
         if (!cropFile || busy) return true;
         busy = true;
@@ -712,7 +786,7 @@ export function createAppearance(ctx) {
         try {
           const image = await prepareProfilePicture(cropFile, {shared, crop}),
             result = await ctx.api('/api/account/picture', {image});
-          ctx.setUserPatch({
+          setUserPatch({
             hasPicture: true,
             pictureUrl: result.pictureUrl,
             pictureStatus: result.pictureStatus || null,
@@ -735,7 +809,7 @@ export function createAppearance(ctx) {
         return true;
       }
       if (operation === 'tab') {
-        tab = TABS.includes(id) ? id : 'frames';
+        tab = tabGroup(id).id;
         refreshPage();
         return true;
       }
@@ -759,7 +833,7 @@ export function createAppearance(ctx) {
         refreshPage();
         try {
           const result = await ctx.api('/api/account/picture', {share: true});
-          ctx.setUserPatch({
+          setUserPatch({
             hasPicture: result.hasPicture,
             pictureUrl: result.pictureUrl,
             pictureStatus: result.pictureStatus || null,
@@ -772,7 +846,7 @@ export function createAppearance(ctx) {
               : 'The picture is still waiting for review.';
         } catch (cause) {
           if (/blocked/i.test(cause.message))
-            ctx.setUserPatch({
+            setUserPatch({
               hasPicture: false,
               pictureUrl: null,
               pictureStatus: null,
@@ -789,7 +863,7 @@ export function createAppearance(ctx) {
         refreshPage();
         try {
           await ctx.api('/api/account/picture', {image: null});
-          ctx.setUserPatch({hasPicture: false, pictureUrl: null, pictureStatus: null, pictureVersion: Date.now()});
+          setUserPatch({hasPicture: false, pictureUrl: null, pictureStatus: null, pictureVersion: Date.now()});
           status = 'Profile picture removed.';
         } finally {
           busy = false;
@@ -810,8 +884,12 @@ export function createAppearance(ctx) {
         if (uploadUrl) URL.revokeObjectURL(uploadUrl);
         uploadUrl = '';
         upload = null;
-        setPreferences({background: prefs.background === 'custom' ? 'none' : prefs.background});
-        status = 'Uploaded background removed from this browser.';
+        const synced = shared && ctx.user() && prefs.bgImageAt;
+        setPreferences({background: prefs.background === 'custom' ? 'none' : prefs.background, bgImageAt: 0});
+        if (synced) await ctx.api('/api/appearance/background', {image: null});
+        status = synced
+          ? 'Uploaded background removed from your account.'
+          : 'Uploaded background removed from this browser.';
       } else if (['buy', 'equip'].includes(operation)) {
         if (!ctx.user()) {
           ctx.login();
@@ -822,7 +900,7 @@ export function createAppearance(ctx) {
         refreshPage();
         try {
           const result = await ctx.api('/api/rewards/' + operation, {item: id});
-          ctx.setRewards(result.rewards);
+          setRewards(result.rewards);
           const def = itemDef(id);
           if (!/-none$/.test(id)) preview = id;
           status = /-none$/.test(id)
@@ -849,9 +927,6 @@ export function createAppearance(ctx) {
         'appearance-dim',
         'appearance-position',
         'appearance-in-game',
-        'appearance-zoom',
-        'appearance-x',
-        'appearance-y',
       ].includes(target.id)
     )
       return false;
@@ -873,6 +948,14 @@ export function createAppearance(ctx) {
           uploadUrl = URL.createObjectURL(upload.blob);
           apply();
           status = 'Your background is saved on this device.';
+          if (shared && ctx.user()) {
+            try {
+              await pushBackground();
+              status = 'Your background is saved with your account.';
+            } catch (cause) {
+              status = `Saved on this device. ${cause.message}`;
+            }
+          }
         } finally {
           busy = false;
         }
@@ -903,11 +986,11 @@ export function createAppearance(ctx) {
         } finally {
           busy = false;
         }
-      } else if (target.id === 'appearance-dim') setPreferences({dim: Number(target.value)});
-      else if (target.id === 'appearance-position') setPreferences({position: target.value});
-      else if (target.id === 'appearance-zoom') setPreferences({bgZoom: Number(target.value) / 100});
-      else if (target.id === 'appearance-x') setPreferences({bgX: Number(target.value)});
-      else if (target.id === 'appearance-y') setPreferences({bgY: Number(target.value)});
+      } else if (target.id === 'appearance-dim') {
+        // The slider already shows its value; saving needs no redraw.
+        setPreferences({dim: Number(target.value)});
+        return true;
+      } else if (target.id === 'appearance-position') setPreferences({position: target.value});
       else setPreferences({inGame: target.checked});
       refreshPage();
     } catch (cause) {
@@ -917,18 +1000,10 @@ export function createAppearance(ctx) {
     return true;
   }
   function input(target) {
-    if (['appearance-zoom', 'appearance-x', 'appearance-y'].includes(target.id)) {
-      const root = document.documentElement.style,
-        read = (id, fallback) => Number(document.querySelector('#' + id)?.value ?? fallback);
-      root.setProperty('--background-zoom', String(read('appearance-zoom', 100) / 100));
-      root.setProperty('--background-position', `${read('appearance-x', 50)}% ${read('appearance-y', 50)}%`);
-      const output = document.querySelector('#' + target.id + '-value');
-      if (output) output.value = target.value + '%';
-      return;
-    }
     if (target.id !== 'appearance-dim') return;
     const dim = Math.max(35, Math.min(90, Number(target.value)));
     document.documentElement.style.setProperty('--background-dim', String(dim / 100));
+    target.style.setProperty('--fill', ((dim - 35) / 55) * 100 + '%');
     const output = document.querySelector('#appearance-dim-value');
     if (output) output.value = dim + '%';
   }

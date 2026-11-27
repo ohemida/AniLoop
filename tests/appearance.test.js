@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {THEMES,BACKGROUNDS,FRAMES,DEFAULT_APPEARANCE,normalizeAppearance,readAppearance,profileCrop,moveProfileCrop} from '../assets/appearance.js';
 test('appearance defaults and malformed settings stay safe',()=>{
  for(const value of [null,{},'bad',{theme:'url(x)',background:'https://x',dim:NaN,inGame:'true',position:'left'}])assert.deepEqual(normalizeAppearance(value),DEFAULT_APPEARANCE);
- assert.deepEqual(normalizeAppearance({theme:'forest',background:'custom',dim:10,inGame:true,position:'top'}),{theme:'forest',background:'custom',dim:35,inGame:true,position:'top',profileX:50,profileY:50,profileZoom:1,bgZoom:1,bgX:50,bgY:0});
+ assert.deepEqual(normalizeAppearance({theme:'forest',background:'custom',dim:10,inGame:true,position:'top'}),{theme:'forest',background:'custom',dim:35,inGame:true,position:'top',profileX:50,profileY:50,profileZoom:1,bgZoom:1,bgX:50,bgY:0,bgImageAt:0});
  assert.deepEqual([normalizeAppearance({bgZoom:9,bgX:-5,bgY:40}).bgZoom,normalizeAppearance({bgZoom:9,bgX:-5}).bgX,normalizeAppearance({position:'bottom'}).bgY],[3,0,100]);
  assert.equal(normalizeAppearance({dim:100}).dim,90);
 });
@@ -30,4 +30,16 @@ test('dragging the image moves the crop in the opposite direction and clamps to 
  assert.ok(moved.x<crop.x);assert.ok(moved.y>crop.y);
  assert.equal(moveProfileCrop(800,400,crop,10000,-10000,200).x,0);
  assert.equal(moveProfileCrop(800,400,crop,10000,-10000,200).y,100);
+});
+
+test('crop box matches cover + scale mapping and keeps the ratio', async () => {
+  const {cropBox} = await import('../assets/appearance.js');
+  assert.deepEqual(cropBox(1600, 900, 16 / 9), {baseW: 1600, w: 1600, h: 900, x: 0, y: 0});
+  const zoomed = cropBox(1600, 900, 16 / 9, {x: 100, y: 0, zoom: 2});
+  assert.equal(zoomed.w, 800);
+  assert.equal(zoomed.h, 450);
+  assert.equal(zoomed.x, 800);
+  assert.equal(zoomed.y, 0);
+  const portrait = cropBox(1000, 1000, 0.5, {x: 50, y: 50, zoom: 1});
+  assert.deepEqual(portrait, {baseW: 500, w: 500, h: 1000, x: 250, y: 0});
 });

@@ -175,7 +175,7 @@ Deno.serve(async (request) => {
       '/api/daily',
     ]);
     if (
-      route === '/api/account/save' || route === '/api/account/picture'
+      route === '/api/account/save' || route === '/api/account/picture' || route === '/api/appearance/background'
         ? !['GET', 'POST'].includes(method)
         : reads.has(route)
           ? method !== 'GET'
