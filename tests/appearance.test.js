@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {THEMES,BACKGROUNDS,FRAMES,DEFAULT_APPEARANCE,normalizeAppearance,readAppearance,profileCrop} from '../assets/appearance.js';
+import {THEMES,BACKGROUNDS,FRAMES,DEFAULT_APPEARANCE,normalizeAppearance,readAppearance,profileCrop,moveProfileCrop} from '../assets/appearance.js';
 test('appearance defaults and malformed settings stay safe',()=>{
  for(const value of [null,{},'bad',{theme:'url(x)',background:'https://x',dim:NaN,inGame:'true',position:'left'}])assert.deepEqual(normalizeAppearance(value),DEFAULT_APPEARANCE);
  assert.deepEqual(normalizeAppearance({theme:'forest',background:'custom',dim:10,inGame:true,position:'top'}),{theme:'forest',background:'custom',dim:35,inGame:true,position:'top'});
@@ -22,4 +22,11 @@ test('profile crop can select image edges and zoom while staying within the sour
  assert.deepEqual(profileCrop(800,400,{x:100,y:0,zoom:2}),{x:600,y:0,side:200});
  assert.deepEqual(profileCrop(400,800,{x:0,y:100,zoom:2}),{x:0,y:600,side:200});
  assert.deepEqual(profileCrop(800,400,{x:-3,y:200,zoom:99}),{x:0,y:400-400/3,side:400/3});
+});
+test('dragging the image moves the crop in the opposite direction and clamps to its edges',()=>{
+ const crop={x:50,y:50,zoom:2};
+ const moved=moveProfileCrop(800,400,crop,50,-50,200);
+ assert.ok(moved.x<crop.x);assert.ok(moved.y>crop.y);
+ assert.equal(moveProfileCrop(800,400,crop,10000,-10000,200).x,0);
+ assert.equal(moveProfileCrop(800,400,crop,10000,-10000,200).y,100);
 });
