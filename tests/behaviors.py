@@ -65,7 +65,7 @@ with sync_playwright() as pw:
  click(p,'play:anidle');target=ANIME[game(p,'anidle')['questions'][0]]
  wrong=[a for a in PACK['anime'] if a['id']!=target['id'] and a['score'] is not None][:3]
  for a in wrong:submit(p,a['title'])
- expect(p.locator('.summary-table-anidle tbody tr')).to_have_count(1)
+ expect(p.locator('.anidle-known')).to_have_count(1)
  p.locator('#answer').fill('unfinished');click(p,'toggle-summary');expect(p.locator('#anidle-summary')).not_to_be_visible();expect(p.locator('#answer')).to_have_value('unfinished')
  p.reload(wait_until='networkidle');click(p,'play:anidle');expect(p.locator('#anidle-summary')).not_to_be_visible();click(p,'toggle-summary')
  for attempt in [13,18,22]:

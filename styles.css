@@ -10282,3 +10282,737 @@ body {
     font-size: 0.78rem;
   }
 }
+
+/* =====================================================================
+   Game tile design system
+   Chunky, pressable tiles; colour carries meaning; fewer borders.
+   Built on the theme variables, so every theme keeps working.
+   ===================================================================== */
+:root {
+  --hit: #2fbf71;
+  --hit-ink: #04210f;
+  --near: #f0a92e;
+  --near-ink: #2b1a00;
+  --miss-bg: color-mix(in srgb, var(--surface-raised, #1b181e) 80%, #fff 6%);
+  --tile: color-mix(in srgb, var(--surface, #111) 90%, #fff 4%);
+  --tile-2: color-mix(in srgb, var(--surface-raised, #1b181e) 88%, #fff 6%);
+  --press: color-mix(in srgb, var(--accent, #9b83a5) 50%, #000);
+  --radius: 20px;
+  --radius-sm: 12px;
+  --cat: var(--accent, #9b83a5);
+}
+[data-category='screenshot'],
+[data-action='play:screenshot'],
+[data-action='library-cat:screenshot'] {
+  --cat: #5aa9ff;
+}
+[data-category='character'],
+[data-action='play:character'],
+[data-action='library-cat:character'] {
+  --cat: #ff7eb6;
+}
+[data-category='opening'],
+[data-action='play:opening'],
+[data-action='library-cat:opening'] {
+  --cat: #a78bfa;
+}
+[data-category='ending'],
+[data-action='play:ending'],
+[data-action='library-cat:ending'] {
+  --cat: #2dd4bf;
+}
+[data-category='anidle'],
+[data-action='play:anidle'],
+[data-action='library-cat:anidle'] {
+  --cat: #fbbf24;
+}
+.cat-svg {
+  display: block;
+  flex: none;
+}
+
+/* Canvas: a soft accent glow instead of flat black (default backdrop only). */
+:root[data-background='none'] body::before {
+  background:
+    radial-gradient(1100px 620px at 8% -12%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 62%),
+    radial-gradient(900px 520px at 105% 8%, color-mix(in srgb, #5aa9ff 10%, transparent), transparent 60%), var(--paper);
+}
+
+/* Typography: one display face everywhere. */
+.hero h1,
+.community-intro h1,
+.room-complete h2 {
+  font-family: Poppins, Arial, sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.045em;
+}
+
+/* Header: no rule line, frosted, pill tabs. */
+:root[data-theme] .sidebar {
+  border-bottom: 0;
+  background: color-mix(in srgb, var(--paper) 78%, transparent);
+  backdrop-filter: blur(14px);
+}
+.sidebar .sidebar-links {
+  gap: 6px;
+  padding-bottom: 12px;
+}
+.sidebar .sidebar-links button {
+  border: 0;
+  border-radius: 999px;
+  padding: 9px 16px;
+  font-weight: 600;
+  color: var(--muted);
+}
+.sidebar .sidebar-links button:hover {
+  color: var(--ink);
+  background: var(--tile);
+}
+.sidebar .sidebar-links button.active {
+  color: var(--accent-soft);
+  background: var(--accent-wash);
+}
+.sidebar nav[aria-label='categories'] {
+  border-top: 0;
+  padding-top: 0;
+}
+:root[data-theme] .sidebar nav[aria-label='categories'] button {
+  border-radius: 999px;
+  background: var(--tile);
+  box-shadow: none;
+  font-weight: 600;
+}
+.sidebar nav[aria-label='categories'] .nav-icon {
+  color: var(--cat);
+}
+:root[data-theme] .sidebar nav[aria-label='categories'] button.active {
+  background: color-mix(in srgb, var(--cat) 20%, var(--tile));
+  color: var(--ink);
+  box-shadow: inset 0 0 0 2px var(--cat);
+}
+:root[data-theme] .sidebar nav button.active .nav-icon {
+  color: var(--cat);
+}
+.sidebar .theme-shortcut {
+  border: 0;
+  background: var(--tile);
+  box-shadow: 0 3px 0 rgb(0 0 0 / 0.45);
+}
+
+/* Buttons: chunky and pressable. */
+.btn {
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+  transition:
+    transform 0.08s ease,
+    box-shadow 0.08s ease,
+    background 0.15s ease;
+}
+:root[data-theme] .btn:not(.ghost):not(.secondary):not(:disabled) {
+  box-shadow: 0 4px 0 var(--press);
+}
+:root[data-theme] .btn.secondary,
+:root[data-theme] .btn.ghost {
+  border-color: transparent;
+  background: var(--tile-2);
+  box-shadow: 0 3px 0 rgb(0 0 0 / 0.5);
+}
+:root[data-theme] .btn.ghost {
+  color: var(--ink);
+}
+.btn:not(:disabled):hover {
+  transform: translateY(-1px);
+}
+:root[data-theme] .btn:not(:disabled):active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 var(--press);
+}
+
+/* Surfaces: tiles instead of outlined boxes. */
+:root[data-theme]
+  :is(
+    .panel,
+    .game-panel,
+    .category-card,
+    .stats-current-round,
+    .stats-metrics,
+    .stats-chart-panel,
+    .friend-score-card,
+    .daily-panel,
+    .answer-form,
+    .frame-item,
+    .profile-showcase,
+    .notice,
+    .milestone,
+    .appearance-teaser
+  ) {
+  border-color: transparent;
+  background: var(--tile);
+  border-radius: var(--radius);
+}
+.toolbar {
+  border-bottom: 0;
+  padding-bottom: 6px;
+}
+.segmented {
+  border: 0;
+  border-radius: 14px;
+  background: var(--tile);
+}
+.segmented button {
+  border-radius: 10px;
+  font-weight: 600;
+}
+:root[data-theme] .segmented .selected,
+:root[data-theme] .segmented button.selected {
+  background: var(--accent);
+  color: #0b0b0b;
+  box-shadow: 0 3px 0 var(--press);
+}
+
+/* Inputs: big, rounded, focus glow. */
+:root .field input,
+:root .field select,
+:root .field textarea {
+  border-radius: var(--radius-sm);
+  border: 2px solid transparent;
+  background: color-mix(in srgb, var(--paper) 70%, #000);
+}
+:root .field input:focus,
+:root .field select:focus,
+:root .field textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 22%, transparent);
+  outline: none;
+}
+
+/* Home: category tiles with their own colour. */
+.category-grid .hub-game-card {
+  border: 0;
+  border-radius: var(--radius);
+  box-shadow: 0 6px 0 color-mix(in srgb, var(--cat) 38%, #000);
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease;
+}
+.category-grid .hub-game-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 9px 0 color-mix(in srgb, var(--cat) 45%, #000);
+}
+.category-grid .hub-game-card:active {
+  transform: translateY(3px);
+  box-shadow: 0 2px 0 color-mix(in srgb, var(--cat) 45%, #000);
+}
+.hub-game-card::before {
+  background:
+    linear-gradient(160deg, color-mix(in srgb, var(--cat) 34%, transparent) 0%, transparent 46%),
+    linear-gradient(180deg, #08080830 0%, #080808b0 50%, #080808f2 100%);
+}
+.hub-card-art {
+  filter: saturate(0.85);
+}
+.hub-game-card .category-icon {
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--cat) !important;
+  color: #0b0b0b !important;
+  box-shadow: 0 3px 0 color-mix(in srgb, var(--cat) 45%, #000);
+}
+.hub-game-card .badge {
+  border: 0;
+  border-radius: 999px;
+  background: #0b0b0bcc;
+  font-weight: 600;
+}
+.hub-game-card .card-bottom {
+  border-top: 0;
+}
+.hub-game-card .card-bottom strong {
+  color: var(--cat);
+}
+.hub-create-card {
+  border: 2px dashed color-mix(in srgb, var(--accent) 45%, transparent);
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--accent-wash) 60%, transparent);
+}
+.progress-track {
+  height: 10px;
+  border-radius: 999px;
+}
+.progress-track i {
+  border-radius: 999px;
+}
+
+/* Game screen: the category colour leads. */
+.game-heading .mode-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px 6px 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--cat) 16%, transparent);
+  color: var(--cat);
+  font-weight: 700;
+}
+:root[data-theme] .game-panel[data-category] {
+  border-top: 4px solid var(--cat);
+}
+.difficulty {
+  border-radius: 999px;
+}
+.hint-buttons button {
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: var(--tile-2);
+  box-shadow: 0 3px 0 rgb(0 0 0 / 0.5);
+}
+.hint-buttons button.unlocked,
+:root[data-theme] .hint-buttons button.unlocked {
+  background: color-mix(in srgb, var(--cat, var(--accent)) 22%, var(--tile-2));
+  box-shadow: inset 0 0 0 2px var(--cat, var(--accent));
+  color: var(--ink);
+}
+.hint-buttons button:disabled {
+  border: 2px dashed color-mix(in srgb, #fff 12%, transparent);
+  background: transparent;
+  box-shadow: none;
+}
+.frame-wrap {
+  border: 0;
+  border-radius: 16px;
+}
+
+/* =========================== Anidle =========================== */
+.anidle-track {
+  max-width: 720px;
+  margin: 0 auto 22px;
+}
+.anidle-track ol {
+  display: grid;
+  grid-template-columns: repeat(22, minmax(0, 1fr));
+  gap: 4px;
+  margin: 0;
+  padding: 0 0 20px;
+  list-style: none;
+}
+.anidle-track li {
+  position: relative;
+  height: 14px;
+  border-radius: 5px;
+  background: var(--tile-2);
+}
+.anidle-track li.is-free {
+  background: color-mix(in srgb, var(--hit) 22%, var(--tile-2));
+}
+.anidle-track li.is-used {
+  background: var(--cat);
+}
+.anidle-track li.is-current {
+  background: var(--ink);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--cat) 45%, transparent);
+}
+.anidle-track li.is-milestone::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: -7px;
+  width: 6px;
+  height: 6px;
+  margin-left: -3px;
+  border-radius: 50%;
+  background: var(--near);
+}
+.anidle-track li span {
+  position: absolute;
+  top: 19px;
+  right: 0;
+  white-space: nowrap;
+  font-size: 0.66rem;
+  font-weight: 600;
+  color: var(--near);
+}
+.anidle-track p {
+  margin: 0;
+  text-align: center;
+  font-size: 0.86rem;
+  color: var(--muted);
+}
+.anidle-form {
+  max-width: 720px;
+  margin: 0 auto 26px;
+}
+.anidle-form .form-actions .btn small {
+  margin-left: 6px;
+  opacity: 0.7;
+  font-weight: 500;
+}
+.anidle-empty {
+  max-width: 520px;
+  margin: 10px auto 0;
+  text-align: center;
+  color: var(--muted);
+}
+
+/* Shared tile + chip vocabulary. */
+.anidle-tiles {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+.anidle-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-height: 84px;
+  padding: 10px 8px;
+  border-radius: 14px;
+  background: var(--miss-bg);
+  box-shadow: 0 4px 0 rgb(0 0 0 / 0.45);
+  text-align: center;
+}
+.anidle-tile .tile-label {
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+.anidle-tile strong {
+  font-size: 1.05rem;
+  font-weight: 800;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+.anidle-tile small {
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+.anidle-tile.is-hit {
+  background: var(--hit);
+  color: var(--hit-ink);
+  box-shadow: 0 4px 0 color-mix(in srgb, var(--hit) 45%, #000);
+}
+.anidle-tile.is-near {
+  background: var(--near);
+  color: var(--near-ink);
+  box-shadow: 0 4px 0 color-mix(in srgb, var(--near) 45%, #000);
+}
+.anidle-tile.is-miss small {
+  color: var(--near);
+}
+.anidle-tile.is-unknown {
+  border: 2px dashed color-mix(in srgb, #fff 14%, transparent);
+  background: transparent;
+  box-shadow: none;
+  color: var(--muted);
+}
+.anidle-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+}
+.chip-label {
+  min-width: 58px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.chip {
+  padding: 5px 11px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: var(--miss-bg);
+  color: color-mix(in srgb, var(--ink) 70%, transparent);
+}
+.chip.is-hit {
+  background: var(--hit);
+  color: var(--hit-ink);
+}
+.chip.is-near {
+  background: var(--near);
+  color: var(--near-ink);
+}
+.chip-empty {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+/* What you know. */
+.summary-toggle {
+  display: flex;
+  justify-content: flex-end;
+  max-width: 880px;
+  margin: 0 auto 10px;
+}
+.summary-toggle button {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+.anidle-known {
+  max-width: 880px;
+  margin: 0 auto 30px;
+  padding: 18px;
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--cat) 9%, var(--tile));
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--cat) 30%, transparent);
+}
+
+/* Guess history. */
+.anidle-history {
+  max-width: 880px;
+  margin: 0 auto;
+}
+.anidle-history-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.anidle-history-head h3 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+.anidle-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  font-size: 0.76rem;
+  color: var(--muted);
+}
+.anidle-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.anidle-legend i {
+  width: 12px;
+  height: 12px;
+  border-radius: 4px;
+  background: var(--miss-bg);
+}
+.anidle-legend i.is-hit {
+  background: var(--hit);
+}
+.anidle-legend i.is-near {
+  background: var(--near);
+}
+.anidle-guesses {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.anidle-guess {
+  padding: 16px;
+  border-radius: var(--radius);
+  background: var(--tile);
+  animation: guess-in 0.28s ease both;
+}
+.anidle-guess.is-correct {
+  box-shadow: inset 0 0 0 2px var(--hit);
+}
+.anidle-guess .guess-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.anidle-guess .guess-head .anime-title {
+  font-size: 1rem;
+  font-weight: 700;
+}
+.anidle-guess .guess-head .anime-japanese-title {
+  display: block;
+  font-size: 0.76rem;
+  font-weight: 400;
+  color: var(--muted);
+}
+.guess-no {
+  flex: none;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--tile-2);
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+@keyframes guess-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .anidle-guess {
+    animation: none;
+  }
+  .btn,
+  .category-grid .hub-game-card {
+    transition: none;
+  }
+}
+
+/* Clue panel (from guess 13). */
+.anidle-clue-panel {
+  max-width: 880px;
+  margin: 0 auto 24px;
+  padding: 18px;
+  border: 0;
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--near) 10%, var(--tile));
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--near) 40%, transparent);
+}
+.anidle-clue-panel h2 {
+  color: var(--near);
+}
+
+@media (max-width: 600px) {
+  .anidle-tiles {
+    gap: 6px;
+  }
+  .anidle-tile {
+    min-height: 72px;
+    padding: 8px 4px;
+  }
+  .anidle-tile strong {
+    font-size: 0.88rem;
+  }
+  .anidle-tile small {
+    font-size: 0.68rem;
+  }
+  .anidle-track ol {
+    gap: 2px;
+  }
+  .anidle-track li {
+    height: 12px;
+    border-radius: 3px;
+  }
+  .anidle-track li span {
+    font-size: 0.6rem;
+  }
+  .anidle-guess,
+  .anidle-known {
+    padding: 12px;
+  }
+  .chip-label {
+    width: 100%;
+  }
+}
+
+/* Anidle polish */
+.anidle-tile {
+  color: var(--ink);
+}
+.anidle-tile strong {
+  overflow-wrap: break-word;
+  word-break: normal;
+  hyphens: auto;
+}
+.anidle-known {
+  background: var(--tile);
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, #fff 8%, transparent);
+}
+.anidle-known .anidle-tile.is-unknown {
+  border-color: color-mix(in srgb, #fff 18%, transparent);
+}
+.anidle-guess .guess-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+.anidle-track li.is-milestone::after {
+  top: -9px;
+}
+.anidle-track li:last-child span {
+  right: 0;
+}
+@media (max-width: 600px) {
+  .anidle-tiles {
+    grid-template-columns: 0.8fr 1.25fr 1.25fr 0.8fr;
+  }
+  .anidle-tile strong {
+    font-size: 0.82rem;
+  }
+  .anidle-tile .tile-label {
+    font-size: 0.6rem;
+  }
+  .anidle-track li span {
+    top: 16px;
+  }
+  .anidle-track li.is-milestone:not(:last-child) span {
+    right: auto;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}
+.anidle-track li.is-milestone:not(:last-child) span {
+  right: auto;
+  left: 50%;
+  transform: translateX(-50%);
+}
+/* Inside the game panel, nested surfaces sit darker so they read as separate tiles. */
+:root[data-theme] .game-panel :is(.answer-form, .anidle-guess, .anidle-known) {
+  background: color-mix(in srgb, var(--paper) 55%, var(--tile));
+}
+.category-grid .hub-game-card .category-icon {
+  background: var(--cat) !important;
+  color: #0b0b0b !important;
+}
+.hub-hero .hub-round-summary {
+  border: 0;
+  padding: 22px;
+  border-radius: var(--radius);
+  background: var(--tile);
+  box-shadow: 0 5px 0 rgb(0 0 0 / 0.4);
+}
+.hub-hero .hub-round-summary > strong {
+  font-size: 2.4rem;
+  font-weight: 800;
+}
+:root[data-theme] .sidebar {
+  background: color-mix(in srgb, var(--paper) 60%, transparent);
+  box-shadow: 0 1px 0 color-mix(in srgb, #fff 5%, transparent);
+}
+/* Streak calendar and milestones as tiles. */
+:root[data-theme] .daily-day {
+  border: 0;
+  border-radius: 12px;
+  background: var(--tile-2);
+  box-shadow: 0 3px 0 rgb(0 0 0 / 0.45);
+}
+:root[data-theme] .daily-day.claimed {
+  background: var(--hit);
+  color: var(--hit-ink);
+  box-shadow: 0 3px 0 color-mix(in srgb, var(--hit) 45%, #000);
+}
+:root[data-theme] .daily-day.today {
+  background: var(--accent-wash);
+  box-shadow:
+    inset 0 0 0 2px var(--accent),
+    0 3px 0 var(--press);
+}
+.streak-ring {
+  border-width: 4px;
+}
+:root[data-theme] .milestone {
+  box-shadow: 0 5px 0 rgb(0 0 0 / 0.4);
+}

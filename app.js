@@ -57,6 +57,18 @@ const esc = (v) =>
   );
 const titleMarkup = (a) =>
   `<span class="anime-title">${esc(a.englishTitle || a.alternativeTitle || a.title)}${(a.japaneseTitle || a.title) !== (a.englishTitle || a.alternativeTitle || a.title) ? `<small class="anime-japanese-title">${esc(a.japaneseTitle || a.title)}</small>` : ''}</span>`;
+const CATEGORY_ICONS = {
+  screenshot:
+    '<rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-9 9"/>',
+  character: '<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/>',
+  opening: '<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',
+  ending: '<path d="M3 18h18M7 18a5 5 0 0 1 10 0M12 6v3M5 10l2 2M19 10l-2 2"/>',
+  anidle:
+    '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="m14 17.5 2 2 4-4"/>',
+};
+/** Inline SVG icon for a category, coloured by the surrounding element. */
+const catIcon = (id) =>
+  `<svg class="cat-svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${CATEGORY_ICONS[id] || ''}</svg>`;
 const fmt = (n) => Number(n).toLocaleString('en-US');
 const button = (action, label, cls = 'btn', extra = '') =>
   `<button type="button" class="${cls}" data-action="${action}" ${extra}>${label}</button>`;
@@ -739,15 +751,26 @@ function anidleSummaryView(g, target) {
   const data = summarizeAnidle(g.guesses, ids(), target);
   const range = (b) =>
     b.exact !== null
-      ? String(b.exact)
+      ? [String(b.exact), 'hit']
       : b.lower !== null && b.upper !== null
-        ? `${b.lower} – ${b.upper}`
+        ? [b.lower === b.upper ? String(b.lower) : `${b.lower}–${b.upper}`, b.lower === b.upper ? 'hit' : 'near']
         : b.lower !== null
-          ? `≥ ${b.lower}`
+          ? [`≥ ${b.lower}`, 'near']
           : b.upper !== null
-            ? `≤ ${b.upper}`
-            : '—';
-  return `<div class="summary-wrap"><table class="comparison summary-table-anidle"><caption class="sr-only">Evidence from your previous guesses</caption><thead><tr>${['Known', 'Year', 'Studio', 'Source', 'Rating', 'Genres', 'Tags'].map((t) => `<th scope="col">${t}</th>`).join('')}</tr></thead><tbody><tr><td><strong>Summary</strong></td><td>${range(data.year)}</td><td>${data.studios.map(esc).join('<br>') || '—'}</td><td>${data.sources.map(esc).join('<br>') || '—'}</td><td>${range(data.score)}</td><td>${data.genres.map((t) => `<span class="tag match">${esc(t)}</span>`).join('') || '—'}</td><td>${data.tags.map((t) => `<span class="tag ${t.match === 'primary' ? 'match' : 'partial'}">${esc(t.value)}</span>`).join('') || '—'}</td></tr></tbody></table></div>`;
+            ? [`≤ ${b.upper}`, 'near']
+            : ['?', 'unknown'];
+  const one = (list) => (list.length ? [list.map(esc).join(' / '), 'hit'] : ['?', 'unknown']);
+  const [year, yearState] = range(data.year),
+    [score, scoreState] = range(data.score),
+    [studio, studioState] = one(data.studios),
+    [source, sourceState] = one(data.sources);
+  return `<section class="anidle-known" aria-label="What you know so far"><div class="anidle-tiles">${anidleTile('Year', year, yearState)}${anidleTile('Studio', studio, studioState)}${anidleTile('Source', source, sourceState)}${anidleTile('Rating', score, scoreState)}</div>${anidleChips(
+    'Genres',
+    data.genres.map((t) => [t, 'hit']),
+  )}${anidleChips(
+    'Tags',
+    data.tags.map((t) => [t.value, t.match === 'primary' ? 'hit' : 'near']),
+  )}</section>`;
 }
 function prepareVideo() {
   const video = app.querySelector('.quiz-video');
@@ -844,7 +867,7 @@ function shell(content) {
               : 'Ready to play';
       return button(
         `play:${c.id}`,
-        `<span class="nav-icon">${c.icon}</span><span>${c.name}<small>${status}</small></span><span class="nav-check">${loop ? (g ? '⟳' : '') : g.done ? '✓' : ''}</span>`,
+        `<span class="nav-icon">${catIcon(c.id)}</span><span>${c.name}<small>${status}</small></span><span class="nav-check">${loop ? (g ? '⟳' : '') : g.done ? '✓' : ''}</span>`,
         view === 'game' && selected === c.id ? 'active' : '',
       );
     },
@@ -915,7 +938,7 @@ function loopDashboard() {
       const loop = state.loops?.[c.id],
         g = loop?.games[c.id],
         stats = loopStats(c.id);
-      return `<button class="category-card hub-game-card" data-action="play:${c.id}">${covers[index] ? `<img class="hub-card-art" ${fastSrc(covers[index].cover, 640, esc)} alt="" loading="lazy" decoding="async">` : ''}<div class="card-top"><span class="category-icon">${c.icon}</span><span class="badge">${loop ? 'Round ' + loop.number : c.rounds === 1 ? '1 game / round' : '3 questions / round'}</span></div><div class="hub-card-copy"><h3>${c.name} loop</h3><p>${c.description}</p><div class="card-bottom"><span>${stats.rounds ? `Best ${fmt(stats.best)} · ${fmt(stats.rounds)} rounds` : 'Up to ' + fmt(c.max) + ' per round'}</span><strong>${g && (g.scores.length || g.guesses.length) ? 'Continue' : 'Loop'} <span aria-hidden="true">⟳</span></strong></div></div></button>`;
+      return `<button class="category-card hub-game-card" data-category="${c.id}" data-action="play:${c.id}">${covers[index] ? `<img class="hub-card-art" ${fastSrc(covers[index].cover, 640, esc)} alt="" loading="lazy" decoding="async">` : ''}<div class="card-top"><span class="category-icon">${catIcon(c.id)}</span><span class="badge">${loop ? 'Round ' + loop.number : c.rounds === 1 ? '1 game / round' : '3 questions / round'}</span></div><div class="hub-card-copy"><h3>${c.name} loop</h3><p>${c.description}</p><div class="card-bottom"><span>${stats.rounds ? `Best ${fmt(stats.best)} · ${fmt(stats.rounds)} rounds` : 'Up to ' + fmt(c.max) + ' per round'}</span><strong>${g && (g.scores.length || g.guesses.length) ? 'Continue' : 'Loop'} <span aria-hidden="true">⟳</span></strong></div></div></button>`;
     },
   ).join('')}</div></section>`;
 }
@@ -944,7 +967,7 @@ function dashboard() {
     (c, index) => {
       const g = s.games[c.id],
         started = g.scores.length || g.guesses.length || g.hints.length;
-      return `<button class="category-card hub-game-card" data-action="play:${c.id}">${covers[index] ? `<img class="hub-card-art" ${fastSrc(covers[index].cover, 640, esc)} alt="" loading="lazy" decoding="async">` : ''}<div class="card-top"><span class="category-icon">${c.icon}</span><span class="badge ${g.done ? 'done' : ''}">${g.done ? '✓ Complete' : started ? 'In progress' : c.id === 'anidle' ? '22 guesses' : '3 questions'}</span></div><div class="hub-card-copy"><h3>${c.name}</h3><p>${c.description}</p><div class="card-bottom"><span>${g.done ? fmt(g.scores.reduce((a, b) => a + b, 0)) : 'Up to ' + fmt(c.max)} points</span><strong>${g.done ? 'View result' : started ? 'Continue' : 'Play'} <span aria-hidden="true">↗</span></strong></div></div></button>`;
+      return `<button class="category-card hub-game-card" data-category="${c.id}" data-action="play:${c.id}">${covers[index] ? `<img class="hub-card-art" ${fastSrc(covers[index].cover, 640, esc)} alt="" loading="lazy" decoding="async">` : ''}<div class="card-top"><span class="category-icon">${catIcon(c.id)}</span><span class="badge ${g.done ? 'done' : ''}">${g.done ? '✓ Complete' : started ? 'In progress' : c.id === 'anidle' ? '22 guesses' : '3 questions'}</span></div><div class="hub-card-copy"><h3>${c.name}</h3><p>${c.description}</p><div class="card-bottom"><span>${g.done ? fmt(g.scores.reduce((a, b) => a + b, 0)) : 'Up to ' + fmt(c.max)} points</span><strong>${g.done ? 'View result' : started ? 'Continue' : 'Play'} <span aria-hidden="true">↗</span></strong></div></div></button>`;
     },
   ).join(
     '',
@@ -965,7 +988,7 @@ function gameView() {
   const c = cat(selected),
     g = session().games[selected],
     level = g.levels?.[g.index] || 'Mix';
-  return `${modeToolbar()}<div class="game-heading"><div><span class="mode-label">${c.icon} ${c.name}</span><h1>${g.done ? 'Your result' : c.verb}</h1><p class="subtle round-meta">${c.id === 'anidle' ? `Guess ${g.attempt} / 22` : `Question ${g.index + 1} / 3`} <span class="difficulty ${level.toLowerCase()}">${level}</span></p></div><div class="game-heading-actions">${isLoop() && !g.done ? button('loop-restart', '↻ New loop', 'btn ghost small', 'title="Throw this round away and start a new one. It will not count in your stats."') : ''}${state.mode === 'infinity' && !social.active && !canAdvance(session()) && hasProgress(session()) ? button('infinity-restart', '↻ Fresh round', 'btn ghost small', 'title="Throw this round away and start a new one. It will not count in your stats."') : ''}${button('help', '?', 'btn ghost small', 'aria-label="Show rules"')}</div></div><div class="game-layout"><section class="game-panel" aria-label="${esc(c.name)}">${g.done ? categorySummary(g) : `${selected === 'screenshot' ? screenshotView(g) : selected === 'character' ? characterView(g) : selected === 'anidle' ? anidleView(g) : musicView(g)}${g.scores.length > g.index ? resultView(g) : ''}`}</section></div>`;
+  return `${modeToolbar()}<div class="game-heading" data-category="${c.id}"><div><span class="mode-label">${catIcon(c.id)} ${c.name}</span><h1>${g.done ? 'Your result' : c.verb}</h1><p class="subtle round-meta">${c.id === 'anidle' ? `Guess ${g.attempt} / 22` : `Question ${g.index + 1} / 3`} <span class="difficulty ${level.toLowerCase()}">${level}</span></p></div><div class="game-heading-actions">${isLoop() && !g.done ? button('loop-restart', '↻ New loop', 'btn ghost small', 'title="Throw this round away and start a new one. It will not count in your stats."') : ''}${state.mode === 'infinity' && !social.active && !canAdvance(session()) && hasProgress(session()) ? button('infinity-restart', '↻ Fresh round', 'btn ghost small', 'title="Throw this round away and start a new one. It will not count in your stats."') : ''}${button('help', '?', 'btn ghost small', 'aria-label="Show rules"')}</div></div><div class="game-layout"><section class="game-panel" data-category="${c.id}" aria-label="${esc(c.name)}">${g.done ? categorySummary(g) : `${selected === 'screenshot' ? screenshotView(g) : selected === 'character' ? characterView(g) : selected === 'anidle' ? anidleView(g) : musicView(g)}${g.scores.length > g.index ? resultView(g) : ''}`}</section></div>`;
 }
 const LOCK_ICON =
   '<svg class="hint-lock" viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path fill="currentColor" d="M5 7V5a3 3 0 0 1 6 0v2h.5A1.5 1.5 0 0 1 13 8.5v5a1.5 1.5 0 0 1-1.5 1.5h-7A1.5 1.5 0 0 1 3 13.5v-5A1.5 1.5 0 0 1 4.5 7H5Zm1.5 0h3V5a1.5 1.5 0 0 0-3 0v2Z"/></svg>';
@@ -1048,25 +1071,64 @@ function musicView(g) {
     : button('music-mode:audio', 'No video clue for this track', 'unlocked', 'disabled');
   return `${mediaElement(m, hasHint && protectedHintsAvailable, mode, a.cover)}<div class="hint-buttons music-mode-buttons">${button('music-mode:audio', hintLabel('Audio only', mode === 'audio' ? 'Playing' : 'Listen'), mode === 'audio' ? 'unlocked' : '')}${controls}</div>${!submitted ? `<form class="answer-form" data-form="anime"><div class="form-line">${field('answer', 'Which anime is this track from?')}<button class="btn" type="submit">Check answer</button></div><div class="form-actions"><span class="subtle">${fmt(roundScore(selected, {correct: true, hints: g.hints.length}))} points available · complete audio track</span>${button('giveup', 'Give up', 'btn ghost small')}</div></form>` : ''}`;
 }
+const ANIDLE_MILESTONES = {13: 'Cover', 18: 'Synopsis', 22: 'Character'};
+function anidleTrack(g) {
+  const next = clueTarget(g.attempt),
+    caption = g.done
+      ? `Finished in ${g.guesses.length} ${g.guesses.length === 1 ? 'guess' : 'guesses'}`
+      : g.attempt <= 3
+        ? `Guess ${g.attempt} of 22 · the first three guesses are free`
+        : next
+          ? `Guess ${g.attempt} of 22 · next clue in ${next - g.attempt} ${next - g.attempt === 1 ? 'guess' : 'guesses'}`
+          : `Guess ${g.attempt} of 22 · every clue is unlocked`;
+  const cells = Array.from({length: 22}, (_, i) => {
+    const n = i + 1,
+      cls = [
+        n < g.attempt ? 'is-used' : n === g.attempt && !g.done ? 'is-current' : '',
+        n <= 3 ? 'is-free' : '',
+        ANIDLE_MILESTONES[n] ? 'is-milestone' : '',
+      ];
+    return `<li class="${cls.join(' ').trim()}">${ANIDLE_MILESTONES[n] ? `<span>${ANIDLE_MILESTONES[n]}</span>` : ''}</li>`;
+  }).join('');
+  return `<div class="anidle-track"><ol aria-hidden="true">${cells}</ol><p>${caption}</p></div>`;
+}
+function anidleTile(label, value, state, note = '') {
+  const said = {hit: 'match', near: 'partly known', miss: 'no match', unknown: 'unknown'}[state] || '';
+  return `<div class="anidle-tile is-${state}"><span class="tile-label">${label}</span><strong>${value}</strong>${note ? `<small>${note}</small>` : ''}<span class="sr-only">${said}</span></div>`;
+}
+function anidleChips(label, items) {
+  return `<div class="anidle-chips"><span class="chip-label">${label}</span>${items.length ? items.map(([text, state]) => `<span class="chip is-${state}">${esc(text)}</span>`).join('') : '<span class="chip-empty">Nothing confirmed yet</span>'}</div>`;
+}
+function anidleGuessCard(guess, target) {
+  const a = anime(guess.id),
+    r = compareAnime(a, target),
+    arrow = (sign, up, down) => (sign > 0 ? `▲ ${up}` : sign < 0 ? `▼ ${down}` : '✓ exact');
+  return `<li class="anidle-guess ${a.id === target.id ? 'is-correct' : ''}"><div class="guess-head"><span class="guess-no">#${guess.attempt}</span>${titleMarkup(a)}</div><div class="anidle-tiles">${anidleTile('Year', a.year ?? '—', r.year === 0 ? 'hit' : 'miss', a.year ? arrow(r.year, 'later', 'earlier') : '')}${anidleTile('Studio', esc(a.studio || '—'), r.studio ? 'hit' : 'miss')}${anidleTile('Source', esc(a.source || '—'), r.source ? 'hit' : 'miss')}${anidleTile('Rating', a.score ?? '—', r.score === null ? 'unknown' : r.score === 0 ? 'hit' : 'miss', r.score === null ? 'no rating' : arrow(r.score, 'higher', 'lower'))}</div>${anidleChips(
+    'Genres',
+    r.genres.map((t) => [t.value, t.match ? 'hit' : 'miss']),
+  )}${anidleChips(
+    'Tags',
+    r.tags.map((t) => [t.value, t.match === 'primary' ? 'hit' : t.match === 'secondary' ? 'near' : 'miss']),
+  )}</li>`;
+}
 function anidleView(g) {
   const target = anime(g.questions[0]),
     done = g.done;
-  return `${g.attempt >= 13 ? anidleClues(g, target) : ''}<div class="anidle-intro"><p class="subtle">${g.guesses.length ? 'Use the matches from your previous guesses.' : 'Start with any anime. Your first three guesses cost no points.'}</p>${g.attempt < 13 ? `<p class="clue-countdown">First clue in ${13 - g.attempt} guesses</p>` : ''}</div>${!done ? `<form class="answer-form" data-form="anidle"><div class="form-line">${field('answer', `Your guess · Attempt ${g.attempt} / 22`)}<button type="submit" class="btn">Check guess</button></div><div class="form-actions">${g.attempt > 3 && clueTarget(g.attempt) ? button('skip-anidle', `⏩ Skip to ${g.attempt < 13 ? 'first' : g.attempt < 18 ? 'next' : 'last'} clue · Guess ${clueTarget(g.attempt)}`, 'btn secondary small') : '<span></span>'}${button('giveup', 'Give up', 'btn ghost small')}</div></form>` : ''}${
-    g.guesses.length
-      ? `<div class="summary-toggle"><button type="button" data-action="toggle-summary" role="switch" aria-checked="${state.showSummary !== false}" aria-controls="anidle-summary">Summary <span class="switch ${state.showSummary !== false ? 'on' : ''}"></span></button></div><div id="anidle-summary" ${state.showSummary === false ? 'hidden' : ''}>${anidleSummaryView(g, target)}</div><div class="comparison-wrap"><table class="comparison"><caption class="sr-only">Compare your guesses with the target anime</caption><thead><tr>${['Anime', 'Year', 'Studio', 'Source', 'Rating', 'Genres', 'Tags'].map((t) => `<th scope="col">${t}</th>`).join('')}</tr></thead><tbody>${[
-          ...g.guesses,
-        ]
-          .reverse()
-          .map((guess) => {
-            const a = anime(guess.id),
-              r = compareAnime(a, target);
-            return `<tr><td><strong>${titleMarkup(a)}</strong><br><span class="subtle">Guess ${guess.attempt}</span></td><td><span class="tag ${r.year ? 'miss' : 'match'}">${a.year ?? '—'} ${r.year > 0 ? '↑' : r.year < 0 ? '↓' : '✓'}</span></td><td><span class="tag ${r.studio ? 'match' : 'miss'}">${esc(a.studio)}</span></td><td><span class="tag ${r.source ? 'match' : 'miss'}">${esc(a.source)}</span></td><td><span class="tag ${r.score === null ? '' : r.score ? 'miss' : 'match'}">${a.score ?? '—'} ${r.score === null ? '' : r.score > 0 ? '↑' : r.score < 0 ? '↓' : '✓'}</span><small class="score-source">${esc(a.scoreSource || 'MyAnimeList')}</small></td><td>${r.genres.map((t) => `<span class="tag ${t.match ? 'match' : 'miss'}">${esc(t.value)}</span>`).join('')}</td><td>${r.tags.map((t) => `<span class="tag ${t.match === 'primary' ? 'match' : t.match === 'secondary' ? 'partial' : 'miss'}">${esc(t.value)}</span>`).join('')}</td></tr>`;
-          })
-          .join(
-            '',
-          )}</tbody></table></div><p class="subtle" style="margin-top:12px">Green = match · Amber = secondary tag · Red = no match. ↑ higher / later, ↓ lower / earlier.</p>`
-      : ''
-  }`;
+  const form = done
+    ? ''
+    : `<form class="answer-form anidle-form" data-form="anidle"><div class="form-line">${field('answer', 'Which anime is it?')}<button type="submit" class="btn">Guess</button></div><div class="form-actions">${g.attempt > 3 && clueTarget(g.attempt) ? button('skip-anidle', `Skip to ${g.attempt < 13 ? 'first' : g.attempt < 18 ? 'next' : 'last'} clue <small>guess ${clueTarget(g.attempt)}</small>`, 'btn secondary small') : '<span></span>'}${button('giveup', 'Give up', 'btn ghost small')}</div></form>`;
+  const guesses = g.guesses.length
+    ? `<section class="anidle-history" aria-label="Your guesses"><div class="anidle-history-head"><h3>Your guesses</h3><div class="anidle-legend" aria-label="Colour key"><span><i class="is-hit"></i>Match</span><span><i class="is-near"></i>Close tag</span><span><i class="is-miss"></i>No match</span></div></div><ol class="anidle-guesses">${[
+        ...g.guesses,
+      ]
+        .reverse()
+        .map((guess) => anidleGuessCard(guess, target))
+        .join('')}</ol></section>`
+    : `<p class="anidle-empty">Start with any anime you know. Each guess shows how close it is to the answer.</p>`;
+  const known = g.guesses.length
+    ? `<div class="summary-toggle"><button type="button" data-action="toggle-summary" role="switch" aria-checked="${state.showSummary !== false}" aria-controls="anidle-summary">Show what you know <span class="switch ${state.showSummary !== false ? 'on' : ''}"></span></button></div><div id="anidle-summary" ${state.showSummary === false ? 'hidden' : ''}>${anidleSummaryView(g, target)}</div>`
+    : '';
+  return `${anidleTrack(g)}${g.attempt >= 13 ? anidleClues(g, target) : ''}${form}${known}${guesses}`;
 }
 function nextCategory() {
   const s = session(),
@@ -1081,7 +1143,7 @@ function nextCategory() {
 function nextCategoryButton() {
   const next = nextCategory();
   return next
-    ? button('play:' + next.id, `Next: ${next.icon} ${next.name} →`)
+    ? button('play:' + next.id, `Next: ${next.name} →`)
     : button('home', state.mode === 'daily' ? 'See your daily result →' : 'See your round result →');
 }
 function resultView(g) {
@@ -1173,7 +1235,7 @@ function libraryView() {
     .map((g) => `<option value="${esc(g)}" ${libraryGenre === g ? 'selected' : ''}>${esc(g)}</option>`)
     .join(
       '',
-    )}</select></label><label class="pool-select"><span>Sort</span><select id="library-sort">${LIBRARY_SORTS.map(([id, label]) => `<option value="${id}" ${librarySort === id ? 'selected' : ''}>${label}</option>`).join('')}</select></label></div><div class="pool-chips" role="group" aria-label="Category">${[['all', 'All', ''], ...CATEGORIES.map((c) => [c.id, c.name, c.icon])].map(([id, label, icon]) => button('library-cat:' + id, `${icon ? `<span aria-hidden="true">${icon}</span> ` : ''}${label}`, 'pool-chip' + (libraryCategory === id ? ' selected' : ''), `aria-pressed="${libraryCategory === id}"`)).join('')}</div><p class="pool-results-count" id="pool-results">${fmt(filtered.length)} anime${pages > 1 ? ` · page ${libraryPage} of ${pages}` : ''}${filteredView ? ` · ${button('clear-library', 'Clear filters', 'link-button')}` : ''}</p><div class="pool-grid">${!visible.length ? `<div class="library-empty" role="status"><h3>No anime found</h3><p>Try another title or character name, or loosen the filters.</p>${button('clear-library', 'Clear filters', 'btn ghost small')}</div>` : visible.map(libraryCard).join('')}</div>${pages > 1 ? `<nav class="library-pagination" aria-label="Pages">${button('library-page:' + String(libraryPage - 1), '‹', 'btn ghost small', 'aria-label="Previous page" ' + (libraryPage <= 1 ? 'disabled' : ''))}${pageButtons.map((n, i) => `${i && n - pageButtons[i - 1] > 1 ? '<span class="page-gap">…</span>' : ''}${button('library-page:' + n, String(n), 'btn ghost small page-number' + (n === libraryPage ? ' selected' : ''), n === libraryPage ? 'aria-current="page"' : '')}`).join('')}${button('library-page:' + String(libraryPage + 1), '›', 'btn ghost small', 'aria-label="Next page" ' + (libraryPage >= pages ? 'disabled' : ''))}</nav>` : ''}<details class="pool-manage"><summary>Manage media pack · <strong>${esc(pack.name)}</strong></summary><p class="subtle">Export the pool, import your own pack, or go back to the default collection.</p><div class="library-tools">${button('export-pack', 'Export pack', 'btn secondary small')}${button('import-pack', 'Import pack', 'btn ghost small')}${packKey() !== starter.key ? button('restore-pack', 'Restore default pool', 'btn ghost small') : ''}<input type="file" id="import-file" accept="application/json,.json" hidden></div></details>${libraryDetail ? libraryDetailView(anime(libraryDetail)) : ''}${editing ? editorView(anime(editing)) : ''}`;
+    )}</select></label><label class="pool-select"><span>Sort</span><select id="library-sort">${LIBRARY_SORTS.map(([id, label]) => `<option value="${id}" ${librarySort === id ? 'selected' : ''}>${label}</option>`).join('')}</select></label></div><div class="pool-chips" role="group" aria-label="Category">${[['all', 'All', ''], ...CATEGORIES.map((c) => [c.id, c.name, catIcon(c.id)])].map(([id, label, icon]) => button('library-cat:' + id, `${icon ? `<span aria-hidden="true">${icon}</span> ` : ''}${label}`, 'pool-chip' + (libraryCategory === id ? ' selected' : ''), `aria-pressed="${libraryCategory === id}"`)).join('')}</div><p class="pool-results-count" id="pool-results">${fmt(filtered.length)} anime${pages > 1 ? ` · page ${libraryPage} of ${pages}` : ''}${filteredView ? ` · ${button('clear-library', 'Clear filters', 'link-button')}` : ''}</p><div class="pool-grid">${!visible.length ? `<div class="library-empty" role="status"><h3>No anime found</h3><p>Try another title or character name, or loosen the filters.</p>${button('clear-library', 'Clear filters', 'btn ghost small')}</div>` : visible.map(libraryCard).join('')}</div>${pages > 1 ? `<nav class="library-pagination" aria-label="Pages">${button('library-page:' + String(libraryPage - 1), '‹', 'btn ghost small', 'aria-label="Previous page" ' + (libraryPage <= 1 ? 'disabled' : ''))}${pageButtons.map((n, i) => `${i && n - pageButtons[i - 1] > 1 ? '<span class="page-gap">…</span>' : ''}${button('library-page:' + n, String(n), 'btn ghost small page-number' + (n === libraryPage ? ' selected' : ''), n === libraryPage ? 'aria-current="page"' : '')}`).join('')}${button('library-page:' + String(libraryPage + 1), '›', 'btn ghost small', 'aria-label="Next page" ' + (libraryPage >= pages ? 'disabled' : ''))}</nav>` : ''}<details class="pool-manage"><summary>Manage media pack · <strong>${esc(pack.name)}</strong></summary><p class="subtle">Export the pool, import your own pack, or go back to the default collection.</p><div class="library-tools">${button('export-pack', 'Export pack', 'btn secondary small')}${button('import-pack', 'Import pack', 'btn ghost small')}${packKey() !== starter.key ? button('restore-pack', 'Restore default pool', 'btn ghost small') : ''}<input type="file" id="import-file" accept="application/json,.json" hidden></div></details>${libraryDetail ? libraryDetailView(anime(libraryDetail)) : ''}${editing ? editorView(anime(editing)) : ''}`;
 }
 function editorView(a) {
   return `<section class="panel editor" id="media-editor"><div class="section-top"><h2>${titleMarkup(a)}</h2>${button('close-editor', 'Close', 'btn ghost small')}</div><form data-form="editor"><div class="editor-body"><div class="field wide"><label for="screenshots">Screenshot URLs (one per line, up to three)</label><textarea name="screenshots" id="screenshots">${esc(

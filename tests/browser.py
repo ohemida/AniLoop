@@ -81,7 +81,7 @@ with sync_playwright() as pw:
  click(p,'play:anidle');target=current(p,'anidle')['questions'][0]
  wrong=[a for a in PACK['anime'] if a['id']!=target and a['score'] is not None][:3]
  for a in wrong:answer(p,a['title'])
- expect(p.locator('.comparison-wrap .comparison tbody tr')).to_have_count(3)
+ expect(p.locator('.anidle-guesses > li')).to_have_count(3)
  answer(p,wrong[0]['title']);expect(p.locator('#toast')).to_contain_text('already guessed')
  click(p,'skip-anidle');assert current(p,'anidle')['attempt']==13
  p.wait_for_function('()=>document.querySelector(".clue-cover img").naturalWidth>0')
