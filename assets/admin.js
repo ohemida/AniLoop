@@ -69,14 +69,14 @@ function pictures(){
  const box=document.querySelector('#pictures');box.replaceChildren();
  const list=(data.pictures||[]).filter(p=>/^data:image\/(png|jpeg|webp);base64,/.test(p.pictureUrl));
  const actions=document.querySelector('#picture-actions');actions.replaceChildren();
- if(list.length){
-  actions.append(btn(`Approve all (${list.length})`,b=>{if(confirm('Approve every picture shown here? Only do this after looking at them.'))write({action:'picture-approve-all'},b,r=>`${r.approved} picture(s) approved.`);}));
+ if(list.some(p=>!p.reviewId)){
+  actions.append(btn(`Approve all pending pictures`,b=>{if(confirm('Approve every picture shown here? Only do this after looking at them.'))write({action:'picture-approve-all'},b,r=>`${r.approved} picture(s) approved.`);}));
   if(data.moderation==='configured')actions.append(btn('Run safety filter again',b=>write({action:'picture-recheck'},b,r=>`${r.approved} approved · ${r.rejected} removed · ${r.waiting} still waiting.`),'ghost'));
  }
  for(const picture of list){
   const article=node('article',null,'picture'),image=node('img');
   image.src=picture.pictureUrl;image.alt=`Profile picture of ${picture.username}`;image.width=96;image.height=96;
-  article.append(image,node('h3',picture.username),btn('Approve',b=>write({action:'picture-approve',userId:picture.userId},b,'Picture approved.')),btn('Reject',b=>{if(confirm('Delete this profile picture?'))write({action:'picture-reject',userId:picture.userId},b,'Picture deleted.');},'ghost danger'));
+  article.append(image,node('h3',picture.username),...(picture.reviewId?[node('p','Manual review requested','muted small')]:[]),btn('Approve',b=>write({action:picture.reviewId?'picture-review-approve':'picture-approve',userId:picture.userId,reviewId:picture.reviewId},b,'Picture approved.')),btn('Reject',b=>{if(confirm(picture.reviewId?'Reject this request? The current picture will remain unchanged.':'Delete this profile picture?'))write({action:picture.reviewId?'picture-review-reject':'picture-reject',userId:picture.userId,reviewId:picture.reviewId},b,picture.reviewId?'Review request rejected.':'Picture deleted.');},'ghost danger'));
   box.append(article);
  }
  if(!list.length)box.append(node('p','No pictures are waiting for review.','muted'));

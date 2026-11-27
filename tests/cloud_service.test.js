@@ -154,6 +154,23 @@ test('profile pictures must pass the safety filter before friends can see them',
  await assert.rejects(checked.picture(users.one,{image:'data:image/jpeg;base64,iVBORw0KGgo'}),/could not be saved/);
 });
 
+test('a flagged picture can be reviewed without replacing the current picture',async()=>{
+ const repo=new FakeRepo(),api=new CloudService(repo,pack,{moderateImage:async()=>({status:'rejected'})});
+ const old='iVBORw0KGgoOLD',image='data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD';
+ repo.docs.set('account:'+users.two,{value:{shards:0,equipped:'classic',owned:[],claims:[],scores:[],picture:old,pictureType:'png',pictureStatus:'approved'},revision:1,owner:users.two});
+ await assert.rejects(api.picture(users.two,{image}),/safety filter/);
+ assert.equal(repo.docs.get('account:'+users.two).value.picture,old);
+ assert.equal((await api.picture(users.two,{image,manualReview:true})).submitted,true);
+ const review=repo.docs.get('picture-review:'+users.two).value;
+ assert.equal(repo.docs.get('account:'+users.two).value.picture,old);
+ await assert.rejects(api.adminAction(users.two,{action:'picture-review-approve',userId:users.two,reviewId:review.id}),/Administrator/);
+ await api.adminAction(users.one,{action:'picture-review-approve',userId:users.two,reviewId:review.id});
+ assert.equal(repo.docs.get('account:'+users.two).value.pictureStatus,'approved');
+ assert.equal(repo.docs.get('account:'+users.two).value.pictureType,'jpeg');
+ assert.equal(repo.docs.has('picture-review:'+users.two),false);
+ await assert.rejects(api.adminAction(users.one,{action:'picture-review-approve',userId:users.two,reviewId:review.id}),/replaced|handled/);
+});
+
 test('friends leaderboard ranks only you and accepted friends, with frames and approved pictures',async()=>{
  const repo=new FakeRepo(),api=new CloudService(repo,pack,{moderateImage:async()=>({status:'approved'})});
  await assert.rejects(api.leaderboard(new URLSearchParams('scope=friends'),null),/Sign in/);
