@@ -10476,16 +10476,89 @@ input.range::-moz-range-track {
   }
 }
 
-/* Appearance tabs stay reachable while scrolling long sections. */
-.appearance-tabs {
-  position: sticky;
-  top: var(--header-h, 0px);
-  z-index: 4;
-  background: color-mix(in srgb, var(--paper, #080808) 88%, transparent);
-  backdrop-filter: blur(12px);
-}
-
 /* The page box previews the dim level live (the slider updates --background-dim). */
 #page-crop-selection {
   background-color: rgb(0 0 0 / var(--background-dim, 0.7));
+}
+
+/* Selects: slim border, custom chevron, one soft focus ring (no double outline). */
+:root .field select {
+  appearance: none;
+  border: 1px solid var(--line);
+  min-height: 44px;
+  padding: 10px 40px 10px 14px;
+  background-color: color-mix(in srgb, var(--paper) 70%, #000);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5l5-5' fill='none' stroke='%23aaa' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  cursor: pointer;
+}
+:root .field select:hover {
+  border-color: color-mix(in srgb, var(--accent) 50%, var(--line));
+}
+:root .field select:focus {
+  border-color: var(--accent);
+  box-shadow: none;
+  outline: none;
+}
+:root .field select:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+.leaderboard-toolbar .field select {
+  min-height: 44px;
+}
+
+/* Account page: picture and background editors come first, then account actions. */
+.account-customize {
+  max-width: 980px;
+  margin-top: 28px;
+  display: grid;
+  gap: 28px;
+}
+.account-customize .appearance-section + .appearance-section {
+  margin-top: 0;
+}
+.account-more {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 16px 20px;
+  border-radius: var(--radius);
+  background: var(--tile);
+}
+.account-more div {
+  display: grid;
+  gap: 2px;
+}
+.account-more span {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+.account-settings {
+  max-width: 680px;
+  margin-top: 28px;
+}
+.account-settings h2 {
+  margin: 0 0 8px;
+}
+.account-settings .hero-actions {
+  margin-top: 14px;
+}
+
+/* File inputs triggered by a styled label button. */
+.file-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+.profile-picture-editor label.btn:has(+ .file-hidden:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.profile-picture-editor label.btn {
+  justify-self: start;
+  margin-bottom: 8px;
 }

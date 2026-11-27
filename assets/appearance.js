@@ -266,10 +266,10 @@ const shared = runtimeConfig.mode === 'supabase';
 const TYPE_BY_TAB = Object.fromEntries(COSMETIC_TYPES.map((t) => [t.tab, t]));
 // Eight item kinds grouped into four tabs; each tab stacks its sections so there are no sub-tabs.
 const TAB_GROUPS = [
-  {id: 'profile', label: 'Profile', views: ['frames', 'picture']},
+  {id: 'profile', label: 'Frames', views: ['frames']},
   {id: 'name', label: 'Name & title', views: ['names', 'titles']},
   {id: 'flair', label: 'Banner & effects', views: ['banners', 'effects']},
-  {id: 'look', label: 'Theme & background', views: ['themes', 'backgrounds']},
+  {id: 'look', label: 'Theme', views: ['themes']},
 ];
 const tabGroup = (id) => TAB_GROUPS.find((g) => g.id === id || g.views.includes(id)) || TAB_GROUPS[0];
 const EFFECT_ICONS = {'effect-sparkle': '✦', 'effect-sakura': '✿', 'effect-confetti': '❖', 'effect-fireworks': '✺'};
@@ -561,6 +561,11 @@ export function createAppearance(ctx) {
   const setUserPatch = (patch) => (markShell(), ctx.setUserPatch(patch));
   const setRewards = (value) => (markShell(), ctx.setRewards(value));
   function refreshPage() {
+    if (ctx.getView() === 'account') {
+      shellDirty = false;
+      ctx.render();
+      return;
+    }
     if (ctx.getView() !== 'appearance') return;
     const main = ctx.app.querySelector('#main');
     if (shellDirty || !main?.querySelector('.appearance-layout')) {
@@ -693,7 +698,7 @@ export function createAppearance(ctx) {
     `<span class="profile-avatar appearance-avatar frame-${esc(frame)} ${classes}">${ctx.avatarImage?.() || esc(ctx.user()?.username.slice(0, 2).toUpperCase() || 'AL')}</span>`;
   function pictureView() {
     if (cropBitmap) queueMicrotask(renderCrop);
-    return `<section class="appearance-section"><h2>Your profile picture.</h2><p>${shared ? 'Choose a picture for your account. After an automatic safety check it is shown next to your username to your friends and on the leaderboard.' : 'Choose a personal image for your account. It is visible only to you, never on leaderboards or other players’ screens.'}</p><div class="profile-picture-editor">${avatar(equipped())}<div><label for="appearance-profile-file">Upload profile picture</label><input id="appearance-profile-file" type="file" accept="image/png,image/jpeg,image/webp" ${busy || !ctx.user() ? 'disabled' : ''}><p class="subtle">PNG, JPEG or WebP · Up to 8 MB. Cropped to a square and saved with your account.</p>${ctx.user()?.hasPicture ? btn('appearance:remove-picture', 'Remove picture', 'btn ghost small', busy ? 'disabled' : '') : ''}${!ctx.user() ? btn('login', 'Sign in to add a picture', 'btn secondary') : ''}</div></div>${cropFile ? `<div class="profile-crop-editor"><h3>Position your picture</h3><p class="subtle">Drag the box to move it and drag any corner to resize. Your current picture stays unchanged until you save.</p>${cropStage('profile-crop-selection', '<canvas id="profile-crop-source" aria-label="Original image"></canvas>', 'Profile picture crop')}<div class="profile-crop-controls"><span class="profile-crop-caption">Final preview</span><canvas id="profile-crop-preview" width="256" height="256" aria-label="Profile picture preview"></canvas><div class="profile-crop-zoom">${btn('appearance:crop-zoom-out', '−', 'btn ghost small', 'aria-label="Zoom out"')}<span id="profile-crop-zoom-label">${Math.round(crop.zoom * 100)}%</span>${btn('appearance:crop-zoom-in', '+', 'btn ghost small', 'aria-label="Zoom in"')}</div><p class="subtle">Drag a corner, scroll or use + to zoom in. At 100%, the box is as large as the image allows.</p><div class="profile-crop-actions">${btn('appearance:save-crop', 'Save picture', 'btn', busy ? 'disabled' : '')}${cropBlocked ? btn('appearance:review-crop', 'Request manual review', 'btn secondary', busy ? 'disabled' : '') : ''}${btn('appearance:cancel-crop', 'Cancel', 'btn ghost', busy ? 'disabled' : '')}</div></div></div>` : ''}${shared && ctx.user()?.hasPicture ? `<div class="picture-status ${ctx.user().pictureStatus === 'approved' ? 'ok' : ''}" role="status"><p>${PICTURE_STATUS[ctx.user().pictureStatus] || PICTURE_STATUS.private}${ctx.user().pictureStatus !== 'approved' && PICTURE_CHECK[ctx.user().pictureCheck] ? ' ' + PICTURE_CHECK[ctx.user().pictureCheck] : ''}</p>${ctx.user().pictureStatus === 'approved' ? '' : btn('appearance:share-picture', ctx.user().pictureStatus === 'pending' ? 'Check again' : 'Share with friends', 'btn secondary small', busy ? 'disabled' : '')}</div>` : ''}<p class="subtle">${shared ? 'Images are resized and metadata is removed. Every upload is checked for nudity, sexual content, graphic violence and self-harm; flagged pictures can be submitted privately for manual review. If the automatic check is unavailable, the picture stays visible only to you until it has been reviewed.' : 'Images are resized and metadata is removed. Their content is not automatically moderated; keeping them private prevents unwanted images appearing to other players.'}</p></section>`;
+    return `<section class="appearance-section"><h2>Your profile picture.</h2><p>${shared ? 'Choose a picture for your account. After an automatic safety check it is shown next to your username to your friends and on the leaderboard.' : 'Choose a personal image for your account. It is visible only to you, never on leaderboards or other players’ screens.'}</p><div class="profile-picture-editor">${avatar(equipped())}<div><label class="btn secondary small ${busy || !ctx.user() ? 'is-disabled' : ''}" for="appearance-profile-file">${ctx.user()?.hasPicture ? 'Change picture' : 'Upload picture'}</label><input id="appearance-profile-file" class="file-hidden" type="file" accept="image/png,image/jpeg,image/webp" ${busy || !ctx.user() ? 'disabled' : ''}><p class="subtle">PNG, JPEG or WebP · Up to 8 MB. Cropped to a square and saved with your account.</p>${ctx.user()?.hasPicture ? btn('appearance:remove-picture', 'Remove picture', 'btn ghost small', busy ? 'disabled' : '') : ''}${!ctx.user() ? btn('login', 'Sign in to add a picture', 'btn secondary') : ''}</div></div>${cropFile ? `<div class="profile-crop-editor"><h3>Position your picture</h3><p class="subtle">Drag the box to move it and drag any corner to resize. Your current picture stays unchanged until you save.</p>${cropStage('profile-crop-selection', '<canvas id="profile-crop-source" aria-label="Original image"></canvas>', 'Profile picture crop')}<div class="profile-crop-controls"><span class="profile-crop-caption">Final preview</span><canvas id="profile-crop-preview" width="256" height="256" aria-label="Profile picture preview"></canvas><div class="profile-crop-zoom">${btn('appearance:crop-zoom-out', '−', 'btn ghost small', 'aria-label="Zoom out"')}<span id="profile-crop-zoom-label">${Math.round(crop.zoom * 100)}%</span>${btn('appearance:crop-zoom-in', '+', 'btn ghost small', 'aria-label="Zoom in"')}</div><p class="subtle">Drag a corner, scroll or use + to zoom in. At 100%, the box is as large as the image allows.</p><div class="profile-crop-actions">${btn('appearance:save-crop', 'Save picture', 'btn', busy ? 'disabled' : '')}${cropBlocked ? btn('appearance:review-crop', 'Request manual review', 'btn secondary', busy ? 'disabled' : '') : ''}${btn('appearance:cancel-crop', 'Cancel', 'btn ghost', busy ? 'disabled' : '')}</div></div></div>` : ''}${shared && ctx.user()?.hasPicture ? `<div class="picture-status ${ctx.user().pictureStatus === 'approved' ? 'ok' : ''}" role="status"><p>${PICTURE_STATUS[ctx.user().pictureStatus] || PICTURE_STATUS.private}${ctx.user().pictureStatus !== 'approved' && PICTURE_CHECK[ctx.user().pictureCheck] ? ' ' + PICTURE_CHECK[ctx.user().pictureCheck] : ''}</p>${ctx.user().pictureStatus === 'approved' ? '' : btn('appearance:share-picture', ctx.user().pictureStatus === 'pending' ? 'Check again' : 'Share with friends', 'btn secondary small', busy ? 'disabled' : '')}</div>` : ''}<p class="subtle">${shared ? 'Images are resized and metadata is removed. Every upload is checked for nudity, sexual content, graphic violence and self-harm; flagged pictures can be submitted privately for manual review. If the automatic check is unavailable, the picture stays visible only to you until it has been reviewed.' : 'Images are resized and metadata is removed. Their content is not automatically moderated; keeping them private prevents unwanted images appearing to other players.'}</p></section>`;
   }
   function framesView(controls = true) {
     const items = FRAMES.filter((f) => filter === 'all' || owns(f.id));
@@ -809,6 +814,11 @@ export function createAppearance(ctx) {
         return true;
       }
       if (operation === 'tab') {
+        // Picture and background editing live on the account page.
+        if (['picture', 'backgrounds'].includes(id) && ctx.user()) {
+          ctx.go('account');
+          return true;
+        }
         tab = tabGroup(id).id;
         refreshPage();
         return true;
@@ -1010,5 +1020,9 @@ export function createAppearance(ctx) {
   function rewardsTeaser() {
     return `<section class="appearance-teaser"><div class="teaser-frames">${['neon', 'aurora', 'galaxy'].map((id) => avatar(id)).join('')}</div><div><h2>Give your profile a signature.</h2><p>Explore frames, dark themes, and personal backgrounds in Appearance.</p></div>${btn('appearance', 'Open Appearance', 'btn secondary')}</section>`;
   }
-  return {view, action, change, input, restore, updateContext, rewardsTeaser, adoptRemote, pushLocal};
+  /** Profile picture and background editors, shown first on the account page. */
+  function accountSections() {
+    return pictureView() + backgroundsView();
+  }
+  return {view, accountSections, action, change, input, restore, updateContext, rewardsTeaser, adoptRemote, pushLocal};
 }

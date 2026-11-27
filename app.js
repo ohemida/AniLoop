@@ -333,7 +333,7 @@ function rememberAccount() {
 function accountView() {
   if (!currentUser)
     return `<section class="community-intro"><img class="community-logo" src="assets/mark.svg" alt="AniLoop original logo"><h1>A name for your score.</h1><p>Play as a guest, or create an account to submit completed rounds and join the community leaderboard.</p><div class="hero-actions">${button('register', 'Create account')}${button('login', 'Sign in', 'btn ghost')}</div></section>`;
-  return `<section class="community-intro"><span class="profile-avatar ${social.frameClass()}">${ownProfileImage() || esc(currentUser.username.slice(0, 2).toUpperCase())}</span><span class="mode-label">Your account</span><h1>${esc(currentUser.username)}</h1><p class="subtle">${currentUser.provider === 'supabase' ? 'Supabase account · Cloud game community' : 'Local account · Stored on this AniLoop server'}</p><p>Your username and submitted scores are public. Your password is never stored in plain text. ${cloudMode ? 'Quiz progress and custom media stay on this browser.' : 'Solo games and custom media stay on this browser; room progress is shared on the server.'}</p><div class="hero-actions">${currentUser.isAdmin ? '<a class="btn secondary" href="admin.html">Admin dashboard</a>' : ''}${button('export-account', 'Download my account data', 'btn secondary')}${button('leaderboard', 'View leaderboards')}${button('logout', 'Sign out', 'btn ghost')}</div></section><section class="panel account-danger"><h2>Delete account</h2><p class="subtle">Permanently removes your account, sessions, and all your leaderboard entries. Your local game progress remains on this device.</p><form data-community-form="delete" class="account-form"><div class="field"><label for="delete-password">Current password</label><input id="delete-password" name="password" type="password" autocomplete="current-password" minlength="12" maxlength="128" required></div><label class="delete-confirm"><input type="checkbox" name="confirm" required> I want to permanently delete my account and scores.</label><p class="account-error" role="alert" hidden></p><button class="btn ghost" type="submit">Delete my account</button></form></section>`;
+  return `<section class="community-intro"><span class="mode-label">Your account</span><h1>${esc(currentUser.username)}</h1><p class="subtle">${currentUser.provider === 'supabase' ? 'Supabase account · Cloud game community' : 'Local account · Stored on this AniLoop server'}</p></section><div class="account-customize">${appearance.accountSections()}<div class="account-more"><div><strong>Frames, titles, name colours and themes</strong><span>Unlock and equip cosmetics with Loop Shards.</span></div>${button('appearance', 'Open Appearance', 'btn secondary small')}</div></div><section class="panel account-settings"><h2>Account</h2><p class="subtle">Your username and submitted scores are public. Your password is never stored in plain text. ${cloudMode ? 'Quiz progress and custom media stay on this browser.' : 'Solo games and custom media stay on this browser; room progress is shared on the server.'}</p><div class="hero-actions">${button('export-account', 'Download my account data', 'btn ghost small')}${button('logout', 'Sign out', 'btn ghost small')}</div></section><section class="panel account-danger"><h2>Delete account</h2><p class="subtle">Permanently removes your account, sessions, and all your leaderboard entries. Your local game progress remains on this device.</p><form data-community-form="delete" class="account-form"><div class="field"><label for="delete-password">Current password</label><input id="delete-password" name="password" type="password" autocomplete="current-password" minlength="12" maxlength="128" required></div><label class="delete-confirm"><input type="checkbox" name="confirm" required> I want to permanently delete my account and scores.</label><p class="account-error" role="alert" hidden></p><button class="btn ghost" type="submit">Delete my account</button></form></section>`;
 }
 function scoreButton() {
   if (isLoop()) return '';
@@ -851,7 +851,7 @@ function prepareVideo() {
 function shell(content) {
   const s = session(),
     count = completedCount(s);
-  return `<header class="sidebar" data-view="${view}"><div class="header-inner"><a class="brand" href="#" data-action="home"><img src="assets/mark.svg" alt="">Ani<span>Loop</span></a><span class="sidebar-caption">Your anime quiz</span><button type="button" class="theme-shortcut" data-action="theme-picker" aria-label="Themes &amp; backgrounds" title="Themes &amp; backgrounds"><span aria-hidden="true">◐</span><span>Themes & backgrounds<small>Make AniLoop yours</small></span></button><nav aria-label="categories">${CATEGORIES.map(
+  return `<header class="sidebar" data-view="${view}"><div class="header-inner"><a class="brand" href="#" data-action="home"><img src="assets/mark.svg" alt="">Ani<span>Loop</span></a><span class="sidebar-caption">Your anime quiz</span><nav aria-label="categories">${CATEGORIES.map(
     (c) => {
       const loop = isLoop(),
         ls = loop ? state.loops?.[c.id] : s,
@@ -1288,15 +1288,7 @@ function render() {
   if (heading) heading.setAttribute('tabindex', '-1');
   warmMedia();
   celebrateAnswer();
-  measureHeader();
 }
-// Sticky elements below the header (e.g. the Appearance tabs) need its live height.
-function measureHeader() {
-  const header = app.querySelector('.sidebar'),
-    pinned = header && ['sticky', 'fixed'].includes(getComputedStyle(header).position);
-  document.documentElement.style.setProperty('--header-h', pinned ? header.offsetHeight + 'px' : '0px');
-}
-addEventListener('resize', measureHeader, {passive: true});
 // On narrow screens the tab rows scroll sideways; keep the current tab visible.
 function centerActiveTabs() {
   for (const bar of app.querySelectorAll('.sidebar-links, .sidebar nav[aria-label="categories"]')) {

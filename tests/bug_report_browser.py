@@ -1,5 +1,5 @@
 from privacy_fixture import open_app
-"""Guest reports, transparent diagnostics, offline draft/download, and visible theme entry."""
+"""Guest reports, transparent diagnostics, offline draft/download, ."""
 from pathlib import Path
 import json,os
 from playwright.sync_api import sync_playwright,expect
@@ -7,9 +7,6 @@ ROOT=Path(__file__).resolve().parents[1];URL=os.environ.get('ANILOOP_URL','http:
 with sync_playwright() as pw:
     browser=pw.chromium.launch();page=browser.new_page(viewport={'width':1440,'height':1100});errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
     open_app(page,URL);page.locator('.hero').wait_for();saved=page.evaluate("localStorage.getItem('aniloop-state-v1')")
-    shortcut=page.locator('.theme-shortcut');expect(shortcut).to_be_visible()
-    assert shortcut.bounding_box()['y']<200
-    shortcut.click();expect(page.locator('.theme-collection')).to_be_visible()
     page.get_by_role('button',name='Report a bug',exact=True).click()
     page.locator('#bug-title').fill('Opening video never starts');page.locator('#bug-category').select_option('Openings')
     page.locator('#bug-steps').fill('Start the opening quiz and unlock the video hint.')
@@ -25,11 +22,10 @@ with sync_playwright() as pw:
     page.screenshot(path=str(ROOT/'qa/bug-report-desktop.png'),full_page=True)
     for width in [1024,768,390,320]:
         page.set_viewport_size({'width':width,'height':1000});assert page.evaluate('document.documentElement.scrollWidth<=innerWidth+1'),width
-        expect(page.locator('.theme-shortcut')).to_be_visible()
     page.screenshot(path=str(ROOT/'qa/bug-report-mobile.png'),full_page=True)
     with page.expect_response('**/api/bugs') as response:page.get_by_role('button',name='Send bug report').click()
     assert response.value.ok;identifier=response.value.json()['id'];expect(page.locator('.report-success')).to_contain_text(identifier)
     assert page.request.get(URL+'/api/bugs').status==404
     assert page.request.post(URL+'/api/bugs',data=contents,headers={'Origin':'https://example.com'}).status==403
     assert page.evaluate("localStorage.getItem('aniloop-state-v1')")==saved
-    assert not errors,errors;browser.close();print('PASS: prominent direct theme shortcut, guest report persistence, diagnostics opt-out, download, draft navigation/retry, mobile layout, cross-origin rejection and saves unchanged')
+    assert not errors,errors;browser.close();print('PASS: guest report persistence, diagnostics opt-out, download, draft navigation/retry, mobile layout, cross-origin rejection and saves unchanged')
