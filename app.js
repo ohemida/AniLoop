@@ -828,7 +828,7 @@ function prepareVideo() {
 function shell(content) {
   const s = session(),
     count = completedCount(s);
-  return `<header class="sidebar" data-view="${view}"><div class="header-inner"><a class="brand" href="#" data-action="home"><img src="assets/mark.svg" alt="">Ani<span>Loop</span></a><span class="sidebar-caption">Your anime quiz</span><button type="button" class="theme-shortcut" data-action="theme-picker"><span aria-hidden="true">◐</span><span>Themes & backgrounds<small>Make AniLoop yours</small></span></button><nav aria-label="categories">${CATEGORIES.map(
+  return `<header class="sidebar" data-view="${view}"><div class="header-inner"><a class="brand" href="#" data-action="home"><img src="assets/mark.svg" alt="">Ani<span>Loop</span></a><span class="sidebar-caption">Your anime quiz</span><button type="button" class="theme-shortcut" data-action="theme-picker" aria-label="Themes &amp; backgrounds" title="Themes &amp; backgrounds"><span aria-hidden="true">◐</span><span>Themes & backgrounds<small>Make AniLoop yours</small></span></button><nav aria-label="categories">${CATEGORIES.map(
     (c) => {
       const loop = isLoop(),
         ls = loop ? state.loops?.[c.id] : s,
@@ -956,7 +956,7 @@ function mediaNotice() {
   return `<aside class="notice"><span>◉</span><span><strong>${pack.anime.length} anime in the pool</strong> · ${counts.screenshot.reduce((a, b) => a + b, 0)} scene sets · ${counts.character.reduce((a, b) => a + b, 0)} characters · ${counts.opening.reduce((a, b) => a + b, 0) + counts.ending.reduce((a, b) => a + b, 0)} music tracks. Easy, Medium, and Hard are reshuffled every round. ${button('library', 'Explore the pool', '')}</span></aside>`;
 }
 function field(name, label, list = 'anime', value = '') {
-  return `<div class="field"><label for="${name}">${label}</label><input id="${name}" name="${name}" value="${esc(value)}" data-suggest="${list}" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="${name}-suggestions" autocomplete="off" placeholder="${list === 'character' ? 'Character name' : 'Type an anime title'}"><div class="suggestions" id="${name}-suggestions" role="listbox" hidden></div></div>`;
+  return `<div class="field"><label for="${name}">${label}</label><input id="${name}" name="${name}" value="${esc(value)}" data-suggest="${list}" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="${name}-suggestions" autocomplete="off" placeholder="${list === 'character' ? 'Character name' : 'Anime title'}"><div class="suggestions" id="${name}-suggestions" role="listbox" hidden></div></div>`;
 }
 function submitControls(extra = '') {
   return `<div class="form-actions"><span class="subtle">${extra || 'Choose a title from the suggestions.'}</span><div>${button('giveup', 'Give up', 'btn ghost small')} <button class="btn" type="submit">Submit answers</button></div></div>`;
@@ -967,13 +967,44 @@ function gameView() {
     level = g.levels?.[g.index] || 'Mix';
   return `${modeToolbar()}<div class="game-heading"><div><span class="mode-label">${c.icon} ${c.name}</span><h1>${g.done ? 'Your result' : c.verb}</h1><p class="subtle round-meta">${c.id === 'anidle' ? `Guess ${g.attempt} / 22` : `Question ${g.index + 1} / 3`} <span class="difficulty ${level.toLowerCase()}">${level}</span></p></div><div class="game-heading-actions">${isLoop() && !g.done ? button('loop-restart', '↻ New loop', 'btn ghost small', 'title="Throw this round away and start a new one. It will not count in your stats."') : ''}${state.mode === 'infinity' && !social.active && !canAdvance(session()) && hasProgress(session()) ? button('infinity-restart', '↻ Fresh round', 'btn ghost small', 'title="Throw this round away and start a new one. It will not count in your stats."') : ''}${button('help', '?', 'btn ghost small', 'aria-label="Show rules"')}</div></div><div class="game-layout"><section class="game-panel" aria-label="${esc(c.name)}">${g.done ? categorySummary(g) : `${selected === 'screenshot' ? screenshotView(g) : selected === 'character' ? characterView(g) : selected === 'anidle' ? anidleView(g) : musicView(g)}${g.scores.length > g.index ? resultView(g) : ''}`}</section></div>`;
 }
+const LOCK_ICON =
+  '<svg class="hint-lock" viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path fill="currentColor" d="M5 7V5a3 3 0 0 1 6 0v2h.5A1.5 1.5 0 0 1 13 8.5v5a1.5 1.5 0 0 1-1.5 1.5h-7A1.5 1.5 0 0 1 3 13.5v-5A1.5 1.5 0 0 1 4.5 7H5Zm1.5 0h3V5a1.5 1.5 0 0 0-3 0v2Z"/></svg>';
+/** Two-line hint button: the clue name and what pressing it does (cost, lock reason, state). */
+function hintLabel(name, note, status = '') {
+  return `<span class="hint-name">${status === 'used' ? '✓ ' : ''}${esc(name)}</span><small class="hint-note">${status === 'locked' ? LOCK_ICON : ''}${esc(note)}</small>`;
+}
 function screenshotView(g) {
   const a = anime(g.questions[g.index]),
     submitted = g.scores.length > g.index,
     frames = questionFrames(g),
     index = g.activeFrame ?? 0,
     src = frames[Math.min(index, frames.length - 1)];
-  return `<div class="frame-wrap"><img class="question-image" ${fastSrc(src, 1280, esc)} fetchpriority="high" decoding="async" alt="Mystery anime scene"><span class="frame-caption">${index === 0 ? 'Original scene' : 'Scene clue ' + index}</span></div><div class="hint-buttons">${button('view-frame:0', '▧ Original scene', index === 0 ? 'unlocked' : '')}${[1, 2, 3].map((n) => button(g.hints.includes(n) && n < 3 ? `view-frame:${n}` : `hint:${n}`, `${g.hints.includes(n) ? '✓' : '♧'} ${n === 3 ? 'Title clue' : `Scene clue ${n}`} ${g.hints.includes(n) ? '' : '−2,500'}`, g.hints.includes(n) ? 'unlocked' : '', submitted || (n > 1 && !g.hints.includes(n - 1)) ? 'disabled' : '')).join('')}</div>${g.hints.includes(3) ? `<p class="hint-text hint-title">Main title: ${esc(maskTitle(a.englishTitle || a.alternativeTitle || a.title))}<br>Japanese title: ${esc(maskTitle(a.japaneseTitle || a.title))}</p>` : ''}${!submitted ? `<form class="answer-form" data-form="anime"><div class="form-line">${field('answer', 'Which anime is this?')}<button class="btn" type="submit">Check answer</button></div><div class="form-actions"><span class="subtle">${fmt(roundScore('screenshot', {correct: true, hints: g.hints.length}))} points available</span>${button('giveup', 'Give up', 'btn ghost small')}</div></form>` : ''}`;
+  return `<div class="frame-wrap"><img class="question-image" ${fastSrc(src, 1280, esc)} fetchpriority="high" decoding="async" alt="Mystery anime scene"><span class="frame-caption">${index === 0 ? 'Original scene' : 'Scene clue ' + index}</span></div><div class="hint-buttons">${button('view-frame:0', hintLabel('Original scene', index === 0 ? 'Showing' : 'View'), index === 0 ? 'unlocked' : '')}${[
+    1, 2, 3,
+  ]
+    .map((n) => {
+      const name = n === 3 ? 'Title clue' : `Scene clue ${n}`,
+        used = g.hints.includes(n),
+        locked = !used && n > 1 && !g.hints.includes(n - 1);
+      const note = used
+        ? n < 3
+          ? 'View'
+          : 'Shown below'
+        : submitted
+          ? 'Not used'
+          : locked
+            ? `After ${n === 3 ? 'scene clue 2' : 'clue ' + (n - 1)}`
+            : 'Costs 2,500';
+      return button(
+        used && n < 3 ? `view-frame:${n}` : `hint:${n}`,
+        hintLabel(name, note, used ? 'used' : locked && !submitted ? 'locked' : ''),
+        [used ? 'unlocked' : '', locked && !submitted ? 'locked' : ''].join(' ').trim(),
+        submitted || locked ? 'disabled' : '',
+      );
+    })
+    .join(
+      '',
+    )}</div>${g.hints.includes(3) ? `<p class="hint-text hint-title">Main title: ${esc(maskTitle(a.englishTitle || a.alternativeTitle || a.title))}<br>Japanese title: ${esc(maskTitle(a.japaneseTitle || a.title))}</p>` : ''}${!submitted ? `<form class="answer-form" data-form="anime"><div class="form-line">${field('answer', 'Which anime is this?')}<button class="btn" type="submit">Check answer</button></div><div class="form-actions"><span class="subtle">${fmt(roundScore('screenshot', {correct: true, hints: g.hints.length}))} points available</span>${button('giveup', 'Give up', 'btn ghost small')}</div></form>` : ''}`;
 }
 function characterView(g) {
   const submitted = g.scores.length > g.index,
@@ -1008,12 +1039,14 @@ function musicView(g) {
   const controls = protectedHintsAvailable
     ? button(
         hasHint ? 'music-mode:video' : 'hint:1',
-        hasHint ? '✓ Video clue unlocked' : '♧ Unlock video clue −2,500',
+        hasHint
+          ? hintLabel('Video clue', mode === 'video' ? 'Showing' : 'Watch', 'used')
+          : hintLabel('Video clue', submitted ? 'Not used' : 'Costs 2,500'),
         mode === 'video' ? 'unlocked' : '',
         submitted && !hasHint ? 'disabled' : '',
       )
     : button('music-mode:audio', 'No video clue for this track', 'unlocked', 'disabled');
-  return `${mediaElement(m, hasHint && protectedHintsAvailable, mode, a.cover)}<div class="hint-buttons music-mode-buttons">${button('music-mode:audio', '♫ Audio only', mode === 'audio' ? 'unlocked' : '')}${controls}</div>${!submitted ? `<form class="answer-form" data-form="anime"><div class="form-line">${field('answer', 'Which anime is this track from?')}<button class="btn" type="submit">Check answer</button></div><div class="form-actions"><span class="subtle">${fmt(roundScore(selected, {correct: true, hints: g.hints.length}))} points available · complete audio track</span>${button('giveup', 'Give up', 'btn ghost small')}</div></form>` : ''}`;
+  return `${mediaElement(m, hasHint && protectedHintsAvailable, mode, a.cover)}<div class="hint-buttons music-mode-buttons">${button('music-mode:audio', hintLabel('Audio only', mode === 'audio' ? 'Playing' : 'Listen'), mode === 'audio' ? 'unlocked' : '')}${controls}</div>${!submitted ? `<form class="answer-form" data-form="anime"><div class="form-line">${field('answer', 'Which anime is this track from?')}<button class="btn" type="submit">Check answer</button></div><div class="form-actions"><span class="subtle">${fmt(roundScore(selected, {correct: true, hints: g.hints.length}))} points available · complete audio track</span>${button('giveup', 'Give up', 'btn ghost small')}</div></form>` : ''}`;
 }
 function anidleView(g) {
   const target = anime(g.questions[0]),
@@ -1190,12 +1223,38 @@ function render() {
   );
   updateCountdown();
   prepareHints();
+  centerActiveTabs();
+  markLoadingImages();
   if (view === 'stats') statistics.afterRender();
   const heading = app.querySelector('main h1');
   if (heading) heading.setAttribute('tabindex', '-1');
   warmMedia();
   celebrateAnswer();
 }
+// On narrow screens the tab rows scroll sideways; keep the current tab visible.
+function centerActiveTabs() {
+  for (const bar of app.querySelectorAll('.sidebar-links, .sidebar nav[aria-label="categories"]')) {
+    const active = bar.querySelector('.active');
+    if (!active || bar.scrollWidth <= bar.clientWidth) continue;
+    const a = active.getBoundingClientRect(),
+      b = bar.getBoundingClientRect();
+    bar.scrollLeft += a.left - b.left - (b.width - a.width) / 2;
+  }
+}
+// Question images show a shimmer until they arrive, so a slow connection never looks like a broken black box.
+const LOADING_IMAGES = '.question-image, .character-item > img';
+const loadingBox = (img) => img.closest('.frame-wrap') || img;
+function markLoadingImages() {
+  for (const img of app.querySelectorAll(LOADING_IMAGES))
+    if (!img.complete || !img.naturalWidth) loadingBox(img).classList.add('media-loading');
+}
+app.addEventListener(
+  'load',
+  (e) => {
+    if (e.target.matches?.(LOADING_IMAGES)) loadingBox(e.target).classList.remove('media-loading');
+  },
+  true,
+);
 let celebrateNext = false;
 function celebrateAnswer() {
   if (!celebrateNext) return;
@@ -2190,6 +2249,7 @@ app.addEventListener(
       if (recoverImage(e.target)) return;
       if (e.target.dataset.failed) return;
       e.target.dataset.failed = '1';
+      if (e.target.matches(LOADING_IMAGES)) loadingBox(e.target).classList.remove('media-loading');
       e.target.alt = 'Image unavailable. Check its source in the media library.';
       e.target.style.minHeight = '100px';
     } else if (e.target.matches('audio,video') && !e.target.classList.contains('hint-source')) {

@@ -9934,3 +9934,351 @@ body {
     align-items: center;
   }
 }
+
+/* ==== Refinements: hint buttons, image loading, appearance grid, mobile ==== */
+
+/* Hint buttons: clue name on top, what it costs or why it is locked underneath. */
+.hint-buttons button {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 2px;
+  min-width: 128px;
+}
+.hint-buttons .hint-name {
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+.hint-buttons .hint-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: var(--muted);
+}
+.hint-buttons button.unlocked .hint-note {
+  color: var(--accent-soft);
+}
+.hint-buttons button:disabled {
+  opacity: 1;
+  background: #131313;
+  border-color: #2e2e2e;
+  border-style: dashed;
+  color: #a39aa8;
+}
+.hint-buttons button:disabled .hint-note {
+  color: #8f8695;
+}
+.hint-lock {
+  flex: none;
+}
+
+/* Question images: shimmer until the picture arrives. */
+@keyframes media-shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: 0 0;
+  }
+}
+.frame-wrap.media-loading::after,
+.character-item > img.media-loading {
+  background: linear-gradient(100deg, #0d0e12 35%, #1c1c24 50%, #0d0e12 65%) 0 0 / 300% 100%;
+  animation: media-shimmer 1.4s linear infinite;
+}
+.frame-wrap.media-loading::after {
+  content: 'Loading scene…';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+@media (prefers-reduced-motion: reduce) {
+  .frame-wrap.media-loading::after,
+  .character-item > img.media-loading {
+    animation: none;
+    background: #15151b;
+  }
+}
+
+/* Appearance: compact multi-column collection, one sign-in banner for guests. */
+.appearance-showcase {
+  top: 150px;
+}
+.frame-collection {
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+}
+.frame-visual {
+  min-height: 118px;
+  padding: 20px 16px 34px;
+}
+.frame-item-copy {
+  padding: 14px 16px 16px;
+}
+.frame-item p {
+  min-height: 0;
+}
+.frame-item-actions {
+  margin-top: 12px;
+}
+.appearance-guest-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px 20px;
+  margin: 0 0 16px;
+  padding: 16px 18px;
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  border-radius: 12px;
+  background: var(--accent-wash);
+}
+.appearance-guest-banner strong {
+  display: block;
+  font-size: 0.92rem;
+}
+.appearance-guest-banner span {
+  display: block;
+  max-width: 56ch;
+  margin-top: 4px;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+.appearance-guest-actions {
+  display: flex;
+  flex: none;
+  gap: 8px;
+}
+
+/* Phones and small tablets. */
+@media (max-width: 768px) {
+  /* Compact header: logo · theme icon · avatar on one row, then the tabs. */
+  .sidebar .header-inner {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: 0 10px;
+  }
+  .sidebar .theme-shortcut {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    margin: 0;
+    padding: 0;
+    border-radius: 12px;
+  }
+  .sidebar .theme-shortcut > span:last-child {
+    display: none;
+  }
+  .sidebar .header-end {
+    grid-column: 3;
+  }
+  .sidebar .sidebar-links,
+  .sidebar nav[aria-label='categories'] {
+    scrollbar-width: none;
+    padding-right: 32px;
+    mask-image: linear-gradient(to right, #000 calc(100% - 40px), transparent);
+  }
+  .sidebar .sidebar-links::-webkit-scrollbar,
+  .sidebar nav[aria-label='categories']::-webkit-scrollbar {
+    display: none;
+  }
+  .sidebar .sidebar-links {
+    grid-row: 2;
+    margin-top: 10px;
+  }
+  .sidebar .sidebar-links button {
+    min-height: 44px;
+    padding: 12px;
+    font-size: 0.86rem;
+  }
+  .sidebar nav[aria-label='categories'] {
+    grid-row: 3;
+  }
+  .sidebar nav[aria-label='categories'] button {
+    min-height: 42px;
+    padding: 10px 12px;
+    font-size: 0.84rem;
+  }
+  /* During a question the page menu steps aside; the logo still leads home. */
+  .sidebar[data-view='game'] .sidebar-links {
+    display: none;
+  }
+  .sidebar[data-view='game'] nav[aria-label='categories'] {
+    grid-row: 2;
+    margin-top: 12px;
+  }
+
+  /* Readable mode switcher and round line. */
+  .toolbar .segmented button {
+    min-height: 42px;
+    font-size: 0.84rem;
+  }
+  .round-label {
+    font-size: 0.82rem;
+  }
+
+  /* Game heading: rules button sits beside the title instead of on its own row. */
+  .game-heading {
+    margin: 22px 0 18px;
+  }
+  .game-heading-actions:has(> .btn:only-child) {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 0;
+  }
+  .hint-buttons button {
+    flex: 1 1 calc(50% - 8px);
+    min-width: 0;
+  }
+  .hint-buttons .hint-name {
+    font-size: 0.84rem;
+  }
+  .hint-buttons .hint-note {
+    font-size: 0.74rem;
+  }
+
+  /* Footer: stacked, with comfortable tap targets. */
+  .footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    font-size: 0.78rem;
+  }
+  .footer-help-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 18px;
+  }
+  .footer-help-links a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+
+  .appearance-guest-actions {
+    width: 100%;
+  }
+  .appearance-guest-actions .btn {
+    flex: 1;
+  }
+}
+@media (max-width: 600px) {
+  .frame-collection {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.frame-item {
+  display: flex;
+  flex-direction: column;
+}
+.frame-item-copy {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+.frame-item-actions {
+  margin-top: auto;
+  padding-top: 12px;
+}
+@media (max-width: 768px) {
+  /* Guests already see the sign-in banner, so the empty wallet and storage note can go. */
+  .appearance-wallet:has([data-action='register']),
+  .appearance-local-note {
+    display: none;
+  }
+  .profile-showcase {
+    padding: 18px 16px;
+  }
+  .profile-showcase-avatar {
+    min-height: 110px;
+  }
+  .appearance-tabs {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    scrollbar-width: none;
+    padding-right: 32px;
+    mask-image: linear-gradient(to right, #000 calc(100% - 40px), transparent);
+  }
+  .appearance-tabs button {
+    flex: none;
+    min-height: 44px;
+    font-size: 0.86rem;
+  }
+}
+@media (max-width: 768px) {
+  .appearance-showcase:has(.appearance-wallet [data-action='register']) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Mobile type floor: nothing a player needs to read goes below ~12px. */
+@media (max-width: 768px) {
+  .daily-day span,
+  .daily-day small {
+    font-size: 0.72rem;
+  }
+  .mode-label,
+  .daily-reset,
+  .card-top .badge,
+  .frame-state,
+  .clue-countdown,
+  .showcase-name .player-title,
+  .round-meta .difficulty,
+  .frame-wrap .frame-caption,
+  .showcase-caption,
+  .notice span {
+    font-size: 0.75rem;
+  }
+  .milestone small,
+  .stats-source-note,
+  .frame-item p,
+  .appearance-reset span,
+  .daily-panel p,
+  .daily-panel strong,
+  .section-top p,
+  .leaderboard-note,
+  .room-join .subtle,
+  .card-bottom span,
+  .card-bottom strong,
+  .hub-round-summary small,
+  .notice,
+  .notice button,
+  .profile-showcase p,
+  .round-meta,
+  .character-item .field label {
+    font-size: 0.8rem;
+  }
+  .btn.small,
+  .segmented button {
+    font-size: 0.8rem;
+  }
+  .hint-buttons .hint-note {
+    font-size: 0.78rem;
+  }
+}
+@media (max-width: 768px) {
+  .daily-streak .mode-label,
+  .hub-round-summary strong small {
+    font-size: 0.75rem;
+  }
+  .hub-game-card .card-bottom span,
+  .hub-game-card .card-bottom strong,
+  .appearance-section-head .segmented button {
+    font-size: 0.8rem;
+  }
+}
+@media (max-width: 768px) {
+  .stats-metrics article > small {
+    font-size: 0.78rem;
+  }
+}
