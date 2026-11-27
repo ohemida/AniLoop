@@ -333,7 +333,7 @@ function rememberAccount() {
 function accountView() {
   if (!currentUser)
     return `<section class="community-intro"><img class="community-logo" src="assets/mark.svg" alt="AniLoop original logo"><h1>A name for your score.</h1><p>Play as a guest, or create an account to submit completed rounds and join the community leaderboard.</p><div class="hero-actions">${button('register', 'Create account')}${button('login', 'Sign in', 'btn ghost')}</div></section>`;
-  return `<section class="community-intro"><span class="mode-label">Your account</span><h1>${esc(currentUser.username)}</h1><p class="subtle">${currentUser.provider === 'supabase' ? 'Supabase account · Cloud game community' : 'Local account · Stored on this AniLoop server'}</p></section><div class="account-customize">${appearance.accountSections()}<div class="account-more"><div><strong>Frames, titles, name colours and themes</strong><span>Unlock and equip cosmetics with Loop Shards.</span></div>${button('appearance', 'Open Appearance', 'btn secondary small')}</div></div><section class="panel account-settings"><h2>Account</h2><p class="subtle">Your username and submitted scores are public. Your password is never stored in plain text. ${cloudMode ? 'Quiz progress and custom media stay on this browser.' : 'Solo games and custom media stay on this browser; room progress is shared on the server.'}</p><div class="hero-actions">${button('export-account', 'Download my account data', 'btn ghost small')}${button('logout', 'Sign out', 'btn ghost small')}</div></section><section class="panel account-danger"><h2>Delete account</h2><p class="subtle">Permanently removes your account, sessions, and all your leaderboard entries. Your local game progress remains on this device.</p><form data-community-form="delete" class="account-form"><div class="field"><label for="delete-password">Current password</label><input id="delete-password" name="password" type="password" autocomplete="current-password" minlength="12" maxlength="128" required></div><label class="delete-confirm"><input type="checkbox" name="confirm" required> I want to permanently delete my account and scores.</label><p class="account-error" role="alert" hidden></p><button class="btn ghost" type="submit">Delete my account</button></form></section>`;
+  return `<section class="community-intro"><span class="mode-label">Your account</span><h1>${esc(currentUser.username)}</h1><p class="subtle">${currentUser.provider === 'supabase' ? 'Supabase account · Cloud game community' : 'Local account · Stored on this AniLoop server'}</p></section><div class="account-customize">${appearance.accountSections()}</div><section class="panel account-settings"><h2>Account</h2><p class="subtle">Your username and submitted scores are public. Your password is never stored in plain text. ${cloudMode ? 'Quiz progress and custom media stay on this browser.' : 'Solo games and custom media stay on this browser; room progress is shared on the server.'}</p><div class="hero-actions">${button('export-account', 'Download my account data', 'btn ghost small')}${button('logout', 'Sign out', 'btn ghost small')}</div></section><section class="panel account-danger"><h2>Delete account</h2><p class="subtle">Permanently removes your account, sessions, and all your leaderboard entries. Your local game progress remains on this device.</p><form data-community-form="delete" class="account-form"><div class="field"><label for="delete-password">Current password</label><input id="delete-password" name="password" type="password" autocomplete="current-password" minlength="12" maxlength="128" required></div><label class="delete-confirm"><input type="checkbox" name="confirm" required> I want to permanently delete my account and scores.</label><p class="account-error" role="alert" hidden></p><button class="btn ghost" type="submit">Delete my account</button></form></section>`;
 }
 function scoreButton() {
   if (isLoop()) return '';
@@ -878,6 +878,7 @@ function shell(content) {
     ['friends', 'Friends'],
     ['rooms', 'Party rooms'],
     ['rewards', 'Daily rewards'],
+    ['appearance', 'Shop'],
   ]
     .map(([id, label]) => button(id, label, view === id ? 'active' : ''))
     .join(
@@ -1377,7 +1378,7 @@ let lastRouteURL = '',
 function go(newView, {historyMode = 'push'} = {}) {
   helpRoute = newView === 'help';
   view = helpRoute ? 'home' : newView;
-  const hash = routeHash({view: newView, selected, mode: state.mode});
+  const hash = routeHash({view: newView, selected, mode: state.mode, tab: appearance.tab()});
   if (historyMode !== 'none') {
     if (historyMode === 'replace') window.history.replaceState({aniloop: true, scroll: 0}, '', hash);
     else if (location.hash !== hash) {
@@ -1397,6 +1398,7 @@ async function restoreNavigation() {
     restoreScroll = window.history.state?.scroll || 0;
   if (dialog.open) dialog.close();
   selected = route.selected;
+  if (route.tab) appearance.setTab(route.tab);
   if (state.mode !== route.mode) {
     state.mode = route.mode;
     persist();
@@ -2360,6 +2362,7 @@ async function init() {
       persist();
     }
     selected = initialRoute.selected;
+    if (initialRoute.tab) appearance.setTab(initialRoute.tab);
     go(initialRoute.view, {historyMode: 'replace'});
     try {
       const [account, config] = await Promise.all([

@@ -266,10 +266,10 @@ const shared = runtimeConfig.mode === 'supabase';
 const TYPE_BY_TAB = Object.fromEntries(COSMETIC_TYPES.map((t) => [t.tab, t]));
 // Eight item kinds grouped into four tabs; each tab stacks its sections so there are no sub-tabs.
 const TAB_GROUPS = [
-  {id: 'profile', label: 'Frames', views: ['frames']},
-  {id: 'name', label: 'Name & title', views: ['names', 'titles']},
-  {id: 'flair', label: 'Banner & effects', views: ['banners', 'effects']},
-  {id: 'look', label: 'Theme', views: ['themes']},
+  {id: 'frames', label: 'Frames', views: ['frames']},
+  {id: 'names', label: 'Names & titles', views: ['names', 'titles']},
+  {id: 'banners', label: 'Banners & effects', views: ['banners', 'effects']},
+  {id: 'themes', label: 'Themes', views: ['themes']},
 ];
 const tabGroup = (id) => TAB_GROUPS.find((g) => g.id === id || g.views.includes(id)) || TAB_GROUPS[0];
 const EFFECT_ICONS = {'effect-sparkle': '✦', 'effect-sakura': '✿', 'effect-confetti': '❖', 'effect-fireworks': '✺'};
@@ -395,7 +395,7 @@ export function createAppearance(ctx) {
   let prefs = readAppearance(),
     upload = null,
     uploadUrl = '',
-    tab = 'profile',
+    tab = 'frames',
     preview = 'classic',
     filter = 'all',
     loading = false,
@@ -719,13 +719,13 @@ export function createAppearance(ctx) {
   function view() {
     const selected = itemDef(preview) || {...FRAMES[0], type: 'frame'},
       look = previewLook(selected);
-    return `<section class="appearance-heading"><div><h1>Make the loop yours.</h1><p>Frames, titles, name colours, banners and effects. Your friends see them next to your name.</p></div>${btn('rewards', 'Daily rewards', 'btn ghost small')}</section><div class="appearance-layout"><aside class="appearance-showcase"><div class="profile-showcase${bannerClass(look)}"><span class="showcase-caption">Your profile preview</span><div class="profile-showcase-avatar">${avatar(selected.type === 'frame' ? selected.id : equipped(), 'large')}</div><h2 class="showcase-name">${nameMarkup(ctx.user()?.username || 'Your anime alias', look, esc)}</h2><p>Your next great guess starts here.</p><span class="showcase-frame-name">${esc(selected.name)}</span><div class="showcase-action">${itemAction(selected, false)}</div></div><div class="appearance-wallet"><span>Loop Shards</span><strong>${ctx.user() ? (loading && !wallet() ? '…' : '◇ ' + fmt(wallet()?.balance || 0)) : '◇ 0'}</strong><p>${ctx.user() ? 'Finish daily quizzes and claim your rewards to collect new frames.' : 'Create an account to earn shards through daily play.'}</p>${btn(ctx.user() ? 'rewards' : 'register', ctx.user() ? 'Earn more shards' : 'Create account', 'btn ghost small')}</div><p class="appearance-local-note">${shared ? 'Themes, backdrops, cosmetics and your uploaded background are saved with your account.' : 'Themes and uploaded backgrounds are personal to this browser. Owned frames stay with your account.'}</p></aside><div class="appearance-workspace"><div class="appearance-tabs" role="group" aria-label="Appearance section">${TAB_GROUPS.map((g) => btn('appearance:tab:' + g.id, g.label, tab === g.id ? 'selected' : '', 'aria-pressed="' + (tab === g.id) + '"')).join('')}</div>${error ? `<p class="media-error" role="alert">${esc(error)}</p>` : ''}${status ? `<p class="appearance-status" role="status">${esc(status)}</p>` : ''}${tabGroup(
+    return `<section class="appearance-heading"><div><span class="mode-label">Shop</span><h1>Make the loop yours.</h1><p>Spend Loop Shards on frames, titles, name colours, banners and effects. Your friends see them next to your name.</p></div>${btn('rewards', 'Daily rewards', 'btn ghost small')}</section><div class="appearance-layout"><aside class="appearance-showcase"><div class="profile-showcase${bannerClass(look)}"><span class="showcase-caption">Your profile preview</span><div class="profile-showcase-avatar">${avatar(selected.type === 'frame' ? selected.id : equipped(), 'large')}</div><h2 class="showcase-name">${nameMarkup(ctx.user()?.username || 'Your anime alias', look, esc)}</h2><p>Your next great guess starts here.</p><span class="showcase-frame-name">${esc(selected.name)}</span><div class="showcase-action">${itemAction(selected, false)}</div></div><div class="appearance-wallet"><span>Loop Shards</span><strong>${ctx.user() ? (loading && !wallet() ? '…' : '◇ ' + fmt(wallet()?.balance || 0)) : '◇ 0'}</strong><p>${ctx.user() ? 'Finish daily quizzes and claim your rewards to collect new frames.' : 'Create an account to earn shards through daily play.'}</p>${btn(ctx.user() ? 'rewards' : 'register', ctx.user() ? 'Earn more shards' : 'Create account', 'btn ghost small')}</div><p class="appearance-local-note">${shared ? 'Themes, backdrops, cosmetics and your uploaded background are saved with your account.' : 'Themes and uploaded backgrounds are personal to this browser. Owned frames stay with your account.'}</p></aside><div class="appearance-workspace"><div class="appearance-tabs" role="group" aria-label="Shop sections">${TAB_GROUPS.map((g) => btn('appearance:tab:' + g.id, g.label, tab === g.id ? 'selected' : '', 'aria-pressed="' + (tab === g.id) + '"')).join('')}</div>${error ? `<p class="media-error" role="alert">${esc(error)}</p>` : ''}${status ? `<p class="appearance-status" role="status">${esc(status)}</p>` : ''}${tabGroup(
       tab,
     )
       .views.map((id, i) => sectionView(id, i === 0))
       .join(
         '',
-      )}<div class="appearance-reset">${btn('appearance:reset', 'Reset theme & background', 'btn ghost small')}<span>Returns to Midnight mauve and Pure black. Your frame collection and uploaded image stay saved.</span></div></div></div>`;
+      )}${tab === 'themes' ? `<div class="appearance-reset">${btn('appearance:reset', 'Reset theme & background', 'btn ghost small')}<span>Returns to Midnight mauve and Pure black. Your frame collection and uploaded image stay saved.</span></div>` : ''}</div></div>`;
   }
   async function action(name) {
     if (name === 'appearance:fit-reset') {
@@ -820,7 +820,8 @@ export function createAppearance(ctx) {
           return true;
         }
         tab = tabGroup(id).id;
-        refreshPage();
+        // Each shop section is its own page (#shop/<tab>), so Back/Forward and links work.
+        ctx.go('appearance');
         return true;
       }
       if (operation === 'preview') {
@@ -1018,11 +1019,24 @@ export function createAppearance(ctx) {
     if (output) output.value = dim + '%';
   }
   function rewardsTeaser() {
-    return `<section class="appearance-teaser"><div class="teaser-frames">${['neon', 'aurora', 'galaxy'].map((id) => avatar(id)).join('')}</div><div><h2>Give your profile a signature.</h2><p>Explore frames, dark themes, and personal backgrounds in Appearance.</p></div>${btn('appearance', 'Open Appearance', 'btn secondary')}</section>`;
+    return `<section class="appearance-teaser"><div class="teaser-frames">${['neon', 'aurora', 'galaxy'].map((id) => avatar(id)).join('')}</div><div><h2>Give your profile a signature.</h2><p>Frames, titles, name colours and themes are waiting in the shop.</p></div>${btn('appearance', 'Open the shop', 'btn secondary')}</section>`;
   }
   /** Profile picture and background editors, shown first on the account page. */
   function accountSections() {
     return pictureView() + backgroundsView();
   }
-  return {view, accountSections, action, change, input, restore, updateContext, rewardsTeaser, adoptRemote, pushLocal};
+  return {
+    tab: () => tab,
+    setTab: (id) => (tab = tabGroup(id).id),
+    view,
+    accountSections,
+    action,
+    change,
+    input,
+    restore,
+    updateContext,
+    rewardsTeaser,
+    adoptRemote,
+    pushLocal,
+  };
 }
