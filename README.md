@@ -106,7 +106,7 @@ Open **Party rooms**, create a room, and share the six-character code or invite 
 
 **Daily rewards** shows your current/best streak, a rolling seven-day activity record, badges at 3/7/14/30 consecutive claimed days, and a shortcut to Appearance. Finish all five daily categories in the default pool and claim **100 Loop Shards**. Every seventh consecutive claim earns **50 extra**. Rewards reset at **00:00 UTC**, while the existing quiz itself still rotates at local midnight. You can claim each quiz date only once and receive at most one reward per UTC day. A missed reward day resets the current streak, but keeps badges and the best streak.
 
-Open **Appearance → Profile frames** to preview, unlock, and equip **Silver lining (250)**, **Mauve orbit (500)**, **Starlit loop (1,000)**, **Night bloom (450)**, **Ink panel (750)**, or **Lunar arc (1,250)**. Filter **My collection** to see owned frames. Purchases equip the frame immediately; owned frames and Classic can be switched freely. Shards have no monetary value and cannot buy points or gameplay advantages. Rewards, inventory, rooms, and currency use the account database and survive server restarts.
+Open **Appearance → Frames** to preview, unlock, and equip profile frames. Prices vary by design, from 250 shards for Silver lining to 10,000 for Galaxy loop. Previously purchased cosmetics remain owned when prices change. Filter **My collection** to see owned frames. Purchases equip the frame immediately; owned frames and Classic can be switched freely. Shards have no monetary value and cannot buy points or gameplay advantages. Rewards, inventory, rooms, and currency use the account database and survive server restarts.
 
 ## Themes and personal backgrounds
 
@@ -222,3 +222,7 @@ The static site uses Supabase Auth, PostgreSQL and the `aniloop` Edge Function f
 ## Supabase accounts
 
 For local browser testing, build the Pages output and serve it from `http://localhost:8098` (for example, `python3 -m http.server 8098 --directory /tmp/aniloop-pages`). Python is only a convenient local static-file server, not an app runtime requirement. Production uses `https://ohemida.github.io/AniLoop/`. The browser contains only Supabase's publishable key. Passwords and session tokens go directly to Supabase Auth; privileged database access stays in the Edge Function. See [supabase/README.md](supabase/README.md) for migrations, deployment secrets and redirects.
+
+## Profile backgrounds and titles
+
+In **Appearance → Backgrounds**, upload a custom background and drag or resize the crop box to position it on your profile preview. This does not change the page background position. The original image stays on the device; the crop settings follow the account. **Rookie Looper** is the free default title. Equipping another title replaces it, and it can be equipped again for free.

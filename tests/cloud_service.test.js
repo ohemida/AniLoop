@@ -46,7 +46,7 @@ test('shard purchases run on the trusted service and cannot go below zero',async
  const repo=new FakeRepo(),api=new CloudService(repo,pack);
  await assert.rejects(api.cosmetic(users.two,'lunar',false),/Not enough/);
  repo.docs.set('account:'+users.one,{value:{shards:1000,equipped:'classic',owned:[],claims:[],scores:[],picture:null},revision:1,owner:users.one});
- const result=await api.cosmetic(users.one,'orbit',false);assert.equal(result.rewards.balance,500);assert.deepEqual(result.rewards.owned,['orbit']);
+ const result=await api.cosmetic(users.one,'orbit',false);assert.equal(result.rewards.balance,350);assert.deepEqual(result.rewards.owned,['orbit']);
  await assert.rejects(api.cosmetic(users.one,'lunar',false),/Not enough/);
 });
 
@@ -205,15 +205,26 @@ test('stored private pictures can be shared later and failed checks explain why'
 
 test('new premium frames can be bought and equipped',async()=>{
  const repo=new FakeRepo(),api=new CloudService(repo,pack);
- repo.docs.set('account:'+users.one,{value:{shards:5000,equipped:'classic',owned:[],claims:[],scores:[],picture:null},revision:1,owner:users.one});
+ repo.docs.set('account:'+users.one,{value:{shards:12000,equipped:'classic',owned:[],claims:[],scores:[],picture:null},revision:1,owner:users.one});
  const result=await api.cosmetic(users.one,'galaxy',false);
  assert.equal(result.rewards.balance,2000);assert.equal(result.rewards.equipped,'galaxy');
  await assert.rejects(api.cosmetic(users.one,'holo',true),/Unlock/);
 });
 
+test('Rookie Looper is free, is the default and can be restored after another title',async()=>{
+ const repo=new FakeRepo(),api=new CloudService(repo,pack);
+ assert.equal((await api.rewards(users.one)).rewards.slots.title,'title-rookie');
+ await assert.rejects(api.cosmetic(users.one,'title-rookie',false),/already own/i);
+ repo.docs.set('account:'+users.one,{value:{shards:1000,equipped:'classic',owned:[],claims:[],scores:[],picture:null},revision:2,owner:users.one});
+ assert.equal((await api.cosmetic(users.one,'title-sleuth',false)).rewards.slots.title,'title-sleuth');
+ const restored=(await api.cosmetic(users.one,'title-rookie',true)).rewards;
+ assert.equal(restored.slots.title,'title-rookie');assert.equal(restored.balance,650);
+ assert.equal((await api.cosmetic(users.one,'title-none',true)).rewards.slots.title,'title-rookie');
+});
+
 test('titles, name colours, banners and effects use their own slots and show to friends',async()=>{
  const repo=new FakeRepo(),api=new CloudService(repo,pack);
- repo.docs.set('account:'+users.two,{value:{shards:6000,equipped:'classic',owned:[],claims:[],scores:[],picture:null},revision:1,owner:users.two});
+ repo.docs.set('account:'+users.two,{value:{shards:20000,equipped:'classic',owned:[],claims:[],scores:[],picture:null},revision:1,owner:users.two});
  await api.cosmetic(users.two,'title-legend',false);await api.cosmetic(users.two,'name-aurora',false);
  const bought=await api.cosmetic(users.two,'banner-stars',false);
  assert.deepEqual(bought.rewards.slots,{title:'title-legend',name:'name-aurora',banner:'banner-stars',effect:null});
@@ -230,8 +241,8 @@ test('titles, name colours, banners and effects use their own slots and show to 
 test('theme and backdrop are saved with the account and come back on sign-in',async()=>{
  const repo=new FakeRepo(),api=new CloudService(repo,pack);
  repo.docs.set('account:'+users.one,{value:{shards:0,equipped:'classic',owned:[],claims:[],scores:[],picture:null},revision:1,owner:users.one});
- const saved=await api.saveAppearance(users.one,{theme:'sakura',background:'nebula',dim:200,inGame:true,position:'top',savedAt:1});
- assert.equal(saved.appearance.theme,'sakura');assert.equal(saved.appearance.dim,90);assert.ok(saved.appearance.savedAt>1,'the server sets the time');
+ const saved=await api.saveAppearance(users.one,{theme:'sakura',background:'nebula',dim:200,inGame:true,position:'top',profileX:22,profileY:81,profileZoom:2.1,savedAt:1});
+ assert.equal(saved.appearance.theme,'sakura');assert.equal(saved.appearance.dim,90);assert.equal(saved.appearance.profileX,22);assert.equal(saved.appearance.profileY,81);assert.equal(saved.appearance.profileZoom,2.1);assert.ok(saved.appearance.savedAt>1,'the server sets the time');
  const again=await api.saveAppearance(users.one,{theme:'ocean',background:'none'});assert.ok(again.appearance.savedAt>saved.appearance.savedAt);
  await assert.rejects(api.saveAppearance(users.one,{theme:'url(x)',background:'none'}),/Invalid appearance/);
  assert.equal(repo.docs.get('account:'+users.one).value.appearance.theme,'ocean');

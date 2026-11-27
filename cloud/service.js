@@ -14,11 +14,11 @@ const publicPicture=a=>a?.pictureStatus==='approved'?pictureUrl(a):null;
 const pictureStatus=a=>a?.picture?(a.pictureStatus||'private'):null;
 const FRAME_IDS=new Set(['classic',...COSMETICS.filter(c=>c.type==='frame').map(c=>c.id)]);
 const LOOK_ID=/^[a-z][a-z0-9-]{1,23}$/;
-export function normalizeLook(v){if(!v||typeof v!=='object'||!LOOK_ID.test(v.theme)||!LOOK_ID.test(v.background))return null;const dim=Number(v.dim);return {theme:v.theme,background:v.background,dim:Number.isFinite(dim)?Math.max(35,Math.min(90,Math.round(dim))):70,inGame:v.inGame===true,position:['center','top','bottom'].includes(v.position)?v.position:'center',savedAt:Number.isSafeInteger(v.savedAt)&&v.savedAt>0?v.savedAt:0};}
+export function normalizeLook(v){if(!v||typeof v!=='object'||!LOOK_ID.test(v.theme)||!LOOK_ID.test(v.background))return null;const dim=Number(v.dim);return {theme:v.theme,background:v.background,dim:Number.isFinite(dim)?Math.max(35,Math.min(90,Math.round(dim))):70,inGame:v.inGame===true,position:['center','top','bottom'].includes(v.position)?v.position:'center',profileX:Number.isFinite(v.profileX)?Math.max(0,Math.min(100,v.profileX)):50,profileY:Number.isFinite(v.profileY)?Math.max(0,Math.min(100,v.profileY)):50,profileZoom:Number.isFinite(v.profileZoom)?Math.max(1,Math.min(3,v.profileZoom)):1,savedAt:Number.isSafeInteger(v.savedAt)&&v.savedAt>0?v.savedAt:0};}
 const frameOf=a=>FRAME_IDS.has(a?.equipped)?a.equipped:'classic';
 // What other players see: approved picture, frame, title, name colour and banner.
 const lookOf=a=>{const slots=normalizeSlots(a?.slots);return {pictureUrl:publicPicture(a),frame:frameOf(a),title:slots.title,nameStyle:slots.name,banner:slots.banner};};
-const DEFAULT_LOOK={pictureUrl:null,frame:'classic',title:null,nameStyle:null,banner:null};
+const DEFAULT_LOOK={pictureUrl:null,frame:'classic',title:'title-rookie',nameStyle:null,banner:null};
 const PICTURE_UPLOADS_PER_DAY=10;
 export class CloudService{
  constructor(repository,pack,options={}){this.repo=repository;this.pack=pack;this.dailySecret=options.dailySecret||'';this.moderateImage=options.moderateImage||null;this.moderationConfigured=options.moderationConfigured??!!this.moderateImage;}
@@ -119,10 +119,10 @@ export class CloudService{
    const a=await tx.get('account:'+actor)||newAccount();a.slots=normalizeSlots(a.slots);
    const wear=d=>{if(d.type==='frame')a.equipped=d.id;else a.slots[d.type]=d.id;};
    if(equip){
-    if(item==='classic')a.equipped='classic';else if(clear)a.slots[clear[1]]=null;
-    else{check(a.owned.includes(item),'Unlock that item before equipping it.');wear(def);}
+    if(item==='classic')a.equipped='classic';else if(clear)a.slots[clear[1]]=clear[1]==='title'?'title-rookie':null;
+    else{check(item==='title-rookie'||a.owned.includes(item),'Unlock that item before equipping it.');wear(def);}
    }else{
-    check(def,'You already own that item.',409);check(!a.owned.includes(item),'You already own that item.',409);
+    check(def&&item!=='title-rookie','You already own that item.',409);check(!a.owned.includes(item),'You already own that item.',409);
     check(a.shards>=def.price,'Not enough Loop Shards.');a.shards-=def.price;a.owned.push(item);wear(def);
    }
    await tx.put('account:'+actor,a,actor);return {rewards:rewards(a)};

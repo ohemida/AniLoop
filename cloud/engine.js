@@ -13,13 +13,13 @@ export const titleMatches=(value,a)=>matches(value,[a.title,...(a.aliases||[])])
 const item=type=>([id,name,price])=>({id,name,price,type,description:'A cosmetic '+type+'.'});
 export const SLOT_TYPES=['title','name','banner','effect'];
 export const COSMETICS=[
- ...[['silver','Silver lining',250],['orbit','Mauve orbit',500],['starlit','Starlit loop',1000],['fern','Night bloom',450],['ink','Ink panel',750],['lunar','Lunar arc',1250],['sakura','Sakura drift',900],['neon','Neon pulse',1500],['ember','Ember crown',1750],['aurora','Aurora veil',2000],['holo','Holo foil',2500],['galaxy','Galaxy loop',3000]].map(item('frame')),
- ...[['title-rookie','Rookie Looper',150],['title-sleuth','Scene Sleuth',600],['title-oracle','Opening Oracle',600],['title-otaku','Certified Otaku',900],['title-sensei','Anime Sensei',1500],['title-legend','Loop Legend',2500]].map(item('title')),
- ...[['name-sakura','Sakura pink',400],['name-ice','Glacier blue',400],['name-gold','Gold leaf',800],['name-sunset','Sunset gradient',1200],['name-aurora','Aurora shimmer',2000]].map(item('name')),
- ...[['banner-dusk','Mauve dusk',500],['banner-sakura','Sakura night',800],['banner-manga','Manga panel',1000],['banner-city','Neon city',1200],['banner-stars','Starfield',1500]].map(item('banner')),
- ...[['effect-sparkle','Sparkle burst',600],['effect-sakura','Petal storm',900],['effect-confetti','Confetti',1200],['effect-fireworks','Fireworks',2000]].map(item('effect'))
+ ...[['silver','Silver lining',250],['orbit','Mauve orbit',650],['starlit','Starlit loop',1600],['fern','Night bloom',400],['ink','Ink panel',900],['lunar','Lunar arc',2200],['sakura','Sakura drift',1200],['neon','Neon pulse',3000],['ember','Ember crown',4000],['aurora','Aurora veil',5500],['holo','Holo foil',7500],['galaxy','Galaxy loop',10000]].map(item('frame')),
+ ...[['title-rookie','Rookie Looper',0],['title-sleuth','Scene Sleuth',350],['title-oracle','Opening Oracle',500],['title-otaku','Certified Otaku',1200],['title-sensei','Anime Sensei',2800],['title-legend','Loop Legend',6500]].map(item('title')),
+ ...[['name-sakura','Sakura pink',300],['name-ice','Glacier blue',500],['name-gold','Gold leaf',1200],['name-sunset','Sunset gradient',2500],['name-aurora','Aurora shimmer',6000]].map(item('name')),
+ ...[['banner-dusk','Mauve dusk',350],['banner-sakura','Sakura night',900],['banner-manga','Manga panel',1600],['banner-city','Neon city',2800],['banner-stars','Starfield',5000]].map(item('banner')),
+ ...[['effect-sparkle','Sparkle burst',500],['effect-sakura','Petal storm',1200],['effect-confetti','Confetti',2500],['effect-fireworks','Fireworks',5500]].map(item('effect'))
 ];
-export function normalizeSlots(value){const slots=value&&typeof value==='object'?value:{};return Object.fromEntries(SLOT_TYPES.map(type=>[type,COSMETICS.some(c=>c.type===type&&c.id===slots[type])?slots[type]:null]));}
+export function normalizeSlots(value){const slots=value&&typeof value==='object'?value:{};return Object.fromEntries(SLOT_TYPES.map(type=>[type,COSMETICS.some(c=>c.type===type&&c.id===slots[type])?slots[type]:type==='title'?'title-rookie':null]));}
 export function recalculate(run,pack){
  check(run&&run.packKey===pack.key,'Only complete rounds from the default pool can enter the leaderboard.');
  let {mode,seed}=run;check(['daily','infinity'].includes(mode)&&typeof seed==='string'&&seed.length>0&&seed.length<=200,'Invalid round identity.');
