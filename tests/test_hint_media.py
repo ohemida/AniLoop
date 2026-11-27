@@ -38,7 +38,7 @@ class HintMediaTest(unittest.TestCase):
         spec={'source':'assets/media/test.mp4','kind':'opening'}
         legacy=hashlib.sha256(json.dumps(spec,sort_keys=True).encode()).hexdigest()
         (self.hints.directory/(legacy+'.mp4')).write_bytes(b'old untrimmed video')
-        (self.hints.directory/(legacy+'.json')).write_text(json.dumps({'url':'/hints/'+legacy+'.mp4'}))
+        (self.hints.directory/(legacy+'.json')).write_text(json.dumps({'url':'/hints/'+legacy+'.mp4'}),encoding='utf-8')
         info=self.hints.create(spec)
         self.assertNotIn(legacy,info['url'])
         self.assertAlmostEqual(info['offset'],2.1)
@@ -65,5 +65,5 @@ class HintMediaTest(unittest.TestCase):
         spec={'source':'assets/media/test.mp4','kind':'ending'}
         old=hashlib.sha256(json.dumps({'version':'opening-window-v3-fast','spec':spec},sort_keys=True).encode()).hexdigest()
         (self.hints.directory/(old+'.mp4')).write_bytes(b'previous strong blur')
-        (self.hints.directory/(old+'.json')).write_text(json.dumps({'url':'/hints/'+old+'.mp4'}))
+        (self.hints.directory/(old+'.json')).write_text(json.dumps({'url':'/hints/'+old+'.mp4'}),encoding='utf-8')
         info=self.hints.create(spec);self.assertNotIn(old,info['url'])

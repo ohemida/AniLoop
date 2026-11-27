@@ -1,11 +1,90 @@
-const CATEGORIES=['General','Screenshots','Characters','Openings','Endings','Anidle','Multiplayer','Appearance'];
-export function createBugReport(ctx){
- const {esc,button}=ctx;let draft={title:'',category:'General',steps:'',expected:'',actual:'',includeDiagnostics:false},busy=false,error='',receipt='',source='home';
- function diagnostics(){const r=document.documentElement;return {appVersion:'appearance-reports-v1',browser:navigator.userAgent.slice(0,500),viewport:`${innerWidth} × ${innerHeight} · ${devicePixelRatio}×`,theme:r.dataset.theme||'mauve',background:r.dataset.background||'none',page:source};}
- function payload(){return {title:draft.title,category:draft.category,steps:draft.steps,expected:draft.expected,actual:draft.actual,diagnostics:draft.includeDiagnostics?diagnostics():{}};}
- function view(){const field=(key,label,placeholder,min,max)=>`<div class="field"><label for="bug-${key}">${label}</label>${key==='title'?`<input id="bug-${key}" name="${key}" value="${esc(draft[key])}" minlength="${min}" maxlength="${max}" required placeholder="${placeholder}">`:`<textarea id="bug-${key}" name="${key}" rows="${key==='steps'?5:3}" minlength="${min}" maxlength="${max}" ${min?'required':''} placeholder="${placeholder}">${esc(draft[key])}</textarea>`}</div>`;return `<section class="report-heading"><h1>Report a bug</h1><p>Tell us what happened so we can improve your next loop.</p></section><div class="report-layout"><form data-bug-report class="report-form panel">${receipt?`<div class="report-success" role="status"><h2>Report saved</h2><p>Reference: <strong>${esc(receipt)}</strong>. The owner of this AniLoop server can review it.</p><p>Your report stays here; it has not been sent to GitHub or email.</p>${button('bug:new','Write another report','btn secondary small')}</div>`:`${error?`<p class="media-error" role="alert">${esc(error)}</p>`:''}${field('title','Short description','For example: Opening video stays on the loading screen',5,120)}<div class="field"><label for="bug-category">Where did it happen?</label><select id="bug-category" name="category">${CATEGORIES.map(c=>`<option ${draft.category===c?'selected':''}>${c}</option>`).join('')}</select></div>${field('steps','Steps to reproduce','What did you click or enter before the issue appeared?',10,3000)}${field('expected','What did you expect? (optional)','What should have happened?',0,2000)}${field('actual','What happened instead?','Describe the issue and any error message you saw.',10,3000)}<label class="appearance-check"><input name="includeDiagnostics" type="checkbox" ${draft.includeDiagnostics?'checked':''}><span>Include browser and display details<small>Preview the exact details below. No account, answers, saves, or uploaded images are attached.</small></span></label><details class="report-diagnostics"><summary>Preview diagnostic details</summary><pre id="bug-diagnostics">${esc(JSON.stringify(draft.includeDiagnostics?diagnostics():{},null,2))}</pre></details><div class="report-actions"><button type="submit" class="btn" ${busy?'disabled':''}>${busy?'Saving report…':'Send bug report'}</button>${button('bug:download','Download copy','btn secondary')}</div>`}</form><aside class="report-notes"><h2>A useful report helps us replay it.</h2><p>Include the game category, what you tried, and whether reloading helped.</p><p>Please leave out passwords and personal information. Reports are visible to the server owner.</p><div><strong>No account needed</strong><p>You can report an issue as a guest. If this server is offline, download a copy and share it with its owner.</p></div>${button('theme-picker','Open themes & backgrounds','btn secondary small')}</aside></div>`;}
- function input(target){if(!target.closest('[data-bug-report]')||!(target.name in draft))return;draft[target.name]=target.type==='checkbox'?target.checked:target.value;const preview=document.querySelector('#bug-diagnostics');if(preview)preview.textContent=JSON.stringify(draft.includeDiagnostics?diagnostics():{},null,2);}
- async function submit(form){if(busy||!form.reportValidity())return;busy=true;error='';ctx.render();try{const result=await ctx.api('/api/bugs',payload());receipt=result.id;}catch(cause){error=cause.message+' Your draft is still here; you can also download a copy.';}finally{busy=false;if(ctx.getView()==='bug-report')ctx.render();}}
- function action(name){if(name==='bug-report'){if(ctx.getView()!=='bug-report')source=ctx.getView();ctx.go('bug-report');return true;}if(name==='bug:new'){receipt='';error='';draft={title:'',category:'General',steps:'',expected:'',actual:'',includeDiagnostics:false};ctx.render();return true;}if(name==='bug:download'){const url=URL.createObjectURL(new Blob([JSON.stringify(payload(),null,2)],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download='aniloop-bug-report.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);return true;}return false;}
- return {view,action,input,submit};
+const CATEGORIES = [
+  'General',
+  'Screenshots',
+  'Characters',
+  'Openings',
+  'Endings',
+  'Anidle',
+  'Multiplayer',
+  'Appearance',
+];
+export function createBugReport(ctx) {
+  const {esc, button} = ctx;
+  let draft = {title: '', category: 'General', steps: '', expected: '', actual: '', includeDiagnostics: false},
+    busy = false,
+    error = '',
+    receipt = '',
+    source = 'home';
+  function diagnostics() {
+    const r = document.documentElement;
+    return {
+      appVersion: 'appearance-reports-v1',
+      browser: navigator.userAgent.slice(0, 500),
+      viewport: `${innerWidth} × ${innerHeight} · ${devicePixelRatio}×`,
+      theme: r.dataset.theme || 'mauve',
+      background: r.dataset.background || 'none',
+      page: source,
+    };
+  }
+  function payload() {
+    return {
+      title: draft.title,
+      category: draft.category,
+      steps: draft.steps,
+      expected: draft.expected,
+      actual: draft.actual,
+      diagnostics: draft.includeDiagnostics ? diagnostics() : {},
+    };
+  }
+  function view() {
+    const field = (key, label, placeholder, min, max) =>
+      `<div class="field"><label for="bug-${key}">${label}</label>${key === 'title' ? `<input id="bug-${key}" name="${key}" value="${esc(draft[key])}" minlength="${min}" maxlength="${max}" required placeholder="${placeholder}">` : `<textarea id="bug-${key}" name="${key}" rows="${key === 'steps' ? 5 : 3}" minlength="${min}" maxlength="${max}" ${min ? 'required' : ''} placeholder="${placeholder}">${esc(draft[key])}</textarea>`}</div>`;
+    return `<section class="report-heading"><h1>Report a bug</h1><p>Tell us what happened so we can improve your next loop.</p></section><div class="report-layout"><form data-bug-report class="report-form panel">${receipt ? `<div class="report-success" role="status"><h2>Report saved</h2><p>Reference: <strong>${esc(receipt)}</strong>. The owner of this AniLoop server can review it.</p><p>Your report stays here; it has not been sent to GitHub or email.</p>${button('bug:new', 'Write another report', 'btn secondary small')}</div>` : `${error ? `<p class="media-error" role="alert">${esc(error)}</p>` : ''}${field('title', 'Short description', 'For example: Opening video stays on the loading screen', 5, 120)}<div class="field"><label for="bug-category">Where did it happen?</label><select id="bug-category" name="category">${CATEGORIES.map((c) => `<option ${draft.category === c ? 'selected' : ''}>${c}</option>`).join('')}</select></div>${field('steps', 'Steps to reproduce', 'What did you click or enter before the issue appeared?', 10, 3000)}${field('expected', 'What did you expect? (optional)', 'What should have happened?', 0, 2000)}${field('actual', 'What happened instead?', 'Describe the issue and any error message you saw.', 10, 3000)}<label class="appearance-check"><input name="includeDiagnostics" type="checkbox" ${draft.includeDiagnostics ? 'checked' : ''}><span>Include browser and display details<small>Preview the exact details below. No account, answers, saves, or uploaded images are attached.</small></span></label><details class="report-diagnostics"><summary>Preview diagnostic details</summary><pre id="bug-diagnostics">${esc(JSON.stringify(draft.includeDiagnostics ? diagnostics() : {}, null, 2))}</pre></details><div class="report-actions"><button type="submit" class="btn" ${busy ? 'disabled' : ''}>${busy ? 'Saving report…' : 'Send bug report'}</button>${button('bug:download', 'Download copy', 'btn secondary')}</div>`}</form><aside class="report-notes"><h2>A useful report helps us replay it.</h2><p>Include the game category, what you tried, and whether reloading helped.</p><p>Please leave out passwords and personal information. Reports are visible to the server owner.</p><div><strong>No account needed</strong><p>You can report an issue as a guest. If this server is offline, download a copy and share it with its owner.</p></div>${button('theme-picker', 'Open themes & backgrounds', 'btn secondary small')}</aside></div>`;
+  }
+  function input(target) {
+    if (!target.closest('[data-bug-report]') || !(target.name in draft)) return;
+    draft[target.name] = target.type === 'checkbox' ? target.checked : target.value;
+    const preview = document.querySelector('#bug-diagnostics');
+    if (preview) preview.textContent = JSON.stringify(draft.includeDiagnostics ? diagnostics() : {}, null, 2);
+  }
+  async function submit(form) {
+    if (busy || !form.reportValidity()) return;
+    busy = true;
+    error = '';
+    ctx.render();
+    try {
+      const result = await ctx.api('/api/bugs', payload());
+      receipt = result.id;
+    } catch (cause) {
+      error = cause.message + ' Your draft is still here; you can also download a copy.';
+    } finally {
+      busy = false;
+      if (ctx.getView() === 'bug-report') ctx.render();
+    }
+  }
+  function action(name) {
+    if (name === 'bug-report') {
+      if (ctx.getView() !== 'bug-report') source = ctx.getView();
+      ctx.go('bug-report');
+      return true;
+    }
+    if (name === 'bug:new') {
+      receipt = '';
+      error = '';
+      draft = {title: '', category: 'General', steps: '', expected: '', actual: '', includeDiagnostics: false};
+      ctx.render();
+      return true;
+    }
+    if (name === 'bug:download') {
+      const url = URL.createObjectURL(new Blob([JSON.stringify(payload(), null, 2)], {type: 'application/json'})),
+        a = document.createElement('a');
+      a.href = url;
+      a.download = 'aniloop-bug-report.json';
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      return true;
+    }
+    return false;
+  }
+  return {view, action, input, submit};
 }

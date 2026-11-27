@@ -12,8 +12,8 @@ class Community:
         self.root=Path(root);self.path=Path(database) if database else self.root/'.runtime/community.sqlite3'
         self.path.parent.mkdir(parents=True,exist_ok=True)
         self.guard=threading.Lock();self.attempts=defaultdict(deque);self.hash_slots=threading.Semaphore(2)
-        self.catalog={a['id']:a for a in json.loads((self.root/'data/pool.json').read_text())['anime']}
-        self.pack_key=json.loads((self.root/'data/pool.json').read_text())['key']
+        self.catalog={a['id']:a for a in json.loads((self.root/'data/pool.json').read_text(encoding='utf-8'))['anime']}
+        self.pack_key=json.loads((self.root/'data/pool.json').read_text(encoding='utf-8'))['key']
         with self.db() as db:
             db.executescript('''
             CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY,username TEXT NOT NULL COLLATE NOCASE UNIQUE,password TEXT NOT NULL,created INTEGER NOT NULL);

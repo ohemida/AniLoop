@@ -1,4 +1,4 @@
-import tempfile,unittest,uuid,time
+import os,tempfile,unittest,uuid,time
 from pathlib import Path
 from community import Community,APIError
 from supabase_auth import SupabaseAuth
@@ -96,7 +96,7 @@ class SupabaseAuthTests(unittest.TestCase):
         fresh=SupabaseAuth(self.community,'https://example.supabase.co','sb_publishable_test',request=self.remote)
         self.assertEqual(fresh.user(token)['id'],user['id'])
         self.assertEqual(fresh.sessions[key]['access'],'refreshed-private')
-        self.assertEqual(self.community.path.with_name(self.community.path.name+'.session-key').stat().st_mode&0o777,0o600)
+        if os.name!='nt':self.assertEqual(self.community.path.with_name(self.community.path.name+'.session-key').stat().st_mode&0o777,0o600)
         # Tampering with encrypted tokens fails closed and removes the affected session.
         with self.community.db() as db:db.execute('UPDATE supabase_sessions SET sealed=? WHERE token_hash=?',(b'tampered',key))
         again=SupabaseAuth(self.community,'https://example.supabase.co','sb_publishable_test',request=self.remote)

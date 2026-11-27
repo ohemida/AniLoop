@@ -10,7 +10,7 @@ with sync_playwright() as pw:
     page=browser.new_page(viewport={'width':1100,'height':900})
     page.set_default_timeout(120000)
     open_app(page,URL);page.locator('.hero').wait_for()
-    entries=json.loads((ROOT/'data/pool.json').read_text())['anime']
+    entries=json.loads((ROOT/'data/pool.json').read_text(encoding='utf-8'))['anime']
     target=next(a for a in entries if (a.get('ending') or {}).get('video','').startswith('assets/media/'))
     page.evaluate('''id=>{const state=JSON.parse(localStorage.getItem('aniloop-state-v1'));state.infinity.games.ending.questions[0]=id;localStorage.setItem('aniloop-state-v1',JSON.stringify(state));}''',target['id'])
     page.route('**/api/hints',lambda route:route.fulfill(status=501,body='Unsupported method'))

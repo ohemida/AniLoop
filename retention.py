@@ -56,7 +56,7 @@ class Maintenance:
             path=folder/('access-'+datetime.now(timezone.utc).strftime('%Y-%m-%d')+'.jsonl')
             if path.exists() and path.stat().st_size>=1024*1024:return
             descriptor=os.open(path,os.O_CREAT|os.O_APPEND|os.O_WRONLY,0o600)
-            with os.fdopen(descriptor,'a') as file:file.write(json.dumps({'time':int(time.time()),'status':int(status)})+'\n')
+            with os.fdopen(descriptor,'a',encoding='utf-8') as file:file.write(json.dumps({'time':int(time.time()),'status':int(status)})+'\n')
     def start(self):
         self.run()
         def worker():

@@ -22,7 +22,7 @@ with sync_playwright() as pw:
     expect(page.locator('.library-empty')).to_be_visible();page.locator('[data-action="clear-library"]').click();expect(page.locator('.library-item')).to_have_count(60)
     for image in page.locator('.library-item img').all():assert '<span' not in image.get_attribute('alt')
     # Newly added real titles participate in Anidle and accept their English/Japanese aliases.
-    added=next(a for a in json.loads((ROOT/'data/pool.json').read_text())['anime'] if a['id'].startswith('anime-mal-'))
+    added=next(a for a in json.loads((ROOT/'data/pool.json').read_text(encoding='utf-8'))['anime'] if a['id'].startswith('anime-mal-'))
     page.evaluate('''id=>{const s=JSON.parse(localStorage.getItem('aniloop-state-v1'));s.infinity.games.anidle.questions=[id];localStorage.setItem('aniloop-state-v1',JSON.stringify(s));}''',added['id'])
     page.reload();page.locator('main h1').wait_for();page.locator('[data-action=home]').first.click();page.locator('.hero').wait_for();page.locator('[data-action="play:anidle"]:visible').first.click()
     page.locator('#answer').fill(added['title']);page.locator('form[data-form=anidle] button[type=submit]').click();expect(page.locator('.category-score')).to_contain_text('10,000')

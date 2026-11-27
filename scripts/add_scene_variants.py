@@ -14,7 +14,7 @@ def canonical(url):
     except (ValueError,UnicodeError):return url
 
 def update(days=60,limit=120):
-    pack=json.loads((ROOT/'data/pool.json').read_text());before=json.loads(json.dumps(pack));registry=json.loads((ROOT/'data/media-index.json').read_text());local={r['path']:r['source'] for r in json.loads((ROOT/'data/media-sources.json').read_text())}
+    pack=json.loads((ROOT/'data/pool.json').read_text(encoding='utf-8'));before=json.loads(json.dumps(pack));registry=json.loads((ROOT/'data/media-index.json').read_text(encoding='utf-8'));local={r['path']:r['source'] for r in json.loads((ROOT/'data/media-sources.json').read_text(encoding='utf-8'))}
     entries={str(a.get('cmsId')):a for a in pack['anime'] if a.get('screenshots')};seen={a['id']:{canonical(local.get(src) or registry.get(src.removeprefix('media/'),{}).get('url') or src) for src in a['screenshots']} for a in entries.values()}
     cache=ROOT/'.tools/source-cache'/('scenes-'+date.today().isoformat());cache.mkdir(parents=True,exist_ok=True)
     def daily(offset):
@@ -58,7 +58,7 @@ def update(days=60,limit=120):
         assert {k:v for k,v in old.items() if k!='screenshots'}=={k:v for k,v in current.items() if k!='screenshots'}
     report={'date':date.today().isoformat(),'rightsStatus':'Public-use permissions unverified; no publication authorised.','addedScenes':len(added),'updatedAnime':len({r['animeId'] for r in added}),'anime':[{'id':a['id'],'before':len(next(old for old in before['anime'] if old['id']==a['id'])['screenshots']),'after':len(a['screenshots'])} for a in pack['anime'] if a['id'] in {r['animeId'] for r in added}],'scenes':added}
     for name,value in [('pool.json',pack),('media-index.json',registry),('scene-update.json',report)]:
-        path=ROOT/'data'/name;tmp=path.with_suffix('.json.tmp');tmp.write_text(json.dumps(value,ensure_ascii=False,indent=2));tmp.replace(path)
+        path=ROOT/'data'/name;tmp=path.with_suffix('.json.tmp');tmp.write_text(json.dumps(value,ensure_ascii=False,indent=2),encoding='utf-8');tmp.replace(path)
     print(json.dumps({k:v for k,v in report.items() if k!='scenes'}),flush=True)
 if __name__=='__main__':
     p=argparse.ArgumentParser();p.add_argument('--days',type=int,default=60);p.add_argument('--limit',type=int,default=120);args=p.parse_args();update(args.days,args.limit)

@@ -11,10 +11,10 @@ def update(days=30,pages=33):
     cache=ROOT/'.tools/source-cache'/('refresh-'+date.today().isoformat());cache.mkdir(parents=True,exist_ok=True)
     def request(url):
         path=cache/(hashlib.sha256(url.encode()).hexdigest()+'.json')
-        if path.exists():return json.loads(path.read_text())
-        raw=subprocess.check_output(['curl','--fail','-L','-sS','--max-time','25',url]);value=json.loads(raw);path.write_text(json.dumps(value));return value
-    pack=json.loads((ROOT/'data/pool.json').read_text());entries={a['id']:a for a in pack['anime']};before=set(entries)
-    registry=json.loads((ROOT/'data/media-index.json').read_text())
+        if path.exists():return json.loads(path.read_text(encoding='utf-8'))
+        raw=subprocess.check_output(['curl','--fail','-L','-sS','--max-time','25',url]);value=json.loads(raw);path.write_text(json.dumps(value),encoding='utf-8');return value
+    pack=json.loads((ROOT/'data/pool.json').read_text(encoding='utf-8'));entries={a['id']:a for a in pack['anime']};before=set(entries)
+    registry=json.loads((ROOT/'data/media-index.json').read_text(encoding='utf-8'))
     def asset(url,kind='image'):
         if not url or urlparse(url).hostname not in {'cms.aniguessr.com','medias.aniguessr.com','cdn.myanimelist.net','a.animethemes.moe','v.animethemes.moe','s4.anilist.co'}:return None
         ext=Path(urlparse(url).path).suffix.lower()
@@ -73,7 +73,7 @@ def update(days=30,pages=33):
     # Retain pack identity, every existing ID, and all original source files/saves.
     assert before.issubset({a['id'] for a in pack['anime']})
     for name,data in [('media-index.json',registry),('pool.json',pack),('pool-report.json',report(pack,registry))]:
-        path=ROOT/'data'/name;temporary=path.with_suffix('.json.tmp');temporary.write_text(json.dumps(data,ensure_ascii=False,indent=2));temporary.replace(path)
+        path=ROOT/'data'/name;temporary=path.with_suffix('.json.tmp');temporary.write_text(json.dumps(data,ensure_ascii=False,indent=2),encoding='utf-8');temporary.replace(path)
     added=[{'id':a['id'],'title':a.get('alternativeTitle') or a['title']} for a in pack['anime'] if a['id'] not in before]
     print(json.dumps({'added':added,'report':report(pack,registry)},indent=2),flush=True)
 if __name__=='__main__':

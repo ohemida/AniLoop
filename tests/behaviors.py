@@ -3,7 +3,7 @@ from privacy_fixture import open_app
 from pathlib import Path
 import json,re,urllib.request,os
 from playwright.sync_api import sync_playwright,expect
-ROOT=Path(__file__).resolve().parents[1];PACK=json.loads((ROOT/'data/pool.json').read_text());ANIME={a['id']:a for a in PACK['anime']}
+ROOT=Path(__file__).resolve().parents[1];PACK=json.loads((ROOT/'data/pool.json').read_text(encoding='utf-8'));ANIME={a['id']:a for a in PACK['anime']}
 URL=os.environ.get('ANILOOP_URL','http://localhost:8097')
 def click(p,a):p.locator(f'[data-action="{a}"]:visible').first.click()
 def state(p):return p.evaluate("JSON.parse(localStorage.getItem('aniloop-state-v1'))")

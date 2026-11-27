@@ -4,7 +4,7 @@ from pathlib import Path
 import json,os
 from playwright.sync_api import sync_playwright,expect
 ROOT=Path(__file__).resolve().parents[1];URL=os.environ.get('ANILOOP_URL','http://localhost:8100')
-pack=json.loads((ROOT/'data/pool.json').read_text());anime={a['id']:a for a in pack['anime']};report=json.loads((ROOT/'data/scene-update.json').read_text())
+pack=json.loads((ROOT/'data/pool.json').read_text(encoding='utf-8'));anime={a['id']:a for a in pack['anime']};report=json.loads((ROOT/'data/scene-update.json').read_text(encoding='utf-8'))
 with sync_playwright() as pw:
     browser=pw.chromium.launch();page=browser.new_page(viewport={'width':1440,'height':1000});errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
     open_app(page,URL);page.locator('.hero').wait_for()

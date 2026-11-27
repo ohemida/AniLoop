@@ -58,7 +58,7 @@ with tempfile.TemporaryDirectory() as folder:
         assert next(c for c in context.cookies() if c['name']=='aniloop_session')['value']==cookie['value']
 
         with page.expect_download() as download:click(page,'export-account')
-        exported=json.loads(Path(download.value.path()).read_text());assert exported['cloud']['profile']['username']=='CloudPlayer'
+        exported=json.loads(Path(download.value.path()).read_text(encoding='utf-8'));assert exported['cloud']['profile']['username']=='CloudPlayer'
         assert 'access-private' not in json.dumps(exported)
         # A validated submitted run still uses the trusted Python scoring service.
         result=page.request.post(URL+'/api/scores',data={'round':complete_round(server.community)});assert result.ok,result.text()

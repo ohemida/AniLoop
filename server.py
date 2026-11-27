@@ -101,7 +101,7 @@ class Handler(SimpleHTTPRequestHandler):
             except FileNotFoundError:self.send_error(404,'Unknown media ID');return None
             except (OSError,ValueError):self.send_error(502,'Media source temporarily unavailable');return None
         else:
-            if route not in {'/','/admin.html','/index.html','/app.js','/catalog.js','/social-ui.js','/core.js','/storage.js','/styles.css','/skin.css'} and not route.startswith(('/assets/','/data/')):
+            if route not in {'/','/admin.html','/index.html','/app.js','/catalog.js','/social-ui.js','/core.js','/storage.js','/styles.css'} and not route.startswith(('/assets/','/data/')):
                 self.send_error(404);return None
             path=Path(self.translate_path(self.path))
             if path.name.endswith('.session-key') or path.suffix.lower() in {'.db','.sqlite','.sqlite3','.py'} or path.is_dir() and route!='/':
@@ -256,7 +256,7 @@ if __name__=='__main__':
         server.community=Community(root,os.environ.get('ANILOOP_DB'))
         server.supabase=None
         project_file=Path(root)/'supabase/project.json'
-        project=json.loads(project_file.read_text()) if project_file.exists() else {}
+        project=json.loads(project_file.read_text(encoding='utf-8')) if project_file.exists() else {}
         if os.environ.get('ANILOOP_SUPABASE_ENABLED',str(int(project.get('enabled',False))))=='1':
             server.supabase=SupabaseAuth(server.community,os.environ.get('ANILOOP_SUPABASE_URL',project.get('url','')),os.environ.get('ANILOOP_SUPABASE_PUBLISHABLE_KEY',project.get('publishableKey','')),os.environ.get('ANILOOP_PUBLIC_ORIGIN') or (f'http://localhost:{args.port}' if args.host in {'127.0.0.1','localhost'} else None))
         server.bugs=BugReports(server.community)

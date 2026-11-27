@@ -8,7 +8,7 @@ from playwright.sync_api import sync_playwright,expect
 ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT));sys.path.insert(0,str(ROOT/'tests'))
 from test_community import complete_round
 URL=os.environ.get('ANILOOP_URL','http://localhost:8100')
-PACK=json.loads((ROOT/'data/pool.json').read_text());ANIME={a['id']:a for a in PACK['anime']}
+PACK=json.loads((ROOT/'data/pool.json').read_text(encoding='utf-8'));ANIME={a['id']:a for a in PACK['anime']}
 def click(p,action):p.locator('[data-action="'+action+'"]:visible').first.click()
 def open_friends(p):click(p,'friends');expect(p.locator('.friends-loading')).to_have_count(0)
 def register(p,username):

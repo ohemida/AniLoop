@@ -4,7 +4,7 @@ import json,time,os
 from pathlib import Path
 root=Path(__file__).resolve().parents[1]
 URL=os.environ.get('ANILOOP_URL','http://localhost:8100')
-a=next(a for a in json.loads((root/'data/pool.json').read_text())['anime'] if (a.get('ending') or {}).get('video','').startswith('assets/media/'))
+a=next(a for a in json.loads((root/'data/pool.json').read_text(encoding='utf-8'))['anime'] if (a.get('ending') or {}).get('video','').startswith('assets/media/'))
 with sync_playwright() as pw:
  b=pw.chromium.launch();p=b.new_page();p.set_default_timeout(120000);calls=[]
  p.on('request',lambda r:calls.append(r.post_data_json) if r.url.endswith('/api/hints') else None)

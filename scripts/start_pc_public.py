@@ -28,10 +28,10 @@ def main():
         time.sleep(1)
     if not url:raise RuntimeError('No public address yet. Check: docker logs --tail 30 aniloop-pc-tunnel')
     values=dict(item.split('=',1) for item in app['Config']['Env'] if '=' in item)
-    previous=envfile.read_text() if envfile.exists() else ''
+    previous=envfile.read_text(encoding='utf-8') if envfile.exists() else ''
     contents=f'ANILOOP_PUBLIC_ORIGIN={url}\nANILOOP_SECURE_COOKIES=1\n'
     # Preserve the exact-origin setting on future Compose recreations.
-    with envfile.open('w') as f:os.fchmod(f.fileno(),0o600);f.write(contents)
+    with envfile.open('w',encoding='utf-8') as f:os.fchmod(f.fileno(),0o600);f.write(contents)
     if values.get('ANILOOP_PUBLIC_ORIGIN')!=url or values.get('ANILOOP_SECURE_COOKIES')!='1':
         print('Updating public origin and secure cookies…',flush=True)
         docker('compose','--env-file',str(envfile),'-p','aniloop-pc','-f',str(compose),'up','-d','--no-build')

@@ -18,7 +18,8 @@ class SessionStore:
         fd=os.open(path,os.O_RDONLY|flags)
         with os.fdopen(fd,'rb') as f:
             if not stat.S_ISREG(os.fstat(f.fileno()).st_mode):raise RuntimeError('Session key must be a regular private file.')
-            os.fchmod(f.fileno(),0o600);key=f.read(128)
+            if os.name!='nt':os.fchmod(f.fileno(),0o600)
+            key=f.read(128)
         self.cipher=Fernet(key)
         with community.db() as db:
             db.execute('CREATE TABLE IF NOT EXISTS supabase_sessions(token_hash TEXT PRIMARY KEY,user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,sealed BLOB NOT NULL,expires REAL NOT NULL)')

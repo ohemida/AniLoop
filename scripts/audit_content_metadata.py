@@ -10,4 +10,4 @@ def report():
         labels[label]={'anime':len(entries),'withScreenshots':sum(bool(a.get('screenshots')) for a in entries),'withOpenings':sum(bool(a.get('opening')) for a in entries),'ids':[a['id'] for a in entries]}
     return {'scope':'Catalog metadata only; individual images, covers, portraits and video frames have not been visually classified. Tags describe anime, not proof of nudity in the selected files. An absent tag is not a safety rating.','poolSha256':hashlib.sha256(source).hexdigest(),'minimumAge':18,'ageAssurance':'Self-declaration only; no birth dates or identity documents collected. Not verified age assurance.','labels':labels}
 if __name__=='__main__':
-    path=ROOT/'data/content-review.json';path.write_text(json.dumps(report(),ensure_ascii=False,indent=2)+'\n');print('Wrote metadata-only content report:',path)
+    path=ROOT/'data/content-review.json';path.write_text(json.dumps(report(),ensure_ascii=False,indent=2)+'\n',encoding='utf-8');print('Wrote metadata-only content report:',path)

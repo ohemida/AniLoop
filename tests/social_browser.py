@@ -6,7 +6,7 @@ import json,os,sys,uuid
 from playwright.sync_api import sync_playwright,expect
 ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT))
 from test_community import complete_round
-URL=os.environ.get('ANILOOP_URL','http://localhost:8100');PACK=json.loads((ROOT/'data/pool.json').read_text());ANIME={a['id']:a for a in PACK['anime']}
+URL=os.environ.get('ANILOOP_URL','http://localhost:8100');PACK=json.loads((ROOT/'data/pool.json').read_text(encoding='utf-8'));ANIME={a['id']:a for a in PACK['anime']}
 def click(page,action):page.locator('[data-action="'+action+'"]:visible').first.click()
 def snapshot(page,code):return page.request.get(URL+'/api/rooms/view?code='+code).json()['room']
 def register(page,name):

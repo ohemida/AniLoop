@@ -12,7 +12,7 @@ class MediaCache:
   if not path.exists():return {}
   stamp=path.stat().st_mtime_ns
   if stamp!=self._mtime:
-   self._index=json.loads(path.read_text());self._mtime=stamp
+   self._index=json.loads(path.read_text(encoding='utf-8'));self._mtime=stamp
   return self._index
  def get(self,key):
   if not key or '/' in key or '\\' in key or '..' in key:raise FileNotFoundError('Invalid media ID')

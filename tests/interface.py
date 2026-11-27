@@ -10,7 +10,7 @@ with sync_playwright() as p:
  assert page.locator('html').get_attribute('lang')=='en';assert 'Choose your next challenge' in page.locator('body').inner_text()
  page.locator('[data-action="play:screenshot"]:visible').first.click();page.locator('#answer').fill('naruto');page.locator('.suggestions:not([hidden]) [role="option"]').first.wait_for();page.locator('#answer').press('ArrowDown');page.locator('#answer').press('Enter');assert page.locator('#answer').input_value();page.wait_for_function('()=>document.querySelector(".question-image").naturalWidth>0');page.screenshot(path=str(root/'qa/english-game.png'),full_page=True)
  # Deterministic local source: exercise encoded cover and clipped video via actual UI.
- pool=json.loads((root/'data/pool.json').read_text())['anime'];item=next(a for a in pool if (a.get('ending') or {}).get('video','').startswith('assets/media/'))
+ pool=json.loads((root/'data/pool.json').read_text(encoding='utf-8'))['anime'];item=next(a for a in pool if (a.get('ending') or {}).get('video','').startswith('assets/media/'))
  page.evaluate('''id=>{let s=JSON.parse(localStorage.getItem('aniloop-state-v1'));s.infinity.games.ending.questions[0]=id;s.infinity.games.ending.hints=[];s.infinity.games.ending.musicMode='audio';localStorage.setItem('aniloop-state-v1',JSON.stringify(s));}''',item['id'])
  page.reload();page.locator('[data-action="play:ending"]:visible').first.click();page.locator('audio').wait_for();page.wait_for_function('()=>document.querySelector("audio").duration>70')
  page.locator('[data-action="hint:1"]').click();page.wait_for_function('()=>document.querySelector(".quiz-video").readyState>=2',timeout=180000)

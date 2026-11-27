@@ -6,15 +6,15 @@ def prepare(destination=None):
     out=Path(destination) if destination else ROOT/'.release/AniLoop'
     if out.exists():raise SystemExit(f'{out} already exists. Choose a fresh output folder or remove that generated folder yourself.')
     out.mkdir(parents=True)
-    for name in ['requirements.txt','session_store.py','profile_images.py','ADMINISTRATION.md','admin.html','supabase_auth.py','retention.py','bugs.py','app.js','friends.py','catalog.js','social-ui.js','core.js','storage.js','styles.css','skin.css','index.html','server.py','community.py','rooms.py','rewards.py','hint_media.py','media_cache.py','start.sh','package.json','README.md','DEPLOYMENT.md','.gitignore','.dockerignore','.env.example','Dockerfile','SECURITY.md','SECURITY_VERIFICATION.md','PRIVATE_DEPLOYMENT.md','PUBLIC_LAUNCH.md','PRIVACY_OPERATIONS.md','compose.private.yml','compose.production.yml','PRODUCTION_SETUP.md']:
+    for name in ['requirements.txt','session_store.py','profile_images.py','ADMINISTRATION.md','admin.html','supabase_auth.py','retention.py','bugs.py','app.js','friends.py','catalog.js','social-ui.js','core.js','storage.js','styles.css','index.html','server.py','community.py','rooms.py','rewards.py','hint_media.py','media_cache.py','start.sh','package.json','README.md','DEPLOYMENT.md','.gitignore','.dockerignore','.env.example','Dockerfile','SECURITY.md','SECURITY_VERIFICATION.md','PRIVATE_DEPLOYMENT.md','PUBLIC_LAUNCH.md','PRIVACY_OPERATIONS.md','compose.private.yml','compose.production.yml','PRODUCTION_SETUP.md']:
         shutil.copy2(ROOT/name,out/name)
     for name in ['.github','scripts','tests','deploy','supabase','cloud']:
         shutil.copytree(ROOT/name,out/name,ignore=shutil.ignore_patterns('__pycache__','*.pyc'))
     shutil.copytree(ROOT/'assets',out/'assets',ignore=shutil.ignore_patterns('media'))
     (out/'data').mkdir()
     for file in (ROOT/'data').glob('*.json'):shutil.copy2(file,out/'data'/file.name)
-    sources={r['path']:r for r in json.loads((ROOT/'data/media-sources.json').read_text())}
-    registry=json.loads((ROOT/'data/media-index.json').read_text())
+    sources={r['path']:r for r in json.loads((ROOT/'data/media-sources.json').read_text(encoding='utf-8'))}
+    registry=json.loads((ROOT/'data/media-index.json').read_text(encoding='utf-8'))
     def replace(value):
         if isinstance(value,dict):return {k:replace(v) for k,v in value.items()}
         if isinstance(value,list):return [replace(v) for v in value]
@@ -26,9 +26,9 @@ def prepare(destination=None):
             registry[key]={'url':source['source'],'kind':'video' if extension in {'.mp4','.webm'} else 'audio' if extension in {'.mp3','.ogg','.wav'} else 'image'}
             return 'media/'+key
         return value
-    pool=replace(json.loads((ROOT/'data/pool.json').read_text()))
-    (out/'data/pool.json').write_text(json.dumps(pool,ensure_ascii=False,separators=(',',':')))
-    (out/'data/media-index.json').write_text(json.dumps(registry,ensure_ascii=False,separators=(',',':')))
+    pool=replace(json.loads((ROOT/'data/pool.json').read_text(encoding='utf-8')))
+    (out/'data/pool.json').write_text(json.dumps(pool,ensure_ascii=False,separators=(',',':')),encoding='utf-8')
+    (out/'data/media-index.json').write_text(json.dumps(registry,ensure_ascii=False,separators=(',',':')),encoding='utf-8')
     print(f'GitHub upload folder: {out}\nMedia loads on demand. No accounts, passwords, databases, caches, or bundled anime media copied.')
     return out
 if __name__=='__main__':

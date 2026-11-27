@@ -4,7 +4,7 @@ from pathlib import Path
 import json,os,base64,re
 from playwright.sync_api import sync_playwright,expect
 ROOT=Path(__file__).resolve().parents[1];OUT=ROOT/'qa';OUT.mkdir(exist_ok=True)
-PACK=json.loads((ROOT/'data/pool.json').read_text());ANIME={a['id']:a for a in PACK['anime']}
+PACK=json.loads((ROOT/'data/pool.json').read_text(encoding='utf-8'));ANIME={a['id']:a for a in PACK['anime']}
 URL=os.environ.get('ANILOOP_URL','http://localhost:8097')
 def click(p,action):p.locator(f'[data-action="{action}"]:visible').first.click()
 def state(p):return p.evaluate("JSON.parse(localStorage.getItem('aniloop-state-v1'))")
@@ -102,7 +102,7 @@ with sync_playwright() as pw:
  p.locator('form[data-form="editor"] button[type="submit"]').click();expect(p.locator('#toast')).to_contain_text('Media saved')
  p.reload(wait_until='networkidle');click(p,'library');expect(p.locator('main')).to_contain_text('My anime media pack')
  with p.expect_download() as result:click(p,'export-pack')
- result.value.save_as(str(OUT/'export.json'));export=json.loads((OUT/'export.json').read_text());assert export['anime'][0]['screenshots'][0].startswith('data:image/png')
+ result.value.save_as(str(OUT/'export.json'));export=json.loads((OUT/'export.json').read_text(encoding='utf-8'));assert export['anime'][0]['screenshots'][0].startswith('data:image/png')
  click(p,'import-pack');p.locator('#import-file').set_input_files(str(ROOT/'data/pool.json'));click(p,'confirm-import')
  expect(p.locator('#toast')).to_contain_text('Media pack activated')
  print('PASS: daily persistence, real-pool editor, upload, IndexedDB, export/import')

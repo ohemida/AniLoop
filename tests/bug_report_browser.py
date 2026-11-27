@@ -17,7 +17,7 @@ with sync_playwright() as pw:
     expect(page.locator('[name=includeDiagnostics]')).not_to_be_checked();page.locator('[name=includeDiagnostics]').check();page.locator('.report-diagnostics summary').click();expect(page.locator('#bug-diagnostics')).to_contain_text('viewport')
     page.locator('[name=includeDiagnostics]').uncheck();expect(page.locator('#bug-diagnostics')).to_have_text('{}')
     with page.expect_download() as download:page.get_by_role('button',name='Download copy').click()
-    contents=json.loads(Path(download.value.path()).read_text());assert contents['diagnostics']=={} and contents['category']=='Openings'
+    contents=json.loads(Path(download.value.path()).read_text(encoding='utf-8'));assert contents['diagnostics']=={} and contents['category']=='Openings'
     page.locator('[data-action=home]').first.click();page.locator('[data-action=bug-report]').click();expect(page.locator('#bug-title')).to_have_value(contents['title'])
     page.route('**/api/bugs',lambda route:route.fulfill(status=503,content_type='application/json',body='{"error":"Server unavailable."}'))
     page.get_by_role('button',name='Send bug report').click();expect(page.locator('[role=alert]')).to_contain_text('draft is still here')

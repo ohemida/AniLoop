@@ -14,7 +14,9 @@ function supportsFilter() {
     const ctx = document.createElement('canvas').getContext('2d');
     ctx.filter = 'blur(2px)';
     filterSupport = ctx.filter === 'blur(2px)';
-  } catch { filterSupport = false; }
+  } catch {
+    filterSupport = false;
+  }
   return filterSupport;
 }
 
@@ -27,14 +29,25 @@ function createPipeline(canvas, smallWidth = SMALL_WIDTH, blurPx = 2) {
   return (source, width, height) => {
     if (!width || !height) return;
     const ratio = height / width;
-    const size = (c, w) => { const h = Math.max(1, Math.round(w * ratio)); if (c.width !== w || c.height !== h) { c.width = w; c.height = h; } };
-    size(small, smallWidth); size(mid, MID_WIDTH); size(canvas, OUT_WIDTH);
-    sctx.imageSmoothingEnabled = true; sctx.imageSmoothingQuality = 'high';
+    const size = (c, w) => {
+      const h = Math.max(1, Math.round(w * ratio));
+      if (c.width !== w || c.height !== h) {
+        c.width = w;
+        c.height = h;
+      }
+    };
+    size(small, smallWidth);
+    size(mid, MID_WIDTH);
+    size(canvas, OUT_WIDTH);
+    sctx.imageSmoothingEnabled = true;
+    sctx.imageSmoothingQuality = 'high';
     sctx.drawImage(source, 0, 0, small.width, small.height);
-    mctx.imageSmoothingEnabled = true; mctx.imageSmoothingQuality = 'high';
+    mctx.imageSmoothingEnabled = true;
+    mctx.imageSmoothingQuality = 'high';
     if (supportsFilter()) mctx.filter = `blur(${blurPx}px)`;
     mctx.drawImage(small, 0, 0, mid.width, mid.height);
-    ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
     ctx.drawImage(mid, 0, 0, canvas.width, canvas.height);
   };
 }
@@ -42,12 +55,18 @@ function createPipeline(canvas, smallWidth = SMALL_WIDTH, blurPx = 2) {
 /** Mirrors a (visually hidden) video element into a blurred canvas. Returns a stop function. */
 export function blurVideo(video, canvas) {
   const draw = createPipeline(canvas);
-  let stopped = false, handle = 0;
-  const paint = () => { if (video.readyState >= 2 && video.videoWidth) draw(video, video.videoWidth, video.videoHeight); };
+  let stopped = false,
+    handle = 0;
+  const paint = () => {
+    if (video.readyState >= 2 && video.videoWidth) draw(video, video.videoWidth, video.videoHeight);
+  };
   const useFrameCallback = typeof video.requestVideoFrameCallback === 'function';
   const loop = () => {
     if (stopped) return;
-    if (!canvas.isConnected) { stop(); return; }
+    if (!canvas.isConnected) {
+      stop();
+      return;
+    }
     paint();
     handle = useFrameCallback ? video.requestVideoFrameCallback(loop) : requestAnimationFrame(loop);
   };
@@ -56,7 +75,8 @@ export function blurVideo(video, canvas) {
   video.addEventListener('seeked', onStatic);
   function stop() {
     stopped = true;
-    if (useFrameCallback) video.cancelVideoFrameCallback?.(handle); else cancelAnimationFrame(handle);
+    if (useFrameCallback) video.cancelVideoFrameCallback?.(handle);
+    else cancelAnimationFrame(handle);
     video.removeEventListener('loadeddata', onStatic);
     video.removeEventListener('seeked', onStatic);
   }
@@ -70,7 +90,10 @@ export function blurImage(src, canvas) {
     const image = new Image();
     image.decoding = 'async';
     image.referrerPolicy = 'no-referrer';
-    image.onload = () => { createPipeline(canvas, 14, 4)(image, image.naturalWidth, image.naturalHeight); resolve(); };
+    image.onload = () => {
+      createPipeline(canvas, 14, 4)(image, image.naturalWidth, image.naturalHeight);
+      resolve();
+    };
     image.onerror = () => reject(new Error('The cover image could not be loaded.'));
     image.src = src;
   });

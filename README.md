@@ -119,7 +119,6 @@ Appearance preferences use `aniloop-appearance-v1` in localStorage. The uploaded
 Appearance browser checks (against a disposable server):
 
 ```bash
-ANILOOP_URL=http://localhost:8100 .tools/qa/bin/python tests/appearance_browser.py
 ANILOOP_URL=http://localhost:8100 ANILOOP_TEST_DB=/tmp/aniloop-appearance-qa.sqlite3 .tools/qa/bin/python tests/appearance_account_browser.py
 ```
 

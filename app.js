@@ -1,362 +1,2400 @@
 import {cleanAuthReturn} from './assets/auth-return.js';
 import {runtimeConfig} from './assets/runtime-config.js';
 import {createCloudRuntime} from './assets/cloud-runtime.js';
-import {readRoute,routeHash} from './assets/navigation.js';
+import {readRoute, routeHash} from './assets/navigation.js';
 import {privacyGate} from './assets/privacy-choice.js';
-import {createPolicies,POLICY_PAGES} from './assets/policies.js';
+import {createPolicies, POLICY_PAGES} from './assets/policies.js';
 import {createBugReport} from './assets/bug-report.js';
 import {createAppearance} from './assets/appearance.js';
-import {createStatistics,captureRound,recordActivity,snapshotRound} from './assets/statistics.js';
-import {createFriends,avatarMarkup} from './assets/friends-ui.js';
+import {createStatistics, captureRound, recordActivity, snapshotRound} from './assets/statistics.js';
+import {createFriends, avatarMarkup} from './assets/friends-ui.js';
 import {catalogIndex} from './catalog.js';
 import {createSocial} from './social-ui.js';
-import {blurVideo,blurImage} from './assets/blur-media.js';
+import {blurVideo, blurImage} from './assets/blur-media.js';
 import {createCloudDaily} from './assets/cloud-daily.js';
-import {fastSrc,recoverImage,warmImages} from './assets/fast-media.js';
-import {nameMarkup,bannerClass,celebrate} from './assets/cosmetics.js';
-import {CATEGORIES,createSession,dayKey,totalScore,completedCount,canAdvance,nextInfinity,commitRound,continueCategory,roundScore,matches,compareAnime,skipAnidle,clueTarget,poolCounts,eligible,summarizeAnidle,videoBounds} from './core.js';
-import {readState,writeState,setStateScope,loadPack,savePack,validatePack} from './storage.js';
-const authReturn=cleanAuthReturn(location.href);
-if(authReturn.changed)history.replaceState(history.state,'',authReturn.url);
+import {fastSrc, recoverImage, warmImages} from './assets/fast-media.js';
+import {nameMarkup, bannerClass, celebrate} from './assets/cosmetics.js';
+import {
+  CATEGORIES,
+  createSession,
+  dayKey,
+  totalScore,
+  completedCount,
+  canAdvance,
+  nextInfinity,
+  commitRound,
+  continueCategory,
+  roundScore,
+  matches,
+  compareAnime,
+  skipAnidle,
+  clueTarget,
+  poolCounts,
+  eligible,
+  summarizeAnidle,
+  videoBounds,
+} from './core.js';
+import {readState, writeState, setStateScope, loadPack, savePack, validatePack} from './storage.js';
+const authReturn = cleanAuthReturn(location.href);
+if (authReturn.changed) history.replaceState(history.state, '', authReturn.url);
 await privacyGate();
-const cloudMode=runtimeConfig.mode==='supabase';
-const cloud=cloudMode?createCloudRuntime(runtimeConfig):null;
-let recoveryReturn=false,recoveryError='';
-if(cloud)try{recoveryReturn=(await cloud.start(authReturn.code)).recovery;}catch(error){recoveryError=error.message;}
-const app=document.querySelector('#app'),dialog=document.querySelector('#dialog');
-const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const titleMarkup=a=>`<span class="anime-title">${esc(a.englishTitle||a.alternativeTitle||a.title)}${(a.japaneseTitle||a.title)!==(a.englishTitle||a.alternativeTitle||a.title)?`<small class="anime-japanese-title">${esc(a.japaneseTitle||a.title)}</small>`:''}</span>`;
-const fmt=n=>Number(n).toLocaleString('en-US');
-const button=(action,label,cls='btn',extra='')=>`<button type="button" class="${cls}" data-action="${action}" ${extra}>${label}</button>`;
-const uid=()=>globalThis.crypto?.randomUUID?.()||`${Date.now()}-${Math.random()}`;
-let hintJobs=[];
-function hintResource(source,kind,window){const id='hint-'+hintJobs.length;hintJobs.push({id,source,kind,window});return id;}
+const cloudMode = runtimeConfig.mode === 'supabase';
+const cloud = cloudMode ? createCloudRuntime(runtimeConfig) : null;
+let recoveryReturn = false,
+  recoveryError = '';
+if (cloud)
+  try {
+    recoveryReturn = (await cloud.start(authReturn.code)).recovery;
+  } catch (error) {
+    recoveryError = error.message;
+  }
+const app = document.querySelector('#app'),
+  dialog = document.querySelector('#dialog');
+const esc = (v) =>
+  String(v ?? '').replace(
+    /[&<>"']/g,
+    (c) => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'})[c],
+  );
+const titleMarkup = (a) =>
+  `<span class="anime-title">${esc(a.englishTitle || a.alternativeTitle || a.title)}${(a.japaneseTitle || a.title) !== (a.englishTitle || a.alternativeTitle || a.title) ? `<small class="anime-japanese-title">${esc(a.japaneseTitle || a.title)}</small>` : ''}</span>`;
+const fmt = (n) => Number(n).toLocaleString('en-US');
+const button = (action, label, cls = 'btn', extra = '') =>
+  `<button type="button" class="${cls}" data-action="${action}" ${extra}>${label}</button>`;
+const uid = () => globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random()}`;
+let hintJobs = [];
+function hintResource(source, kind, window) {
+  const id = 'hint-' + hintJobs.length;
+  hintJobs.push({id, source, kind, window});
+  return id;
+}
 // Share background preparation and explicit unlocks; UI IDs are not media identities.
-const hintRequests=new Map();
-function requestHint(job){
- const spec={source:job.source,kind:job.kind,...(job.kind==='opening'&&job.window?{window:job.window}:{})};
- const key=JSON.stringify(spec);
- if(hintRequests.has(key))return hintRequests.get(key);
- const task=(async()=>{
-   const response=cloudMode?await communityAPI('/api/hints',spec):await fetch('/api/hints',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(spec)});
-   if(cloudMode)return response;
-   if(!response.ok){
-    if([404,405,501].includes(response.status)){
-     const error=new Error('This server is outdated and cannot prepare hints. Restart it from the AniLoop folder with python3 server.py, then reload this page.');
-     error.outdated=true;throw error;
+const hintRequests = new Map();
+function requestHint(job) {
+  const spec = {
+    source: job.source,
+    kind: job.kind,
+    ...(job.kind === 'opening' && job.window ? {window: job.window} : {}),
+  };
+  const key = JSON.stringify(spec);
+  if (hintRequests.has(key)) return hintRequests.get(key);
+  const task = (async () => {
+    const response = cloudMode
+      ? await communityAPI('/api/hints', spec)
+      : await fetch('/api/hints', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(spec),
+        });
+    if (cloudMode) return response;
+    if (!response.ok) {
+      if ([404, 405, 501].includes(response.status)) {
+        const error = new Error(
+          'This server is outdated and cannot prepare hints. Restart it from the AniLoop folder with python3 server.py, then reload this page.',
+        );
+        error.outdated = true;
+        throw error;
+      }
+      const detail = await response.json().catch(() => null);
+      throw new Error(
+        detail?.error ||
+          'The media source could not be loaded. Retry the hint, or check its source in the media library.',
+      );
     }
-    const detail=await response.json().catch(()=>null);
-    throw new Error(detail?.error||'The media source could not be loaded. Retry the hint, or check its source in the media library.');
-   }
-   return await response.json();
- })();
- hintRequests.set(key,task);
- task.catch(()=>{if(hintRequests.get(key)===task)hintRequests.delete(key);});
- if(hintRequests.size>32)hintRequests.delete(hintRequests.keys().next().value);
- return task;
+    return await response.json();
+  })();
+  hintRequests.set(key, task);
+  task.catch(() => {
+    if (hintRequests.get(key) === task) hintRequests.delete(key);
+  });
+  if (hintRequests.size > 32) hintRequests.delete(hintRequests.keys().next().value);
+  return task;
 }
 // Static hosts (GitHub Pages) have no ffmpeg backend: blur in the browser instead.
-const clientHints=cloudMode&&runtimeConfig.videoHintsEnabled!==true;
-function hintError(element,job,message){
- const layout=element.closest('.video-hint-layout')||element.parentElement;if(!layout)return;
- element.closest('.media-player')?.querySelector('.hint-processing')?.remove();
- const windowNote=layout.querySelector('.video-window-note');if(windowNote)windowNote.textContent='Video hint unavailable. Full audio is still available.';
- const note=document.createElement('div');note.className='media-error hint-error';note.setAttribute('role','status');
- const text=document.createElement('p');text.textContent=(job.kind==='cover'?'Cover hint: ':'Video hint: ')+message;
- const retry=document.createElement('button');retry.className='btn ghost small';retry.textContent='Retry hint';
- retry.addEventListener('click',()=>render());note.append(text,retry);layout.append(note);
+const clientHints = cloudMode && runtimeConfig.videoHintsEnabled !== true;
+function hintError(element, job, message) {
+  const layout = element.closest('.video-hint-layout') || element.parentElement;
+  if (!layout) return;
+  element.closest('.media-player')?.querySelector('.hint-processing')?.remove();
+  const windowNote = layout.querySelector('.video-window-note');
+  if (windowNote) windowNote.textContent = 'Video hint unavailable. Full audio is still available.';
+  const note = document.createElement('div');
+  note.className = 'media-error hint-error';
+  note.setAttribute('role', 'status');
+  const text = document.createElement('p');
+  text.textContent = (job.kind === 'cover' ? 'Cover hint: ' : 'Video hint: ') + message;
+  const retry = document.createElement('button');
+  retry.className = 'btn ghost small';
+  retry.textContent = 'Retry hint';
+  retry.addEventListener('click', () => render());
+  note.append(text, retry);
+  layout.append(note);
 }
-function prepareClientHints(){
- for(const job of hintJobs){
-  const element=document.getElementById(job.id);if(!element||element.dataset.client)continue;
-  const canvas=document.createElement('canvas');canvas.className='hint-canvas';canvas.setAttribute('role','img');canvas.setAttribute('aria-label',element.getAttribute('aria-label')||element.alt||'Blurred clue');
-  if(job.kind==='cover'){element.dataset.client='true';element.replaceWith(canvas);blurImage(job.source,canvas).catch(error=>hintError(canvas,job,error.message));continue;}
-  element.dataset.client='true';element.dataset.offset='0';element.classList.add('hint-source');element.before(canvas);
-  element.addEventListener('loadedmetadata',()=>element.closest('.media-player')?.querySelector('.hint-processing')?.remove(),{once:true});
-  element.addEventListener('error',()=>hintError(element,job,'This clip could not be loaded. Full audio is still available.'),{once:true});
-  element.preload='auto';element.src=job.source;blurVideo(element,canvas);prepareVideo();
- }
+function prepareClientHints() {
+  for (const job of hintJobs) {
+    const element = document.getElementById(job.id);
+    if (!element || element.dataset.client) continue;
+    const canvas = document.createElement('canvas');
+    canvas.className = 'hint-canvas';
+    canvas.setAttribute('role', 'img');
+    canvas.setAttribute('aria-label', element.getAttribute('aria-label') || element.alt || 'Blurred clue');
+    if (job.kind === 'cover') {
+      element.dataset.client = 'true';
+      element.replaceWith(canvas);
+      blurImage(job.source, canvas).catch((error) => hintError(canvas, job, error.message));
+      continue;
+    }
+    element.dataset.client = 'true';
+    element.dataset.offset = '0';
+    element.classList.add('hint-source');
+    element.before(canvas);
+    element.addEventListener(
+      'loadedmetadata',
+      () => element.closest('.media-player')?.querySelector('.hint-processing')?.remove(),
+      {once: true},
+    );
+    element.addEventListener(
+      'error',
+      () => hintError(element, job, 'This clip could not be loaded. Full audio is still available.'),
+      {once: true},
+    );
+    element.preload = 'auto';
+    element.src = job.source;
+    blurVideo(element, canvas);
+    prepareVideo();
+  }
 }
-async function prepareHints(){
- if(clientHints){prepareClientHints();return;}
- const jobs=hintJobs,play=app.querySelector('[data-action="media-toggle"]');
- if(play&&jobs.some(j=>j.kind!=='cover'&&!document.getElementById(j.id)?.getAttribute('src')))play.disabled=true;
- await Promise.all(jobs.map(async job=>{
-  const element=document.getElementById(job.id);
-  if(!element||element.getAttribute('src')||element.dataset.loading)return;
-  element.dataset.loading='true';
-  try{
-   const result=await requestHint(job);
-   if(!element.isConnected)return;
-   element.src=result.url;element.dataset.offset=result.offset||0;
-   element.closest('.media-player')?.querySelector('.hint-processing')?.remove();
-   if(element.matches('video')){prepareVideo();if(play)play.disabled=false;}
-  }catch(error){
-   if(!element.isConnected)return;
-   const layout=element.closest('.video-hint-layout')||element.parentElement;
-   element.closest('.media-player')?.querySelector('.hint-processing')?.remove();
-   const windowNote=layout.querySelector('.video-window-note');
-   if(windowNote)windowNote.textContent='Video hint unavailable. Full audio is still available.';
-   // One full-width message for both failed resources; never squeeze errors into a cover.
-   if(error.outdated){
-    if(layout.querySelector('.hint-server-error'))return;
-    layout.querySelectorAll('.hint-error').forEach(note=>note.remove());
-    const note=document.createElement('div');note.className='media-error hint-error hint-server-error';note.setAttribute('role','alert');
-    const title=document.createElement('strong');title.textContent='Restart the local server';
-    const text=document.createElement('p');text.textContent=error.message;
-    note.append(title,text);if(layout.matches('.video-hint-layout')){const audio=document.createElement('button');audio.className='btn secondary small';audio.dataset.action='music-mode:audio';audio.textContent='Continue with full audio';note.append(audio);}layout.prepend(note);return;
-   }
-   const note=document.createElement('div');note.className='media-error hint-error';note.setAttribute('role','status');
-   const text=document.createElement('p');text.textContent=(job.kind==='cover'?'Cover hint: ':'Video hint: ')+error.message;
-   const retry=document.createElement('button');retry.className='btn ghost small';retry.textContent='Retry hint';
-   retry.addEventListener('click',()=>{layout.querySelectorAll('.hint-error').forEach(note=>note.remove());prepareHints();});
-   note.append(text,retry);layout.append(note);
-  }finally{delete element.dataset.loading;}
- }));
+async function prepareHints() {
+  if (clientHints) {
+    prepareClientHints();
+    return;
+  }
+  const jobs = hintJobs,
+    play = app.querySelector('[data-action="media-toggle"]');
+  if (play && jobs.some((j) => j.kind !== 'cover' && !document.getElementById(j.id)?.getAttribute('src')))
+    play.disabled = true;
+  await Promise.all(
+    jobs.map(async (job) => {
+      const element = document.getElementById(job.id);
+      if (!element || element.getAttribute('src') || element.dataset.loading) return;
+      element.dataset.loading = 'true';
+      try {
+        const result = await requestHint(job);
+        if (!element.isConnected) return;
+        element.src = result.url;
+        element.dataset.offset = result.offset || 0;
+        element.closest('.media-player')?.querySelector('.hint-processing')?.remove();
+        if (element.matches('video')) {
+          prepareVideo();
+          if (play) play.disabled = false;
+        }
+      } catch (error) {
+        if (!element.isConnected) return;
+        const layout = element.closest('.video-hint-layout') || element.parentElement;
+        element.closest('.media-player')?.querySelector('.hint-processing')?.remove();
+        const windowNote = layout.querySelector('.video-window-note');
+        if (windowNote) windowNote.textContent = 'Video hint unavailable. Full audio is still available.';
+        // One full-width message for both failed resources; never squeeze errors into a cover.
+        if (error.outdated) {
+          if (layout.querySelector('.hint-server-error')) return;
+          layout.querySelectorAll('.hint-error').forEach((note) => note.remove());
+          const note = document.createElement('div');
+          note.className = 'media-error hint-error hint-server-error';
+          note.setAttribute('role', 'alert');
+          const title = document.createElement('strong');
+          title.textContent = 'Restart the local server';
+          const text = document.createElement('p');
+          text.textContent = error.message;
+          note.append(title, text);
+          if (layout.matches('.video-hint-layout')) {
+            const audio = document.createElement('button');
+            audio.className = 'btn secondary small';
+            audio.dataset.action = 'music-mode:audio';
+            audio.textContent = 'Continue with full audio';
+            note.append(audio);
+          }
+          layout.prepend(note);
+          return;
+        }
+        const note = document.createElement('div');
+        note.className = 'media-error hint-error';
+        note.setAttribute('role', 'status');
+        const text = document.createElement('p');
+        text.textContent = (job.kind === 'cover' ? 'Cover hint: ' : 'Video hint: ') + error.message;
+        const retry = document.createElement('button');
+        retry.className = 'btn ghost small';
+        retry.textContent = 'Retry hint';
+        retry.addEventListener('click', () => {
+          layout.querySelectorAll('.hint-error').forEach((note) => note.remove());
+          prepareHints();
+        });
+        note.append(text, retry);
+        layout.append(note);
+      } finally {
+        delete element.dataset.loading;
+      }
+    }),
+  );
 }
 
-let authProvider=cloudMode?'supabase':'local',supabaseEnabled=cloudMode;
-let accountChecked=false,currentUser=null,board={scope:'global',mode:'infinity',period:'all',entries:[],loading:false,error:''},boardRequest=0;
-async function communityAPI(path,data){
- if(cloudMode)return cloud.api(path,data);
- const response=await fetch(path,{method:data===undefined?'GET':'POST',credentials:'same-origin',headers:data===undefined?{}:{'Content-Type':'application/json'},body:data===undefined?undefined:JSON.stringify(data)});
- const payload=await response.json().catch(()=>null);
- if(!response.ok)throw new Error(payload?.error||'Accounts need the current AniLoop server. Restart python3 server.py and use its printed URL.');
- return payload;
+let authProvider = cloudMode ? 'supabase' : 'local',
+  supabaseEnabled = cloudMode;
+let accountChecked = false,
+  currentUser = null,
+  board = {scope: 'global', mode: 'infinity', period: 'all', entries: [], loading: false, error: ''},
+  boardRequest = 0;
+async function communityAPI(path, data) {
+  if (cloudMode) return cloud.api(path, data);
+  const response = await fetch(path, {
+    method: data === undefined ? 'GET' : 'POST',
+    credentials: 'same-origin',
+    headers: data === undefined ? {} : {'Content-Type': 'application/json'},
+    body: data === undefined ? undefined : JSON.stringify(data),
+  });
+  const payload = await response.json().catch(() => null);
+  if (!response.ok)
+    throw new Error(
+      payload?.error || 'Accounts need the current AniLoop server. Restart python3 server.py and use its printed URL.',
+    );
+  return payload;
 }
-function authDialog(mode='login'){
- if(mode==='forgot'||mode==='reset'){
-  const reset=mode==='reset';dialog.innerHTML=`<div class="dialog-head"><h2 id="dialog-title">${reset?'Choose a new password':'Reset your password'}</h2>${button('close-dialog','×','','aria-label="Close dialog"')}</div><p class="subtle">${reset?'Enter your new password.':'Enter your account email. Open the reset link in this same browser.'}</p><form data-community-form="${mode}" class="account-form">${reset?'<div class="field"><label for="reset-password">New password</label><input id="reset-password" name="password" type="password" autocomplete="new-password" minlength="12" maxlength="128" required></div><div class="field"><label for="reset-confirm">Confirm password</label><input id="reset-confirm" name="confirm" type="password" autocomplete="new-password" minlength="12" maxlength="128" required></div>':'<div class="field"><label for="reset-email">Email</label><input id="reset-email" name="email" type="email" autocomplete="email" maxlength="254" required></div>'}<p class="account-error" role="alert" hidden></p><p class="account-message" role="status" hidden></p><button class="btn full" type="submit">${reset?'Update password':'Send reset link'}</button></form><div class="account-switch">${button('login','Back to sign in','text-button')}</div>`;if(!dialog.open)dialog.showModal();dialog.querySelector('input')?.focus();return;
- }
- const register=mode==='register',cloud=authProvider==='supabase';
- dialog.innerHTML=`<div class="dialog-head"><div><span class="mode-label">${cloud?'Supabase account':'Local account'}</span><h2 id="dialog-title">${register?'Create your account':'Welcome back'}</h2></div>${button('close-dialog','×','','aria-label="Close dialog"')}</div>${supabaseEnabled&&!cloudMode?`<div class="segmented account-providers" role="group" aria-label="Account provider">${button('auth-provider:supabase','Supabase account',cloud?'selected':'')}${button('auth-provider:local','Existing local account',!cloud?'selected':'')}</div>`:''}<p class="subtle">${register?'Accounts are for adults aged 18 or over. Choose a public username. Your submitted scores will appear on the community leaderboard.':'Sign in to submit scores and play with friends.'}</p><form data-community-form="${mode}" class="account-form">${!cloud||register?'<div class="field"><label for="account-username">Username</label><input id="account-username" name="username" autocomplete="username" minlength="3" maxlength="24" required placeholder="Your anime alias"></div>':''}${cloud?'<div class="field"><label for="account-email">Email</label><input id="account-email" name="email" type="email" autocomplete="email" maxlength="254" required placeholder="you@example.com"></div>':''}<div class="field"><label for="account-password">Password</label><input id="account-password" name="password" type="password" autocomplete="${register?'new-password':'current-password'}" minlength="12" maxlength="128" required placeholder="At least 12 characters"></div>${register?'<div class="field"><label for="account-confirm">Confirm password</label><input id="account-confirm" name="confirm" type="password" autocomplete="new-password" minlength="12" maxlength="128" required></div><label class="delete-confirm"><input type="checkbox" name="adult" required> I am 18 years or older.</label><label class="delete-confirm"><input type="checkbox" name="privacy" required> I have read the <a href="#privacy" data-action="privacy">privacy policy</a> and accept the <a href="#terms" data-action="terms">terms of use</a>.</label>':''}<p class="account-error" role="alert" hidden></p><p class="account-message" role="status" hidden></p><button class="btn full" type="submit">${register?'Create account':'Sign in'}</button></form><div class="account-switch">${register?'Already have an account?':'New to AniLoop?'} ${button(register?'login':'register',register?'Sign in':'Create account','text-button')}</div><p class="subtle account-note">${cloudMode?'Your quiz progress and custom media stay in this browser. Your account, submitted scores, friends, rewards and rooms use Supabase.':'Solo progress stays on this browser.'} ${cloud?'Supabase stores your email and handles password authentication and email confirmation. Existing local accounts remain separate; they are not automatically migrated.':'No email is collected for local accounts; password recovery is not available.'} Read our <a href="#privacy" data-action="privacy">Privacy policy</a>, <a href="#cookies" data-action="cookies">Cookies & storage</a>, and <a href="#terms" data-action="terms">Terms of use</a> before creating an account. Contact <a href="mailto:dailyaniloop@gmail.com">dailyaniloop@gmail.com</a>.</p>`;
- if(cloudMode&&!register)dialog.querySelector('.account-switch').insertAdjacentHTML('beforebegin',`<div class="account-switch">${button('forgot','Forgot password?','text-button')}</div>`);
- if(!dialog.open)dialog.showModal();dialog.querySelector('input')?.focus();
+function authDialog(mode = 'login') {
+  if (mode === 'forgot' || mode === 'reset') {
+    const reset = mode === 'reset';
+    dialog.innerHTML = `<div class="dialog-head"><h2 id="dialog-title">${reset ? 'Choose a new password' : 'Reset your password'}</h2>${button('close-dialog', '×', '', 'aria-label="Close dialog"')}</div><p class="subtle">${reset ? 'Enter your new password.' : 'Enter your account email. Open the reset link in this same browser.'}</p><form data-community-form="${mode}" class="account-form">${reset ? '<div class="field"><label for="reset-password">New password</label><input id="reset-password" name="password" type="password" autocomplete="new-password" minlength="12" maxlength="128" required></div><div class="field"><label for="reset-confirm">Confirm password</label><input id="reset-confirm" name="confirm" type="password" autocomplete="new-password" minlength="12" maxlength="128" required></div>' : '<div class="field"><label for="reset-email">Email</label><input id="reset-email" name="email" type="email" autocomplete="email" maxlength="254" required></div>'}<p class="account-error" role="alert" hidden></p><p class="account-message" role="status" hidden></p><button class="btn full" type="submit">${reset ? 'Update password' : 'Send reset link'}</button></form><div class="account-switch">${button('login', 'Back to sign in', 'text-button')}</div>`;
+    if (!dialog.open) dialog.showModal();
+    dialog.querySelector('input')?.focus();
+    return;
+  }
+  const register = mode === 'register',
+    cloud = authProvider === 'supabase';
+  dialog.innerHTML = `<div class="dialog-head"><div><span class="mode-label">${cloud ? 'Supabase account' : 'Local account'}</span><h2 id="dialog-title">${register ? 'Create your account' : 'Welcome back'}</h2></div>${button('close-dialog', '×', '', 'aria-label="Close dialog"')}</div>${supabaseEnabled && !cloudMode ? `<div class="segmented account-providers" role="group" aria-label="Account provider">${button('auth-provider:supabase', 'Supabase account', cloud ? 'selected' : '')}${button('auth-provider:local', 'Existing local account', !cloud ? 'selected' : '')}</div>` : ''}<p class="subtle">${register ? 'Accounts are for adults aged 18 or over. Choose a public username. Your submitted scores will appear on the community leaderboard.' : 'Sign in to submit scores and play with friends.'}</p><form data-community-form="${mode}" class="account-form">${!cloud || register ? '<div class="field"><label for="account-username">Username</label><input id="account-username" name="username" autocomplete="username" minlength="3" maxlength="24" required placeholder="Your anime alias"></div>' : ''}${cloud ? '<div class="field"><label for="account-email">Email</label><input id="account-email" name="email" type="email" autocomplete="email" maxlength="254" required placeholder="you@example.com"></div>' : ''}<div class="field"><label for="account-password">Password</label><input id="account-password" name="password" type="password" autocomplete="${register ? 'new-password' : 'current-password'}" minlength="12" maxlength="128" required placeholder="At least 12 characters"></div>${register ? '<div class="field"><label for="account-confirm">Confirm password</label><input id="account-confirm" name="confirm" type="password" autocomplete="new-password" minlength="12" maxlength="128" required></div><label class="delete-confirm"><input type="checkbox" name="adult" required> I am 18 years or older.</label><label class="delete-confirm"><input type="checkbox" name="privacy" required> I have read the <a href="#privacy" data-action="privacy">privacy policy</a> and accept the <a href="#terms" data-action="terms">terms of use</a>.</label>' : ''}<p class="account-error" role="alert" hidden></p><p class="account-message" role="status" hidden></p><button class="btn full" type="submit">${register ? 'Create account' : 'Sign in'}</button></form><div class="account-switch">${register ? 'Already have an account?' : 'New to AniLoop?'} ${button(register ? 'login' : 'register', register ? 'Sign in' : 'Create account', 'text-button')}</div><p class="subtle account-note">${cloudMode ? 'Your quiz progress and custom media stay in this browser. Your account, submitted scores, friends, rewards and rooms use Supabase.' : 'Solo progress stays on this browser.'} ${cloud ? 'Supabase stores your email and handles password authentication and email confirmation. Existing local accounts remain separate; they are not automatically migrated.' : 'No email is collected for local accounts; password recovery is not available.'} Read our <a href="#privacy" data-action="privacy">Privacy policy</a>, <a href="#cookies" data-action="cookies">Cookies & storage</a>, and <a href="#terms" data-action="terms">Terms of use</a> before creating an account. Contact <a href="mailto:dailyaniloop@gmail.com">dailyaniloop@gmail.com</a>.</p>`;
+  if (cloudMode && !register)
+    dialog
+      .querySelector('.account-switch')
+      .insertAdjacentHTML(
+        'beforebegin',
+        `<div class="account-switch">${button('forgot', 'Forgot password?', 'text-button')}</div>`,
+      );
+  if (!dialog.open) dialog.showModal();
+  dialog.querySelector('input')?.focus();
 }
-function ownProfileImage(){const u=shownUser();return u?.hasPicture?`<img class="own-profile-picture" src="${cloudMode?esc(u.pictureUrl||''):`/api/account/picture?v=${u.pictureVersion||0}`}" alt="Your profile picture">`:'';}
+function ownProfileImage() {
+  const u = shownUser();
+  return u?.hasPicture
+    ? `<img class="own-profile-picture" src="${cloudMode ? esc(u.pictureUrl || '') : `/api/account/picture?v=${u.pictureVersion || 0}`}" alt="Your profile picture">`
+    : '';
+}
 // The last signed-in account is remembered on this device so a reload shows your name, frame and
 // cosmetics at once instead of a guest flash while the server answers. The server stays authoritative.
-const ACCOUNT_CACHE='aniloop-account-cache-v1';
-let accountCache=(()=>{try{const v=JSON.parse(localStorage.getItem(ACCOUNT_CACHE)||'null');return v?.user?.id?v:null;}catch{return null;}})(),accountCacheText='',adoptedLook=null;
-function shownUser(){return currentUser||(cloudMode&&!accountChecked&&cloud?.signedIn?accountCache?.user||null:null);}
-function rememberAccount(){if(!cloudMode||!accountChecked)return;try{if(!currentUser){if(accountCache){localStorage.removeItem(ACCOUNT_CACHE);accountCache=null;accountCacheText='';}return;}const text=JSON.stringify({user:currentUser,rewards:social.rewards||accountCache?.rewards||null});if(text===accountCacheText||text.length>60000)return;localStorage.setItem(ACCOUNT_CACHE,text);accountCacheText=text;accountCache=JSON.parse(text);}catch{}}
-function accountView(){
- if(!currentUser)return `<section class="community-intro"><img class="community-logo" src="assets/mark.svg" alt="AniLoop original logo"><h1>A name for your score.</h1><p>Play as a guest, or create an account to submit completed rounds and join the community leaderboard.</p><div class="hero-actions">${button('register','Create account')}${button('login','Sign in','btn ghost')}</div></section>`;
- return `<section class="community-intro"><span class="profile-avatar ${social.frameClass()}">${ownProfileImage()||esc(currentUser.username.slice(0,2).toUpperCase())}</span><span class="mode-label">Your account</span><h1>${esc(currentUser.username)}</h1><p class="subtle">${currentUser.provider==='supabase'?'Supabase account · Cloud game community':'Local account · Stored on this AniLoop server'}</p><p>Your username and submitted scores are public. Your password is never stored in plain text. ${cloudMode?'Quiz progress and custom media stay on this browser.':'Solo games and custom media stay on this browser; room progress is shared on the server.'}</p><div class="hero-actions">${currentUser.isAdmin?'<a class="btn secondary" href="admin.html">Admin dashboard</a>':''}${button('export-account','Download my account data','btn secondary')}${button('leaderboard','View leaderboards')}${button('logout','Sign out','btn ghost')}</div></section><section class="panel account-danger"><h2>Delete account</h2><p class="subtle">Permanently removes your account, sessions, and all your leaderboard entries. Your local game progress remains on this device.</p><form data-community-form="delete" class="account-form"><div class="field"><label for="delete-password">Current password</label><input id="delete-password" name="password" type="password" autocomplete="current-password" minlength="12" maxlength="128" required></div><label class="delete-confirm"><input type="checkbox" name="confirm" required> I want to permanently delete my account and scores.</label><p class="account-error" role="alert" hidden></p><button class="btn ghost" type="submit">Delete my account</button></form></section>`;
+const ACCOUNT_CACHE = 'aniloop-account-cache-v1';
+let accountCache = (() => {
+    try {
+      const v = JSON.parse(localStorage.getItem(ACCOUNT_CACHE) || 'null');
+      return v?.user?.id ? v : null;
+    } catch {
+      return null;
+    }
+  })(),
+  accountCacheText = '',
+  adoptedLook = null;
+function shownUser() {
+  return currentUser || (cloudMode && !accountChecked && cloud?.signedIn ? accountCache?.user || null : null);
 }
-function scoreButton(){if(isLoop())return '';if(remoteDaily())return completedCount(session())===5?'<span class="reward-claimed">✓ Saved to the leaderboard</span>':'';const submitted=currentUser&&session().submittedBy?.includes(currentUser.id);return completedCount(session())===5?button('submit-score',submitted?'Score submitted':'Submit to leaderboard','btn secondary',submitted?'disabled':''):'';}
-function leaderboardView(){const friendsScope=board.scope==='friends',entries=board.entries,ranked=entries.filter(e=>e.score!==null&&e.score!==undefined),podium=ranked.slice(0,3),rest=entries.filter(e=>!podium.includes(e)),scopeLocked=friendsScope&&!currentUser;
- const seg=(prefix,items,current,label)=>`<div class="segmented" role="group" aria-label="${label}">${items.map(([id,text])=>button(prefix+id,text,current===id?'selected':'','aria-pressed="'+(current===id)+'"')).join('')}</div>`;
- const you=e=>e.isSelf||e.userId===currentUser?.id,pic=e=>you(e)&&currentUser?.hasPicture?currentUser.pictureUrl:e.pictureUrl;
- const podiumCard=(e,place)=>`<article class="podium-card place-${place} ${you(e)?'is-you':''}${bannerClass(e)}"><span class="podium-medal" aria-label="Rank ${place}">${place}</span>${avatarMarkup(e.username,pic(e),esc,e.frame)}<h3 class="player-name-wrap">${nameMarkup(e.username,e,esc)}${you(e)?'<span class="you-label">You</span>':''}</h3><strong>${fmt(e.score)}</strong><small>${fmt(e.rounds)} ${e.rounds===1?'round':'rounds'}</small></article>`;
- const row=e=>`<tr class="${you(e)?'your-rank':''}"><td><span class="rank-number">${e.rank??'—'}</span></td><td><span class="leaderboard-player">${avatarMarkup(e.username,pic(e),esc,e.frame)}<strong class="player-name-wrap">${nameMarkup(e.username,e,esc)}</strong>${you(e)?'<span class="you-label">You</span>':''}</span></td><td class="ranking-score">${e.score===null||e.score===undefined?'<span class="subtle">No round yet</span>':`${fmt(e.score)}<small> / 100,000</small>`}</td><td>${fmt(e.rounds||0)}</td></tr>`;
- const empty=friendsScope?`<div class="leaderboard-empty"><span class="empty-rank">♧</span><h2>${entries.length>1?'Nobody has a result here yet.':'Add friends to start a rivalry.'}</h2><p>${entries.length>1?'Finish a round in this mode to take the first spot.':'Add friends by username on the Friends page. Their best rounds appear here next to yours.'}</p>${button('friends','Open Friends','btn secondary small')}</div>`:'<div class="leaderboard-empty"><span class="empty-rank">♧</span><h2>The first spot is open.</h2><p>No rounds have been submitted for this filter. Finish all five categories to take it.</p></div>';
- return `<section class="community-intro leaderboard-intro"><span class="mode-label">${friendsScope?'Friends leaderboard':'Community leaderboards'}</span><h1>${friendsScope?'You and your friends.':'Make your loop count.'}</h1><p>${friendsScope?'Best round per player among you and your accepted friends.':'Best completed round per player. Ties use completed-round count, then earliest first result. Top 100 players are shown.'}</p></section><div class="leaderboard-toolbar">${seg('board-scope:',[['global','Everyone'],['friends','Friends']],board.scope,'Leaderboard scope')}${seg('board-mode:',[['infinity','∞ Infinity'],['daily','Daily quiz']],board.mode,'Leaderboard mode')}<div class="field"><label for="board-period">Time period</label><select id="board-period"><option value="all" ${board.period==='all'?'selected':''}>All time</option><option value="week" ${board.period==='week'?'selected':''}>Past 7 days</option><option value="today" ${board.period==='today'?'selected':''}>Today (UTC)</option></select></div>${button('board-refresh','Refresh','btn ghost small')}</div><section class="leaderboard-panel" aria-label="Player rankings" aria-busy="${board.loading}">${scopeLocked?`<div class="leaderboard-empty"><span class="empty-rank">♧</span><h2>Sign in to see your friends.</h2><p>The friends leaderboard compares your best rounds with the players you added.</p>${button('login','Sign in','btn secondary small')}</div>`:board.loading?'<p class="empty" role="status">Loading player rankings…</p>':board.error?`<div class="media-error" role="alert">${esc(board.error)} ${button('board-refresh','Retry','btn ghost small')}</div>`:ranked.length?`<div class="podium">${[podium[1],podium[0],podium[2]].map((e,i)=>e?podiumCard(e,[2,1,3][i]):'<div class="podium-spot" aria-hidden="true"></div>').join('')}</div>${rest.length?`<div class="leaderboard-table-wrap"><table class="leaderboard-table"><thead><tr><th scope="col">Rank</th><th scope="col">Player</th><th scope="col">Best round</th><th scope="col">Rounds</th></tr></thead><tbody>${rest.map(row).join('')}</tbody></table></div>`:''}`:empty}</section>${friendsScope?'':`<div class="leaderboard-join"><div><h2>${currentUser?'Your next round could be here.':'Give your score a name.'}</h2><p class="subtle">${currentUser?'Only completed rounds from the default media pool are eligible. Daily results are saved automatically.':'Create an account to submit results. You can keep playing as a guest.'}</p></div><div class="hero-actions">${currentUser?(scoreButton()||button('home','Play a round')):button('register','Create account')}</div></div>`}<p class="subtle leaderboard-note">The server recalculates every score from the answers, and daily results are graded on the server. Custom packs are excluded.</p>`;}
-async function loadLeaderboard(){const request=++boardRequest;board.loading=true;board.error='';if(view==='leaderboard')render();try{if(board.scope==='friends'&&!currentUser){board.entries=[];return;}const data=await communityAPI('/api/leaderboard?mode='+board.mode+'&period='+board.period+'&scope='+board.scope);if(request===boardRequest)board.entries=data.entries;}catch(error){if(request===boardRequest)board.error=error.message;}finally{if(request===boardRequest){board.loading=false;if(view==='leaderboard')render();}}}
-async function publishScore(){if(!currentUser){authDialog();return;}if(completedCount(session())!==5){toast('Complete all five categories first.');return;}if(session().submittedBy?.includes(currentUser.id))return;const round=session(),userId=currentUser.id;const result=await communityAPI('/api/scores',{round});(round.submittedBy??=[]).push(userId);persist();render();toast('Score submitted: '+fmt(result.score)+' points.');if(view==='leaderboard')loadLeaderboard();}
-async function submitCommunity(form){const data=new FormData(form),mode=form.dataset.communityForm,error=form.querySelector('.account-error'),submit=form.querySelector('[type="submit"]');error.hidden=true;submit.disabled=true;
- if(cloudMode&&(mode==='forgot'||mode==='reset')){try{if(mode==='forgot'){await cloud.requestPasswordReset(String(data.get('email')||'').trim());const message=form.querySelector('.account-message');message.hidden=false;message.textContent='If an account exists for this email, a reset link will be sent. Open it in this same browser.';}else{if(data.get('password')!==data.get('confirm'))throw new Error('Your passwords do not match.');await cloud.updatePassword(String(data.get('password')));dialog.close();toast('Password updated.');}}catch(cause){error.textContent=cause.message;error.hidden=false;}finally{submit.disabled=false;}return;}
- try{if(cloudMode&&currentUser&&['login','register'].includes(mode))await communityAPI('/api/account/save',{state});if(mode==='delete'){await communityAPI('/api/account/delete',{password:data.get('password')});currentUser=null;if(cloudMode){setStateScope(null);state=readState();ensureSessions();}social.clear();friends.clear();cloudDaily.clear();go('account');toast('Account and leaderboard entries deleted.');return;}
- if(mode==='register'&&data.get('password')!==data.get('confirm'))throw new Error('Your passwords do not match.');if(mode==='register'&&(!data.get('adult')||!data.get('privacy')))throw new Error('Please confirm your age and the privacy policy.');const result=await communityAPI('/api/'+mode,{provider:cloudMode?'supabase':authProvider,username:data.get('username'),email:data.get('email'),password:data.get('password'),...(mode==='register'||cloudMode?{adultConfirmed:true,privacyAcknowledged:true,noticeVersion:'2026-11-24.5'}:{})});if(result.requiresConfirmation){authDialog('login');const message=dialog.querySelector('.account-message');message.hidden=false;message.textContent='Check your email to confirm your account, then sign in here. No game profile is created until you sign in.';dialog.querySelector('#account-email').value=String(data.get('email')||'');return;}const previousUser=currentUser;currentUser=result.user;if(cloudMode)await switchStateForUser(currentUser,previousUser);await social.refresh();dialog.close();render();if(view==='friends')await friends.load();toast(mode==='register'?'Account created. Welcome, '+currentUser.username+'.':'Welcome back, '+currentUser.username+'.');
- }catch(cause){error.textContent=cause.message;error.hidden=false;}finally{submit.disabled=false;}}
-let libraryPage=1,libraryQuery='',libraryCategory='all',libraryTimer,librarySort='az',libraryGenre='all',libraryDetail=null;
-const LIBRARY_PAGE=48,LIBRARY_SORTS=[['az','A–Z'],['score','Top rated'],['new','Newest first'],['old','Oldest first']];
-let starter,pack,state=readState(),view='home',selected=null,editing=null,toastTimer;
-const packKey=()=>pack.key||'custom';
-const remoteDaily=()=>cloudMode&&!social.active&&state.mode==='daily';
-const ids=()=>social.active||remoteDaily()?starter.anime:pack.anime;
-const anime=id=>catalogIndex(ids()).byId.get(id);
-const cat=id=>CATEGORIES.find(c=>c.id===id);
-const isLoop=()=>!social.active&&state.mode==='loop';
+function rememberAccount() {
+  if (!cloudMode || !accountChecked) return;
+  try {
+    if (!currentUser) {
+      if (accountCache) {
+        localStorage.removeItem(ACCOUNT_CACHE);
+        accountCache = null;
+        accountCacheText = '';
+      }
+      return;
+    }
+    const text = JSON.stringify({user: currentUser, rewards: social.rewards || accountCache?.rewards || null});
+    if (text === accountCacheText || text.length > 60000) return;
+    localStorage.setItem(ACCOUNT_CACHE, text);
+    accountCacheText = text;
+    accountCache = JSON.parse(text);
+  } catch {}
+}
+function accountView() {
+  if (!currentUser)
+    return `<section class="community-intro"><img class="community-logo" src="assets/mark.svg" alt="AniLoop original logo"><h1>A name for your score.</h1><p>Play as a guest, or create an account to submit completed rounds and join the community leaderboard.</p><div class="hero-actions">${button('register', 'Create account')}${button('login', 'Sign in', 'btn ghost')}</div></section>`;
+  return `<section class="community-intro"><span class="profile-avatar ${social.frameClass()}">${ownProfileImage() || esc(currentUser.username.slice(0, 2).toUpperCase())}</span><span class="mode-label">Your account</span><h1>${esc(currentUser.username)}</h1><p class="subtle">${currentUser.provider === 'supabase' ? 'Supabase account · Cloud game community' : 'Local account · Stored on this AniLoop server'}</p><p>Your username and submitted scores are public. Your password is never stored in plain text. ${cloudMode ? 'Quiz progress and custom media stay on this browser.' : 'Solo games and custom media stay on this browser; room progress is shared on the server.'}</p><div class="hero-actions">${currentUser.isAdmin ? '<a class="btn secondary" href="admin.html">Admin dashboard</a>' : ''}${button('export-account', 'Download my account data', 'btn secondary')}${button('leaderboard', 'View leaderboards')}${button('logout', 'Sign out', 'btn ghost')}</div></section><section class="panel account-danger"><h2>Delete account</h2><p class="subtle">Permanently removes your account, sessions, and all your leaderboard entries. Your local game progress remains on this device.</p><form data-community-form="delete" class="account-form"><div class="field"><label for="delete-password">Current password</label><input id="delete-password" name="password" type="password" autocomplete="current-password" minlength="12" maxlength="128" required></div><label class="delete-confirm"><input type="checkbox" name="confirm" required> I want to permanently delete my account and scores.</label><p class="account-error" role="alert" hidden></p><button class="btn ghost" type="submit">Delete my account</button></form></section>`;
+}
+function scoreButton() {
+  if (isLoop()) return '';
+  if (remoteDaily())
+    return completedCount(session()) === 5 ? '<span class="reward-claimed">✓ Saved to the leaderboard</span>' : '';
+  const submitted = currentUser && session().submittedBy?.includes(currentUser.id);
+  return completedCount(session()) === 5
+    ? button(
+        'submit-score',
+        submitted ? 'Score submitted' : 'Submit to leaderboard',
+        'btn secondary',
+        submitted ? 'disabled' : '',
+      )
+    : '';
+}
+function leaderboardView() {
+  const friendsScope = board.scope === 'friends',
+    entries = board.entries,
+    ranked = entries.filter((e) => e.score !== null && e.score !== undefined),
+    podium = ranked.slice(0, 3),
+    rest = entries.filter((e) => !podium.includes(e)),
+    scopeLocked = friendsScope && !currentUser;
+  const seg = (prefix, items, current, label) =>
+    `<div class="segmented" role="group" aria-label="${label}">${items.map(([id, text]) => button(prefix + id, text, current === id ? 'selected' : '', 'aria-pressed="' + (current === id) + '"')).join('')}</div>`;
+  const you = (e) => e.isSelf || e.userId === currentUser?.id,
+    pic = (e) => (you(e) && currentUser?.hasPicture ? currentUser.pictureUrl : e.pictureUrl);
+  const podiumCard = (e, place) =>
+    `<article class="podium-card place-${place} ${you(e) ? 'is-you' : ''}${bannerClass(e)}"><span class="podium-medal" aria-label="Rank ${place}">${place}</span>${avatarMarkup(e.username, pic(e), esc, e.frame)}<h3 class="player-name-wrap">${nameMarkup(e.username, e, esc)}${you(e) ? '<span class="you-label">You</span>' : ''}</h3><strong>${fmt(e.score)}</strong><small>${fmt(e.rounds)} ${e.rounds === 1 ? 'round' : 'rounds'}</small></article>`;
+  const row = (e) =>
+    `<tr class="${you(e) ? 'your-rank' : ''}"><td><span class="rank-number">${e.rank ?? '—'}</span></td><td><span class="leaderboard-player">${avatarMarkup(e.username, pic(e), esc, e.frame)}<strong class="player-name-wrap">${nameMarkup(e.username, e, esc)}</strong>${you(e) ? '<span class="you-label">You</span>' : ''}</span></td><td class="ranking-score">${e.score === null || e.score === undefined ? '<span class="subtle">No round yet</span>' : `${fmt(e.score)}<small> / 100,000</small>`}</td><td>${fmt(e.rounds || 0)}</td></tr>`;
+  const empty = friendsScope
+    ? `<div class="leaderboard-empty"><span class="empty-rank">♧</span><h2>${entries.length > 1 ? 'Nobody has a result here yet.' : 'Add friends to start a rivalry.'}</h2><p>${entries.length > 1 ? 'Finish a round in this mode to take the first spot.' : 'Add friends by username on the Friends page. Their best rounds appear here next to yours.'}</p>${button('friends', 'Open Friends', 'btn secondary small')}</div>`
+    : '<div class="leaderboard-empty"><span class="empty-rank">♧</span><h2>The first spot is open.</h2><p>No rounds have been submitted for this filter. Finish all five categories to take it.</p></div>';
+  return `<section class="community-intro leaderboard-intro"><span class="mode-label">${friendsScope ? 'Friends leaderboard' : 'Community leaderboards'}</span><h1>${friendsScope ? 'You and your friends.' : 'Make your loop count.'}</h1><p>${friendsScope ? 'Best round per player among you and your accepted friends.' : 'Best completed round per player. Ties use completed-round count, then earliest first result. Top 100 players are shown.'}</p></section><div class="leaderboard-toolbar">${seg(
+    'board-scope:',
+    [
+      ['global', 'Everyone'],
+      ['friends', 'Friends'],
+    ],
+    board.scope,
+    'Leaderboard scope',
+  )}${seg(
+    'board-mode:',
+    [
+      ['infinity', '∞ Infinity'],
+      ['daily', 'Daily quiz'],
+    ],
+    board.mode,
+    'Leaderboard mode',
+  )}<div class="field"><label for="board-period">Time period</label><select id="board-period"><option value="all" ${board.period === 'all' ? 'selected' : ''}>All time</option><option value="week" ${board.period === 'week' ? 'selected' : ''}>Past 7 days</option><option value="today" ${board.period === 'today' ? 'selected' : ''}>Today (UTC)</option></select></div>${button('board-refresh', 'Refresh', 'btn ghost small')}</div><section class="leaderboard-panel" aria-label="Player rankings" aria-busy="${board.loading}">${scopeLocked ? `<div class="leaderboard-empty"><span class="empty-rank">♧</span><h2>Sign in to see your friends.</h2><p>The friends leaderboard compares your best rounds with the players you added.</p>${button('login', 'Sign in', 'btn secondary small')}</div>` : board.loading ? '<p class="empty" role="status">Loading player rankings…</p>' : board.error ? `<div class="media-error" role="alert">${esc(board.error)} ${button('board-refresh', 'Retry', 'btn ghost small')}</div>` : ranked.length ? `<div class="podium">${[podium[1], podium[0], podium[2]].map((e, i) => (e ? podiumCard(e, [2, 1, 3][i]) : '<div class="podium-spot" aria-hidden="true"></div>')).join('')}</div>${rest.length ? `<div class="leaderboard-table-wrap"><table class="leaderboard-table"><thead><tr><th scope="col">Rank</th><th scope="col">Player</th><th scope="col">Best round</th><th scope="col">Rounds</th></tr></thead><tbody>${rest.map(row).join('')}</tbody></table></div>` : ''}` : empty}</section>${friendsScope ? '' : `<div class="leaderboard-join"><div><h2>${currentUser ? 'Your next round could be here.' : 'Give your score a name.'}</h2><p class="subtle">${currentUser ? 'Only completed rounds from the default media pool are eligible. Daily results are saved automatically.' : 'Create an account to submit results. You can keep playing as a guest.'}</p></div><div class="hero-actions">${currentUser ? scoreButton() || button('home', 'Play a round') : button('register', 'Create account')}</div></div>`}<p class="subtle leaderboard-note">The server recalculates every score from the answers, and daily results are graded on the server. Custom packs are excluded.</p>`;
+}
+async function loadLeaderboard() {
+  const request = ++boardRequest;
+  board.loading = true;
+  board.error = '';
+  if (view === 'leaderboard') render();
+  try {
+    if (board.scope === 'friends' && !currentUser) {
+      board.entries = [];
+      return;
+    }
+    const data = await communityAPI(
+      '/api/leaderboard?mode=' + board.mode + '&period=' + board.period + '&scope=' + board.scope,
+    );
+    if (request === boardRequest) board.entries = data.entries;
+  } catch (error) {
+    if (request === boardRequest) board.error = error.message;
+  } finally {
+    if (request === boardRequest) {
+      board.loading = false;
+      if (view === 'leaderboard') render();
+    }
+  }
+}
+async function publishScore() {
+  if (!currentUser) {
+    authDialog();
+    return;
+  }
+  if (completedCount(session()) !== 5) {
+    toast('Complete all five categories first.');
+    return;
+  }
+  if (session().submittedBy?.includes(currentUser.id)) return;
+  const round = session(),
+    userId = currentUser.id;
+  const result = await communityAPI('/api/scores', {round});
+  (round.submittedBy ??= []).push(userId);
+  persist();
+  render();
+  toast('Score submitted: ' + fmt(result.score) + ' points.');
+  if (view === 'leaderboard') loadLeaderboard();
+}
+async function submitCommunity(form) {
+  const data = new FormData(form),
+    mode = form.dataset.communityForm,
+    error = form.querySelector('.account-error'),
+    submit = form.querySelector('[type="submit"]');
+  error.hidden = true;
+  submit.disabled = true;
+  if (cloudMode && (mode === 'forgot' || mode === 'reset')) {
+    try {
+      if (mode === 'forgot') {
+        await cloud.requestPasswordReset(String(data.get('email') || '').trim());
+        const message = form.querySelector('.account-message');
+        message.hidden = false;
+        message.textContent =
+          'If an account exists for this email, a reset link will be sent. Open it in this same browser.';
+      } else {
+        if (data.get('password') !== data.get('confirm')) throw new Error('Your passwords do not match.');
+        await cloud.updatePassword(String(data.get('password')));
+        dialog.close();
+        toast('Password updated.');
+      }
+    } catch (cause) {
+      error.textContent = cause.message;
+      error.hidden = false;
+    } finally {
+      submit.disabled = false;
+    }
+    return;
+  }
+  try {
+    if (cloudMode && currentUser && ['login', 'register'].includes(mode))
+      await communityAPI('/api/account/save', {state});
+    if (mode === 'delete') {
+      await communityAPI('/api/account/delete', {password: data.get('password')});
+      currentUser = null;
+      if (cloudMode) {
+        setStateScope(null);
+        state = readState();
+        ensureSessions();
+      }
+      social.clear();
+      friends.clear();
+      cloudDaily.clear();
+      go('account');
+      toast('Account and leaderboard entries deleted.');
+      return;
+    }
+    if (mode === 'register' && data.get('password') !== data.get('confirm'))
+      throw new Error('Your passwords do not match.');
+    if (mode === 'register' && (!data.get('adult') || !data.get('privacy')))
+      throw new Error('Please confirm your age and the privacy policy.');
+    const result = await communityAPI('/api/' + mode, {
+      provider: cloudMode ? 'supabase' : authProvider,
+      username: data.get('username'),
+      email: data.get('email'),
+      password: data.get('password'),
+      ...(mode === 'register' || cloudMode
+        ? {adultConfirmed: true, privacyAcknowledged: true, noticeVersion: '2026-11-24.5'}
+        : {}),
+    });
+    if (result.requiresConfirmation) {
+      authDialog('login');
+      const message = dialog.querySelector('.account-message');
+      message.hidden = false;
+      message.textContent =
+        'Check your email to confirm your account, then sign in here. No game profile is created until you sign in.';
+      dialog.querySelector('#account-email').value = String(data.get('email') || '');
+      return;
+    }
+    const previousUser = currentUser;
+    currentUser = result.user;
+    if (cloudMode) await switchStateForUser(currentUser, previousUser);
+    await social.refresh();
+    dialog.close();
+    render();
+    if (view === 'friends') await friends.load();
+    toast(
+      mode === 'register'
+        ? 'Account created. Welcome, ' + currentUser.username + '.'
+        : 'Welcome back, ' + currentUser.username + '.',
+    );
+  } catch (cause) {
+    error.textContent = cause.message;
+    error.hidden = false;
+  } finally {
+    submit.disabled = false;
+  }
+}
+let libraryPage = 1,
+  libraryQuery = '',
+  libraryCategory = 'all',
+  libraryTimer,
+  librarySort = 'az',
+  libraryGenre = 'all',
+  libraryDetail = null;
+const LIBRARY_PAGE = 48,
+  LIBRARY_SORTS = [
+    ['az', 'A–Z'],
+    ['score', 'Top rated'],
+    ['new', 'Newest first'],
+    ['old', 'Oldest first'],
+  ];
+let starter,
+  pack,
+  state = readState(),
+  view = 'home',
+  selected = null,
+  editing = null,
+  toastTimer;
+const packKey = () => pack.key || 'custom';
+const remoteDaily = () => cloudMode && !social.active && state.mode === 'daily';
+const ids = () => (social.active || remoteDaily() ? starter.anime : pack.anime);
+const anime = (id) => catalogIndex(ids()).byId.get(id);
+const cat = (id) => CATEGORIES.find((c) => c.id === id);
+const isLoop = () => !social.active && state.mode === 'loop';
 // Category loop: endless rounds of a single category (3 questions each, Anidle 1 game).
-function loopSession(id=selected||state.loopCategory){if(!cat(id))id='screenshot';state.loops??={};let s=state.loops[id];if(!validSession(s)||s.category!==id){s=createSession('loop',1,uid(),ids(),packKey());s.category=id;state.loops[id]=s;}return s;}
-function loopStats(id){return (state.loopStats??={})[id]??={rounds:0,best:0,total:0};}
-function nextLoop(){const id=selected||state.loopCategory,old=loopSession(id);if(!old.games[id].done){toast('Finish this loop round first.');return false;}const next=createSession('loop',old.number+1,uid(),ids(),packKey(),old);next.category=id;state.loops[id]=next;persist();return true;}
-const session=()=>social.active?social.session:state.mode==='daily'?(cloudMode?cloudDaily.session||cloudDaily.placeholder:state.daily):state.mode==='loop'?loopSession():state.infinity;
-function toast(message){const el=document.querySelector('#toast');el.textContent=message;el.classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('visible'),5500);}
+function loopSession(id = selected || state.loopCategory) {
+  if (!cat(id)) id = 'screenshot';
+  state.loops ??= {};
+  let s = state.loops[id];
+  if (!validSession(s) || s.category !== id) {
+    s = createSession('loop', 1, uid(), ids(), packKey());
+    s.category = id;
+    state.loops[id] = s;
+  }
+  return s;
+}
+function loopStats(id) {
+  return ((state.loopStats ??= {})[id] ??= {rounds: 0, best: 0, total: 0});
+}
+function nextLoop() {
+  const id = selected || state.loopCategory,
+    old = loopSession(id);
+  if (!old.games[id].done) {
+    toast('Finish this loop round first.');
+    return false;
+  }
+  const next = createSession('loop', old.number + 1, uid(), ids(), packKey(), old);
+  next.category = id;
+  state.loops[id] = next;
+  persist();
+  return true;
+}
+const session = () =>
+  social.active
+    ? social.session
+    : state.mode === 'daily'
+      ? cloudMode
+        ? cloudDaily.session || cloudDaily.placeholder
+        : state.daily
+      : state.mode === 'loop'
+        ? loopSession()
+        : state.infinity;
+function toast(message) {
+  const el = document.querySelector('#toast');
+  el.textContent = message;
+  el.classList.add('visible');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('visible'), 5500);
+}
 let cloudSaveTimer;
-function persist(){try{state.savedAt=Date.now();writeState(state);if(cloudMode&&currentUser){clearTimeout(cloudSaveTimer);cloudSaveTimer=setTimeout(()=>communityAPI('/api/account/save',{state}).catch(()=>{}),1200);}}catch{toast('Storage is full or blocked. Progress will be lost when you reload.');}}
-async function switchStateForUser(user,previous=currentUser){if(!cloudMode)return;const wantDaily=remoteDaily();clearTimeout(cloudSaveTimer);setStateScope(user?.id||null);let local=readState();if(user){try{const cloudSave=await communityAPI('/api/account/save');if(cloudSave.state&&Number(cloudSave.savedAt)>Number(local.savedAt||0))local=cloudSave.state;}catch(error){if(!/not found|no cloud save/i.test(error.message))toast('Cloud save is offline; this device copy remains available.');}}state=local||{};ensureSessions();if(wantDaily&&user)state.mode='daily';cloudDaily.clear();if(user&&remoteDaily())await cloudDaily.load();}
-function validSession(s){return s?.version===2&&s.packKey===packKey()&&CATEGORIES.every(c=>{const g=s.games?.[c.id];return g&&Array.isArray(g.questions)&&g.questions.length===c.rounds&&Array.isArray(g.scores)&&Array.isArray(g.answers)&&Array.isArray(g.hints)&&Array.isArray(g.guesses)&&Number.isInteger(g.index)&&g.index>=0&&g.index<c.rounds&&g.questions.flat().every(id=>anime(id));});}
-function archive(s){if(!s||!Object.values(s.games||{}).some(g=>g.scores?.length))return;state.history??=[];const key=`${s.mode}:${s.seed}`;if(state.history.some(r=>r.key===key))return;captureRound(state,s,pack.name);state.history.unshift({...snapshotRound(s,pack.name),key});state.history=state.history.slice(0,100);}
-function ensureSessions(){if(packKey()==='expanded-pool-v3'){for(const key of ['daily','infinity']){const prior=state[key];if(prior?.version===2&&prior.packKey==='real-pool-v2'&&CATEGORIES.every(c=>prior.games?.[c.id]?.questions?.flat().every(id=>anime(id)))){prior.packKey=packKey();if(key==='daily')prior.seed=`${dayKey()}:${packKey()}`;}}}state.version=1;state.history=Array.isArray(state.history)?state.history:[];state.mode=['daily','loop'].includes(state.mode)?state.mode:'infinity';state.loops=state.loops&&typeof state.loops==='object'?state.loops:{};for(const [id,loop] of Object.entries(state.loops))if(!cat(id)||!validSession(loop))delete state.loops[id];if(!cat(state.loopCategory))state.loopCategory='screenshot';if(!validSession(state.daily)||state.daily.seed!==`${dayKey()}:${packKey()}`){if(validSession(state.daily))archive(state.daily);state.daily=createSession('daily',dayKey(),`${dayKey()}:${packKey()}`,ids(),packKey());}if(state.infinity&&!validSession(state.infinity))archive(state.infinity);if(!validSession(state.infinity))state.infinity=createSession('infinity',1,uid(),ids(),packKey());persist();}
-function stopAudio(){app.querySelectorAll('video,audio').forEach(m=>m.pause());}
-function questionFrames(g,roundIndex=g.index){const a=anime(g.questions[roundIndex]);return (g.frames?.[roundIndex]?.length?g.frames[roundIndex]:a.screenshots.map((_,i)=>i)).map(i=>a.screenshots[i]);}
-function questionCharacter(g,index,roundIndex=g.index){const a=anime(g.questions[roundIndex][index]),ref=g.characterRefs?.[roundIndex]?.[index],c=a.characters?.find(c=>c.id===ref);return c?{...a,character:c.name,characterAliases:c.aliases,characterImage:c.image}:a;}
-function categorySummary(g){const total=g.scores.reduce((a,b)=>a+b,0);return `<div class="category-score"><span>${cat(selected).name} complete</span><strong>${fmt(total)}</strong><span>of ${fmt(cat(selected).max)} points</span>${button('share','↗','share-button','aria-label="Copy result"')}</div>${!isLoop()?`<div class="loop-next-top">${nextCategoryButton()}</div>`:''}${isLoop()?`<div class="loop-next-top">${button('loop-next','⟳ Next loop round')}<span class="subtle">Round ${session().number} done · next round has new questions</span></div>`:''}<div class="round-results">${g.questions.map((q,r)=>{const a=selected==='character'?null:anime(q),m=a?.[selected],level=g.levels?.[r]||'Mix';return `<article class="round-result"><div class="round-result-top"><h3>Question ${r+1} <span class="difficulty ${level.toLowerCase()}">${level}</span></h3><strong>${fmt(g.scores[r])} points</strong></div>${selected==='character'?`<div class="result-characters">${q.map((_,i)=>{const c=questionCharacter(g,i,r),answer=g.answers[r]?.entries?.[i];return `<div><img ${fastSrc(c.characterImage,320,esc)} alt="${esc(c.character)}">${characterFeedback(c,answer)}</div>`;}).join('')}</div>`:`<div class="result-anime">${a.cover?`<img class="result-cover" ${fastSrc(a.cover,320,esc)} alt="Cover">`:''}<div><h3>${titleMarkup(a)}</h3><p class="subtle">${a.year||''}${m?.song?' · '+esc(m.song):''}${m?.artist?' · '+esc(m.artist):''}</p>${selected==='screenshot'?`<div class="result-thumbs">${questionFrames(g,r).map(src=>`<img ${fastSrc(src,640,esc)} alt="Anime scene">`).join('')}</div>`:m?.audio?`<audio controls preload="none" src="${esc(m.audio)}" aria-label="${esc(m.song||'Music clip')}"></audio>`:''}</div></div>`}</article>`;}).join('')}</div><div class="summary-actions">${isLoop()?`${button('loop-next','⟳ Next loop round')}${button('home','Back to overview','btn ghost')}${loopSummary(selected)}`:`${nextCategory()?nextCategoryButton():''}${button('home','Back to overview',nextCategory()?'btn ghost':'btn')}${state.mode==='infinity'?nextButton('btn secondary'):''}`}</div>`;}
-function loopSummary(id){const stats=loopStats(id);return stats.rounds?`<p class="subtle loop-stats">${fmt(stats.rounds)} loop ${stats.rounds===1?'round':'rounds'} · best ${fmt(stats.best)} · average ${fmt(Math.round(stats.total/stats.rounds))} / ${fmt(cat(id).max)}</p>`:'';}
-function characterFeedback(a,r){return `<div class="character-feedback"><p class="field-result ${r?.character?'correct':'incorrect'}"><span aria-label="Name ${r?.character?'correct':'incorrect'}">${r?.character?'✓':'✕'}</span><strong>${esc(a.character)}</strong></p><p class="field-result ${r?.anime?'correct':'incorrect'}"><span aria-label="Anime ${r?.anime?'correct':'incorrect'}">${r?.anime?'✓':'✕'}</span>${titleMarkup(a)}</p><span class="subtle">${fmt((r?.character?2000:0)+(r?.anime?500:0))} / 2,500 points</span></div>`;}
-function maskTitle(value){return String(value||'').split(/(\s+)/).map(w=>/^\s+$/.test(w)?w:[...w].map((c,i)=>i===0?c:/[\p{L}\p{N}]/u.test(c)?'_':c).join('')).join('');}
-function anidleClues(g,target){const cover=`<div class="clue-cover"><img id="${hintResource(target.cover,'cover')}" alt="Blurred anime cover"></div>`;return `<section class="anidle-clue-panel" aria-label="Anidle clues"><h2>Clues</h2><div class="clue-panel-content">${cover}<div class="clue-panel-text"><h3>Synopsis</h3><p class="synopsis-clue ${g.attempt<18?'locked':''}" data-synopsis-id="${esc(target.id)}">${g.attempt>=18?esc(synopsisText(target)):`Unlocks in ${18-g.attempt} guesses`}</p><h3>Most popular character</h3><p class="popular-character-clue ${g.attempt<22?'locked':''}">${g.attempt>=22?esc(target.popularCharacter):`Unlocks in ${22-g.attempt} guesses`}</p></div></div></section>`;}
-function anidleSummaryView(g,target){const data=summarizeAnidle(g.guesses,ids(),target);const range=b=>b.exact!==null?String(b.exact):b.lower!==null&&b.upper!==null?`${b.lower} – ${b.upper}`:b.lower!==null?`≥ ${b.lower}`:b.upper!==null?`≤ ${b.upper}`:'—';return `<div class="summary-wrap"><table class="comparison summary-table-anidle"><caption class="sr-only">Evidence from your previous guesses</caption><thead><tr>${['Known','Year','Studio','Source','Rating','Genres','Tags'].map(t=>`<th scope="col">${t}</th>`).join('')}</tr></thead><tbody><tr><td><strong>Summary</strong></td><td>${range(data.year)}</td><td>${data.studios.map(esc).join('<br>')||'—'}</td><td>${data.sources.map(esc).join('<br>')||'—'}</td><td>${range(data.score)}</td><td>${data.genres.map(t=>`<span class="tag match">${esc(t)}</span>`).join('')||'—'}</td><td>${data.tags.map(t=>`<span class="tag ${t.match==='primary'?'match':'partial'}">${esc(t.value)}</span>`).join('')||'—'}</td></tr></tbody></table></div>`;}
-function prepareVideo(){const video=app.querySelector('.quiz-video');if(!video)return;const kind=selected,g=session().games[kind],media=anime(g.questions[g.index])[kind],locked=kind==='opening';const seek=app.querySelector('#video-seek'),volume=app.querySelector('#video-volume'),time=app.querySelector('#video-time'),play=app.querySelector('[data-action="media-toggle"]');let bounds={start:0,end:0},correcting=false;const clock=v=>`${Math.floor(v/60)}:${String(Math.floor(v%60)).padStart(2,'0')}`;const constrain=()=>{if(correcting||!video.dataset.positioned||!locked)return;const position=video.currentTime;if(position<bounds.start-.015||position>=bounds.end){correcting=true;if(position>=bounds.end)video.pause();video.currentTime=position<bounds.start?bounds.start:Math.max(bounds.start,bounds.end-.04);correcting=false;}};const update=()=>{constrain();if(Number.isFinite(video.duration)){seek.value=String(Math.max(0,Math.min(1000,(video.currentTime-bounds.start)/(bounds.end-bounds.start)*1000)));time.textContent=clock(video.currentTime+Number(video.dataset.offset||0))+' / '+clock(bounds.end+Number(video.dataset.offset||0));}play.textContent=video.paused?'▶':'Ⅱ';play.setAttribute('aria-label',video.paused?'Play video':'Pause video');};video.volume=Number(volume.value);const ready=()=>{if(!video.dataset.positioned&&Number.isFinite(video.duration)){try{bounds=video.dataset.client&&locked?videoBounds(video.duration,media.videoWindow||{}):{start:0,end:video.duration};}catch{bounds={start:0,end:video.duration};}video.dataset.windowStart=bounds.start;video.dataset.windowEnd=bounds.end;video.currentTime=bounds.start;video.dataset.positioned='true';const note=app.querySelector('.video-window-note');if(note)note.textContent=`Locked video window: ${clock(bounds.start+Number(video.dataset.offset||0))} – ${clock(bounds.end+Number(video.dataset.offset||0))}`;update();}};video.addEventListener('loadedmetadata',ready);video.addEventListener('timeupdate',update);video.addEventListener('seeking',constrain);video.addEventListener('play',()=>{if(locked&&video.currentTime>=bounds.end-.1)video.currentTime=bounds.start;update();});video.addEventListener('pause',update);if(video.requestVideoFrameCallback){const frame=()=>{constrain();if(video.isConnected)video.requestVideoFrameCallback(frame);};video.requestVideoFrameCallback(frame);}if(video.readyState>=1)ready();}
-function shell(content){const s=session(),count=completedCount(s);return `<header class="sidebar" data-view="${view}"><div class="header-inner"><a class="brand" href="#" data-action="home"><img src="assets/mark.svg" alt="">Ani<span>Loop</span></a><span class="sidebar-caption">Your anime quiz</span><button type="button" class="theme-shortcut" data-action="theme-picker"><span aria-hidden="true">◐</span><span>Themes & backgrounds<small>Make AniLoop yours</small></span></button><nav aria-label="categories">${CATEGORIES.map(c=>{const loop=isLoop(),ls=loop?state.loops?.[c.id]:s,g=ls?.games[c.id];const status=!g?'Start a loop':loop?`Round ${ls.number} · ${g.done?'complete':g.scores.length+' / '+c.rounds}`:g.done?fmt(g.scores.reduce((a,b)=>a+b,0))+' points':g.scores.length?g.scores.length+' / '+c.rounds+' questions':'Ready to play';return button(`play:${c.id}`,`<span class="nav-icon">${c.icon}</span><span>${c.name}<small>${status}</small></span><span class="nav-check">${loop?(g?'⟳':''):g.done?'✓':''}</span>`,view==='game'&&selected===c.id?'active':'');}).join('')}</nav><div class="sidebar-links">${[['home','Overview'],['stats','Statistics'],['leaderboard','Leaderboards'],['friends','Friends'],['rooms','Party rooms'],['rewards','Daily rewards']].map(([id,label])=>button(id,label,view===id?'active':'')).join('')}${currentUser?.isAdmin?'<a class="admin-nav-link" href="admin.html">Admin</a>':''}</div>${sidebarProgress(s,count)}${social.sidebar()}<div class="header-end"><button type="button" class="account-entry" data-action="account"><span class="avatar ${social.frameClass()}">${ownProfileImage()||esc(shownUser()?shownUser().username.slice(0,2).toUpperCase():'You')}</span><span>${esc(shownUser()?.username||'Guest player')}<small>${shownUser()?'Manage account':'Sign in / create account'}</small></span></button>${button('help','?','help-icon','aria-label="Open game rules"')}</div></div></header><main class="page" id="main">${content}</main><footer class="footer"><span>AniLoop · Personal project in Austria</span><span>${social.active?'Room progress saved on the server':'Solo progress saved on this device'}</span><span class="policy-footer-links footer-help-links"><a href="#library" data-action="library">Media pool</a><a href="#bug-report" data-action="bug-report">Report a bug</a><a href="#privacy" data-action="privacy">Privacy &amp; legal</a></span></footer>`;}
-function sidebarProgress(s,count){
- if(isLoop()){const id=selected||state.loopCategory,c=cat(id),g=s.games[id],points=g.scores.reduce((a,b)=>a+b,0),stats=loopStats(id);return `<div class="sidebar-progress"><div><span>⟳ ${esc(c.name)} loop</span><strong>${fmt(points)}</strong></div><div class="progress-track"><i style="width:${Math.round(g.scores.length/c.rounds*100)}%"></i></div><p>Round ${s.number} · ${g.scores.length} of ${c.rounds} ${c.rounds===1?'game':'questions'}${stats.rounds?` · best ${fmt(stats.best)}`:''}</p>${nextButton('btn full small')}</div>`;}
- return `<div class="sidebar-progress"><div><span>${social.active?(social.room.mode==='coop'?'∞ Co-op':'♧ Party'):state.mode==='infinity'?'∞ Infinity':'Daily quiz'}</span><strong>${fmt(totalScore(s))}</strong></div><div class="progress-track"><i style="width:${count*20}%"></i></div><p>${count} of 5 categories complete</p>${state.mode==='infinity'?nextButton('btn full small'):''}</div>`;
+function persist() {
+  try {
+    state.savedAt = Date.now();
+    writeState(state);
+    if (cloudMode && currentUser) {
+      clearTimeout(cloudSaveTimer);
+      cloudSaveTimer = setTimeout(() => communityAPI('/api/account/save', {state}).catch(() => {}), 1200);
+    }
+  } catch {
+    toast('Storage is full or blocked. Progress will be lost when you reload.');
+  }
 }
-function modeToolbar(){const modes=[['infinity','∞ Infinity'],['loop','⟳ Category loop'],['daily','Daily quiz']];const loopCat=cat(selected||state.loopCategory);return `<div class="toolbar"><div class="segmented" role="group" aria-label="Game mode">${modes.map(([id,label])=>button('mode-'+id,label,state.mode===id?'selected':'','aria-pressed="'+(state.mode===id)+'"')).join('')}</div><span class="round-label">${state.mode==='infinity'?`Round <strong>${session().number}</strong> · No time limit`:state.mode==='loop'?(view==='game'?`${esc(loopCat.name)} loop · Round <strong>${session().number}</strong>`:'Endless rounds of one category'):`${cloudMode&&cloudDaily.day?cloudDaily.day+' (UTC)':new Date().toLocaleDateString('en-US')} · <span id="countdown"></span>`}</span></div>`;}
-function hasProgress(s){return Object.values(s?.games||{}).some(g=>g.scores?.length);}
-function nextButton(cls='btn'){if(social.active)return '';const s=session();if(state.mode==='loop'){const id=selected||state.loopCategory;return view==='game'&&s.games[id].done?button('loop-next','⟳ Next loop round',cls):'';}return state.mode==='infinity'?button('next','Next Infinity round',cls,canAdvance(s)?'':'disabled title="Complete all five categories first."')+(!canAdvance(s)&&hasProgress(s)?button('infinity-restart','↻ Fresh round','btn ghost','title="Throw this round away and start a new one. It will not count in your stats."'):''):button('home','Back to overview',cls);}
-function loopDashboard(){const covers=pack.anime.filter(a=>a.cover).slice(0,8);return `${modeToolbar()}<section class="hero hub-hero loop-hero"><div class="hero-copy"><span class="hub-mode">Category loop</span><h1>One category.<br>Endless rounds.</h1><p>Pick a category and keep looping it: three new questions every round (one game for Anidle). Your Infinity and daily progress stay untouched.</p><div class="hero-actions">${button('play:'+state.loopCategory,state.loops?.[state.loopCategory]?'Continue '+cat(state.loopCategory).name+' loop':'Start '+cat(state.loopCategory).name+' loop')}${button('help','How to play','btn ghost')}</div></div><div class="hub-round-summary"><span>Loop rounds finished</span><strong>${fmt(CATEGORIES.reduce((n,c)=>n+loopStats(c.id).rounds,0))}</strong><p>Each category keeps its own round counter, best score and average.</p></div></section><section class="hub-picker" aria-label="Choose a category to loop"><div class="category-grid loop-grid">${CATEGORIES.map((c,index)=>{const loop=state.loops?.[c.id],g=loop?.games[c.id],stats=loopStats(c.id);return `<button class="category-card hub-game-card" data-action="play:${c.id}">${covers[index]?`<img class="hub-card-art" ${fastSrc(covers[index].cover,640,esc)} alt="" loading="lazy" decoding="async">`:''}<div class="card-top"><span class="category-icon">${c.icon}</span><span class="badge">${loop?'Round '+loop.number:c.rounds===1?'1 game / round':'3 questions / round'}</span></div><div class="hub-card-copy"><h3>${c.name} loop</h3><p>${c.description}</p><div class="card-bottom"><span>${stats.rounds?`Best ${fmt(stats.best)} · ${fmt(stats.rounds)} rounds`:'Up to '+fmt(c.max)+' per round'}</span><strong>${g&&(g.scores.length||g.guesses.length)?'Continue':'Loop'} <span aria-hidden="true">⟳</span></strong></div></div></button>`;}).join('')}</div></section>`;}
-function dailyGate(){if(currentUser&&accountChecked&&!cloudDaily.loading&&!cloudDaily.error)queueMicrotask(()=>cloudDaily.load().then(()=>{if(remoteDaily())render();}).catch(onError));const signedIn=!!currentUser,waiting=!accountChecked||signedIn&&(cloudDaily.loading||!cloudDaily.error);return `${modeToolbar()}<section class="hero hub-hero daily-gate"><div class="hero-copy"><span class="hub-mode">Daily quiz</span><h1>${waiting?'Loading today’s daily…':signedIn?'The daily quiz is unavailable.':'One daily. One try.'}</h1><p>${waiting?'Fetching today’s questions from the server.':signedIn?esc(cloudDaily.error):'The daily quiz is the same for every player and counts for the leaderboard, so it needs an account: each account gets exactly one attempt and every answer is checked on the server. Infinity and Category loops stay free for everyone, no account needed.'}</p><div class="hero-actions">${waiting?'':signedIn?button('daily-retry','Try again'):button('login','Sign in to play')+button('register','Create account','btn ghost')}${button('mode-infinity','Play Infinity','btn ghost')}${button('mode-loop','Category loop','btn ghost')}</div></div></section>`;}
-function dashboard(){if(isLoop())return loopDashboard();const s=session(),count=completedCount(s),first=CATEGORIES.find(c=>!s.games[c.id].done),infinity=state.mode==='infinity',covers=pack.anime.filter(a=>a.cover).slice(0,8);return `${modeToolbar()}${count===5?`<div class="completion"><div><h2>Round complete!</h2><p>${fmt(totalScore(s))} of 100,000 points. ${infinity?'Ready for five new challenges?':'A new daily quiz arrives tomorrow.'}</p></div><div class="completion-buttons">${scoreButton()}${infinity?nextButton():button('share','Copy result','btn')}</div></div>`:''}<section class="hero hub-hero"><div class="hero-copy"><span class="hub-mode">${infinity?'Infinity quiz':'Daily quiz'}</span><h1>What are we<br>guessing today?</h1><p>Five ways to know your anime. Pick a challenge and keep your loop going.</p><div class="hero-actions">${first?button(`play:${first.id}`,count?'Keep playing':'Start playing'):button('share','Copy result','btn')}${button('help','How to play','btn ghost')}</div></div><div class="hub-round-summary"><span>${infinity?'Your current loop':'Today’s progress'}</span><strong>${fmt(totalScore(s))}<small> / 100,000 points</small></strong><div class="progress-track" role="progressbar" aria-label="Completed categories" aria-valuemin="0" aria-valuemax="5" aria-valuenow="${count}"><i style="width:${count*20}%"></i></div><p>${count} of 5 categories complete</p>${infinity?nextButton('btn secondary small'):`<span class="subtle">Daily quiz resets at midnight${cloudMode?' UTC':''}</span>`}</div></section><section class="hub-picker" aria-label="Choose your challenge"><div class="category-grid">${CATEGORIES.map((c,index)=>{const g=s.games[c.id],started=g.scores.length||g.guesses.length||g.hints.length;return `<button class="category-card hub-game-card" data-action="play:${c.id}">${covers[index]?`<img class="hub-card-art" ${fastSrc(covers[index].cover,640,esc)} alt="" loading="lazy" decoding="async">`:''}<div class="card-top"><span class="category-icon">${c.icon}</span><span class="badge ${g.done?'done':''}">${g.done?'✓ Complete':started?'In progress':c.id==='anidle'?'22 guesses':'3 questions'}</span></div><div class="hub-card-copy"><h3>${c.name}</h3><p>${c.description}</p><div class="card-bottom"><span>${g.done?fmt(g.scores.reduce((a,b)=>a+b,0)):'Up to '+fmt(c.max)} points</span><strong>${g.done?'View result':started?'Continue':'Play'} <span aria-hidden="true">↗</span></strong></div></div></button>`;}).join('')}<button type="button" class="hub-create-card" data-action="mode-loop"><span class="hub-create-symbol" aria-hidden="true">⟳</span><h3>Category loop</h3><p>Only screenshots? Only openings? Loop a single category with endless three-question rounds.</p><strong>Start looping <span aria-hidden="true">↗</span></strong></button></div></section><section class="hub-community"><div><h2>Same anime. Your people.</h2><p>Compare your daily scores or take on the next loop together.</p></div><div>${button('friends','Friends','btn secondary')}${button('rooms','Party & Co-op','btn ghost')}</div></section>${social.dailyPanel()}${mediaNotice()}`;}
+async function switchStateForUser(user, previous = currentUser) {
+  if (!cloudMode) return;
+  const wantDaily = remoteDaily();
+  clearTimeout(cloudSaveTimer);
+  setStateScope(user?.id || null);
+  let local = readState();
+  if (user) {
+    try {
+      const cloudSave = await communityAPI('/api/account/save');
+      if (cloudSave.state && Number(cloudSave.savedAt) > Number(local.savedAt || 0)) local = cloudSave.state;
+    } catch (error) {
+      if (!/not found|no cloud save/i.test(error.message))
+        toast('Cloud save is offline; this device copy remains available.');
+    }
+  }
+  state = local || {};
+  ensureSessions();
+  if (wantDaily && user) state.mode = 'daily';
+  cloudDaily.clear();
+  if (user && remoteDaily()) await cloudDaily.load();
+}
+function validSession(s) {
+  return (
+    s?.version === 2 &&
+    s.packKey === packKey() &&
+    CATEGORIES.every((c) => {
+      const g = s.games?.[c.id];
+      return (
+        g &&
+        Array.isArray(g.questions) &&
+        g.questions.length === c.rounds &&
+        Array.isArray(g.scores) &&
+        Array.isArray(g.answers) &&
+        Array.isArray(g.hints) &&
+        Array.isArray(g.guesses) &&
+        Number.isInteger(g.index) &&
+        g.index >= 0 &&
+        g.index < c.rounds &&
+        g.questions.flat().every((id) => anime(id))
+      );
+    })
+  );
+}
+function archive(s) {
+  if (!s || !Object.values(s.games || {}).some((g) => g.scores?.length)) return;
+  state.history ??= [];
+  const key = `${s.mode}:${s.seed}`;
+  if (state.history.some((r) => r.key === key)) return;
+  captureRound(state, s, pack.name);
+  state.history.unshift({...snapshotRound(s, pack.name), key});
+  state.history = state.history.slice(0, 100);
+}
+function ensureSessions() {
+  if (packKey() === 'expanded-pool-v3') {
+    for (const key of ['daily', 'infinity']) {
+      const prior = state[key];
+      if (
+        prior?.version === 2 &&
+        prior.packKey === 'real-pool-v2' &&
+        CATEGORIES.every((c) => prior.games?.[c.id]?.questions?.flat().every((id) => anime(id)))
+      ) {
+        prior.packKey = packKey();
+        if (key === 'daily') prior.seed = `${dayKey()}:${packKey()}`;
+      }
+    }
+  }
+  state.version = 1;
+  state.history = Array.isArray(state.history) ? state.history : [];
+  state.mode = ['daily', 'loop'].includes(state.mode) ? state.mode : 'infinity';
+  state.loops = state.loops && typeof state.loops === 'object' ? state.loops : {};
+  for (const [id, loop] of Object.entries(state.loops)) if (!cat(id) || !validSession(loop)) delete state.loops[id];
+  if (!cat(state.loopCategory)) state.loopCategory = 'screenshot';
+  if (!validSession(state.daily) || state.daily.seed !== `${dayKey()}:${packKey()}`) {
+    if (validSession(state.daily)) archive(state.daily);
+    state.daily = createSession('daily', dayKey(), `${dayKey()}:${packKey()}`, ids(), packKey());
+  }
+  if (state.infinity && !validSession(state.infinity)) archive(state.infinity);
+  if (!validSession(state.infinity)) state.infinity = createSession('infinity', 1, uid(), ids(), packKey());
+  persist();
+}
+function stopAudio() {
+  app.querySelectorAll('video,audio').forEach((m) => m.pause());
+}
+function questionFrames(g, roundIndex = g.index) {
+  const a = anime(g.questions[roundIndex]);
+  return (g.frames?.[roundIndex]?.length ? g.frames[roundIndex] : a.screenshots.map((_, i) => i)).map(
+    (i) => a.screenshots[i],
+  );
+}
+function questionCharacter(g, index, roundIndex = g.index) {
+  const a = anime(g.questions[roundIndex][index]),
+    ref = g.characterRefs?.[roundIndex]?.[index],
+    c = a.characters?.find((c) => c.id === ref);
+  return c ? {...a, character: c.name, characterAliases: c.aliases, characterImage: c.image} : a;
+}
+function categorySummary(g) {
+  const total = g.scores.reduce((a, b) => a + b, 0);
+  return `<div class="category-score"><span>${cat(selected).name} complete</span><strong>${fmt(total)}</strong><span>of ${fmt(cat(selected).max)} points</span>${button('share', '↗', 'share-button', 'aria-label="Copy result"')}</div>${!isLoop() ? `<div class="loop-next-top">${nextCategoryButton()}</div>` : ''}${isLoop() ? `<div class="loop-next-top">${button('loop-next', '⟳ Next loop round')}<span class="subtle">Round ${session().number} done · next round has new questions</span></div>` : ''}<div class="round-results">${g.questions
+    .map((q, r) => {
+      const a = selected === 'character' ? null : anime(q),
+        m = a?.[selected],
+        level = g.levels?.[r] || 'Mix';
+      return `<article class="round-result"><div class="round-result-top"><h3>Question ${r + 1} <span class="difficulty ${level.toLowerCase()}">${level}</span></h3><strong>${fmt(g.scores[r])} points</strong></div>${
+        selected === 'character'
+          ? `<div class="result-characters">${q
+              .map((_, i) => {
+                const c = questionCharacter(g, i, r),
+                  answer = g.answers[r]?.entries?.[i];
+                return `<div><img ${fastSrc(c.characterImage, 320, esc)} alt="${esc(c.character)}">${characterFeedback(c, answer)}</div>`;
+              })
+              .join('')}</div>`
+          : `<div class="result-anime">${a.cover ? `<img class="result-cover" ${fastSrc(a.cover, 320, esc)} alt="Cover">` : ''}<div><h3>${titleMarkup(a)}</h3><p class="subtle">${a.year || ''}${m?.song ? ' · ' + esc(m.song) : ''}${m?.artist ? ' · ' + esc(m.artist) : ''}</p>${
+              selected === 'screenshot'
+                ? `<div class="result-thumbs">${questionFrames(g, r)
+                    .map((src) => `<img ${fastSrc(src, 640, esc)} alt="Anime scene">`)
+                    .join('')}</div>`
+                : m?.audio
+                  ? `<audio controls preload="none" src="${esc(m.audio)}" aria-label="${esc(m.song || 'Music clip')}"></audio>`
+                  : ''
+            }</div></div>`
+      }</article>`;
+    })
+    .join(
+      '',
+    )}</div><div class="summary-actions">${isLoop() ? `${button('loop-next', '⟳ Next loop round')}${button('home', 'Back to overview', 'btn ghost')}${loopSummary(selected)}` : `${nextCategory() ? nextCategoryButton() : ''}${button('home', 'Back to overview', nextCategory() ? 'btn ghost' : 'btn')}${state.mode === 'infinity' ? nextButton('btn secondary') : ''}`}</div>`;
+}
+function loopSummary(id) {
+  const stats = loopStats(id);
+  return stats.rounds
+    ? `<p class="subtle loop-stats">${fmt(stats.rounds)} loop ${stats.rounds === 1 ? 'round' : 'rounds'} · best ${fmt(stats.best)} · average ${fmt(Math.round(stats.total / stats.rounds))} / ${fmt(cat(id).max)}</p>`
+    : '';
+}
+function characterFeedback(a, r) {
+  return `<div class="character-feedback"><p class="field-result ${r?.character ? 'correct' : 'incorrect'}"><span aria-label="Name ${r?.character ? 'correct' : 'incorrect'}">${r?.character ? '✓' : '✕'}</span><strong>${esc(a.character)}</strong></p><p class="field-result ${r?.anime ? 'correct' : 'incorrect'}"><span aria-label="Anime ${r?.anime ? 'correct' : 'incorrect'}">${r?.anime ? '✓' : '✕'}</span>${titleMarkup(a)}</p><span class="subtle">${fmt((r?.character ? 2000 : 0) + (r?.anime ? 500 : 0))} / 2,500 points</span></div>`;
+}
+function maskTitle(value) {
+  return String(value || '')
+    .split(/(\s+)/)
+    .map((w) =>
+      /^\s+$/.test(w) ? w : [...w].map((c, i) => (i === 0 ? c : /[\p{L}\p{N}]/u.test(c) ? '_' : c)).join(''),
+    )
+    .join('');
+}
+function anidleClues(g, target) {
+  const cover = `<div class="clue-cover"><img id="${hintResource(target.cover, 'cover')}" alt="Blurred anime cover"></div>`;
+  return `<section class="anidle-clue-panel" aria-label="Anidle clues"><h2>Clues</h2><div class="clue-panel-content">${cover}<div class="clue-panel-text"><h3>Synopsis</h3><p class="synopsis-clue ${g.attempt < 18 ? 'locked' : ''}" data-synopsis-id="${esc(target.id)}">${g.attempt >= 18 ? esc(synopsisText(target)) : `Unlocks in ${18 - g.attempt} guesses`}</p><h3>Most popular character</h3><p class="popular-character-clue ${g.attempt < 22 ? 'locked' : ''}">${g.attempt >= 22 ? esc(target.popularCharacter) : `Unlocks in ${22 - g.attempt} guesses`}</p></div></div></section>`;
+}
+function anidleSummaryView(g, target) {
+  const data = summarizeAnidle(g.guesses, ids(), target);
+  const range = (b) =>
+    b.exact !== null
+      ? String(b.exact)
+      : b.lower !== null && b.upper !== null
+        ? `${b.lower} – ${b.upper}`
+        : b.lower !== null
+          ? `≥ ${b.lower}`
+          : b.upper !== null
+            ? `≤ ${b.upper}`
+            : '—';
+  return `<div class="summary-wrap"><table class="comparison summary-table-anidle"><caption class="sr-only">Evidence from your previous guesses</caption><thead><tr>${['Known', 'Year', 'Studio', 'Source', 'Rating', 'Genres', 'Tags'].map((t) => `<th scope="col">${t}</th>`).join('')}</tr></thead><tbody><tr><td><strong>Summary</strong></td><td>${range(data.year)}</td><td>${data.studios.map(esc).join('<br>') || '—'}</td><td>${data.sources.map(esc).join('<br>') || '—'}</td><td>${range(data.score)}</td><td>${data.genres.map((t) => `<span class="tag match">${esc(t)}</span>`).join('') || '—'}</td><td>${data.tags.map((t) => `<span class="tag ${t.match === 'primary' ? 'match' : 'partial'}">${esc(t.value)}</span>`).join('') || '—'}</td></tr></tbody></table></div>`;
+}
+function prepareVideo() {
+  const video = app.querySelector('.quiz-video');
+  if (!video) return;
+  const kind = selected,
+    g = session().games[kind],
+    media = anime(g.questions[g.index])[kind],
+    locked = kind === 'opening';
+  const seek = app.querySelector('#video-seek'),
+    volume = app.querySelector('#video-volume'),
+    time = app.querySelector('#video-time'),
+    play = app.querySelector('[data-action="media-toggle"]');
+  let bounds = {start: 0, end: 0},
+    correcting = false;
+  const clock = (v) => `${Math.floor(v / 60)}:${String(Math.floor(v % 60)).padStart(2, '0')}`;
+  const constrain = () => {
+    if (correcting || !video.dataset.positioned || !locked) return;
+    const position = video.currentTime;
+    if (position < bounds.start - 0.015 || position >= bounds.end) {
+      correcting = true;
+      if (position >= bounds.end) video.pause();
+      video.currentTime = position < bounds.start ? bounds.start : Math.max(bounds.start, bounds.end - 0.04);
+      correcting = false;
+    }
+  };
+  const update = () => {
+    constrain();
+    if (Number.isFinite(video.duration)) {
+      seek.value = String(
+        Math.max(0, Math.min(1000, ((video.currentTime - bounds.start) / (bounds.end - bounds.start)) * 1000)),
+      );
+      time.textContent =
+        clock(video.currentTime + Number(video.dataset.offset || 0)) +
+        ' / ' +
+        clock(bounds.end + Number(video.dataset.offset || 0));
+    }
+    play.textContent = video.paused ? '▶' : 'Ⅱ';
+    play.setAttribute('aria-label', video.paused ? 'Play video' : 'Pause video');
+  };
+  video.volume = Number(volume.value);
+  const ready = () => {
+    if (!video.dataset.positioned && Number.isFinite(video.duration)) {
+      try {
+        bounds =
+          video.dataset.client && locked
+            ? videoBounds(video.duration, media.videoWindow || {})
+            : {start: 0, end: video.duration};
+      } catch {
+        bounds = {start: 0, end: video.duration};
+      }
+      video.dataset.windowStart = bounds.start;
+      video.dataset.windowEnd = bounds.end;
+      video.currentTime = bounds.start;
+      video.dataset.positioned = 'true';
+      const note = app.querySelector('.video-window-note');
+      if (note)
+        note.textContent = `Locked video window: ${clock(bounds.start + Number(video.dataset.offset || 0))} – ${clock(bounds.end + Number(video.dataset.offset || 0))}`;
+      update();
+    }
+  };
+  video.addEventListener('loadedmetadata', ready);
+  video.addEventListener('timeupdate', update);
+  video.addEventListener('seeking', constrain);
+  video.addEventListener('play', () => {
+    if (locked && video.currentTime >= bounds.end - 0.1) video.currentTime = bounds.start;
+    update();
+  });
+  video.addEventListener('pause', update);
+  if (video.requestVideoFrameCallback) {
+    const frame = () => {
+      constrain();
+      if (video.isConnected) video.requestVideoFrameCallback(frame);
+    };
+    video.requestVideoFrameCallback(frame);
+  }
+  if (video.readyState >= 1) ready();
+}
+function shell(content) {
+  const s = session(),
+    count = completedCount(s);
+  return `<header class="sidebar" data-view="${view}"><div class="header-inner"><a class="brand" href="#" data-action="home"><img src="assets/mark.svg" alt="">Ani<span>Loop</span></a><span class="sidebar-caption">Your anime quiz</span><button type="button" class="theme-shortcut" data-action="theme-picker"><span aria-hidden="true">◐</span><span>Themes & backgrounds<small>Make AniLoop yours</small></span></button><nav aria-label="categories">${CATEGORIES.map(
+    (c) => {
+      const loop = isLoop(),
+        ls = loop ? state.loops?.[c.id] : s,
+        g = ls?.games[c.id];
+      const status = !g
+        ? 'Start a loop'
+        : loop
+          ? `Round ${ls.number} · ${g.done ? 'complete' : g.scores.length + ' / ' + c.rounds}`
+          : g.done
+            ? fmt(g.scores.reduce((a, b) => a + b, 0)) + ' points'
+            : g.scores.length
+              ? g.scores.length + ' / ' + c.rounds + ' questions'
+              : 'Ready to play';
+      return button(
+        `play:${c.id}`,
+        `<span class="nav-icon">${c.icon}</span><span>${c.name}<small>${status}</small></span><span class="nav-check">${loop ? (g ? '⟳' : '') : g.done ? '✓' : ''}</span>`,
+        view === 'game' && selected === c.id ? 'active' : '',
+      );
+    },
+  ).join('')}</nav><div class="sidebar-links">${[
+    ['home', 'Overview'],
+    ['stats', 'Statistics'],
+    ['leaderboard', 'Leaderboards'],
+    ['friends', 'Friends'],
+    ['rooms', 'Party rooms'],
+    ['rewards', 'Daily rewards'],
+  ]
+    .map(([id, label]) => button(id, label, view === id ? 'active' : ''))
+    .join(
+      '',
+    )}${currentUser?.isAdmin ? '<a class="admin-nav-link" href="admin.html">Admin</a>' : ''}</div>${sidebarProgress(s, count)}${social.sidebar()}<div class="header-end"><button type="button" class="account-entry" data-action="account"><span class="avatar ${social.frameClass()}">${ownProfileImage() || esc(shownUser() ? shownUser().username.slice(0, 2).toUpperCase() : 'You')}</span><span>${esc(shownUser()?.username || 'Guest player')}<small>${shownUser() ? 'Manage account' : 'Sign in / create account'}</small></span></button>${button('help', '?', 'help-icon', 'aria-label="Open game rules"')}</div></div></header><main class="page" id="main">${content}</main><footer class="footer"><span>AniLoop · Personal project in Austria</span><span>${social.active ? 'Room progress saved on the server' : 'Solo progress saved on this device'}</span><span class="policy-footer-links footer-help-links"><a href="#library" data-action="library">Media pool</a><a href="#bug-report" data-action="bug-report">Report a bug</a><a href="#privacy" data-action="privacy">Privacy &amp; legal</a></span></footer>`;
+}
+function sidebarProgress(s, count) {
+  if (isLoop()) {
+    const id = selected || state.loopCategory,
+      c = cat(id),
+      g = s.games[id],
+      points = g.scores.reduce((a, b) => a + b, 0),
+      stats = loopStats(id);
+    return `<div class="sidebar-progress"><div><span>⟳ ${esc(c.name)} loop</span><strong>${fmt(points)}</strong></div><div class="progress-track"><i style="width:${Math.round((g.scores.length / c.rounds) * 100)}%"></i></div><p>Round ${s.number} · ${g.scores.length} of ${c.rounds} ${c.rounds === 1 ? 'game' : 'questions'}${stats.rounds ? ` · best ${fmt(stats.best)}` : ''}</p>${nextButton('btn full small')}</div>`;
+  }
+  return `<div class="sidebar-progress"><div><span>${social.active ? (social.room.mode === 'coop' ? '∞ Co-op' : '♧ Party') : state.mode === 'infinity' ? '∞ Infinity' : 'Daily quiz'}</span><strong>${fmt(totalScore(s))}</strong></div><div class="progress-track"><i style="width:${count * 20}%"></i></div><p>${count} of 5 categories complete</p>${state.mode === 'infinity' ? nextButton('btn full small') : ''}</div>`;
+}
+function modeToolbar() {
+  const modes = [
+    ['infinity', '∞ Infinity'],
+    ['loop', '⟳ Category loop'],
+    ['daily', 'Daily quiz'],
+  ];
+  const loopCat = cat(selected || state.loopCategory);
+  return `<div class="toolbar"><div class="segmented" role="group" aria-label="Game mode">${modes.map(([id, label]) => button('mode-' + id, label, state.mode === id ? 'selected' : '', 'aria-pressed="' + (state.mode === id) + '"')).join('')}</div><span class="round-label">${state.mode === 'infinity' ? `Round <strong>${session().number}</strong> · No time limit` : state.mode === 'loop' ? (view === 'game' ? `${esc(loopCat.name)} loop · Round <strong>${session().number}</strong>` : 'Endless rounds of one category') : `${cloudMode && cloudDaily.day ? cloudDaily.day + ' (UTC)' : new Date().toLocaleDateString('en-US')} · <span id="countdown"></span>`}</span></div>`;
+}
+function hasProgress(s) {
+  return Object.values(s?.games || {}).some((g) => g.scores?.length);
+}
+function nextButton(cls = 'btn') {
+  if (social.active) return '';
+  const s = session();
+  if (state.mode === 'loop') {
+    const id = selected || state.loopCategory;
+    return view === 'game' && s.games[id].done ? button('loop-next', '⟳ Next loop round', cls) : '';
+  }
+  return state.mode === 'infinity'
+    ? button(
+        'next',
+        'Next Infinity round',
+        cls,
+        canAdvance(s) ? '' : 'disabled title="Complete all five categories first."',
+      ) +
+        (!canAdvance(s) && hasProgress(s)
+          ? button(
+              'infinity-restart',
+              '↻ Fresh round',
+              'btn ghost',
+              'title="Throw this round away and start a new one. It will not count in your stats."',
+            )
+          : '')
+    : button('home', 'Back to overview', cls);
+}
+function loopDashboard() {
+  const covers = pack.anime.filter((a) => a.cover).slice(0, 8);
+  return `${modeToolbar()}<section class="hero hub-hero loop-hero"><div class="hero-copy"><span class="hub-mode">Category loop</span><h1>One category.<br>Endless rounds.</h1><p>Pick a category and keep looping it: three new questions every round (one game for Anidle). Your Infinity and daily progress stay untouched.</p><div class="hero-actions">${button('play:' + state.loopCategory, state.loops?.[state.loopCategory] ? 'Continue ' + cat(state.loopCategory).name + ' loop' : 'Start ' + cat(state.loopCategory).name + ' loop')}${button('help', 'How to play', 'btn ghost')}</div></div><div class="hub-round-summary"><span>Loop rounds finished</span><strong>${fmt(CATEGORIES.reduce((n, c) => n + loopStats(c.id).rounds, 0))}</strong><p>Each category keeps its own round counter, best score and average.</p></div></section><section class="hub-picker" aria-label="Choose a category to loop"><div class="category-grid loop-grid">${CATEGORIES.map(
+    (c, index) => {
+      const loop = state.loops?.[c.id],
+        g = loop?.games[c.id],
+        stats = loopStats(c.id);
+      return `<button class="category-card hub-game-card" data-action="play:${c.id}">${covers[index] ? `<img class="hub-card-art" ${fastSrc(covers[index].cover, 640, esc)} alt="" loading="lazy" decoding="async">` : ''}<div class="card-top"><span class="category-icon">${c.icon}</span><span class="badge">${loop ? 'Round ' + loop.number : c.rounds === 1 ? '1 game / round' : '3 questions / round'}</span></div><div class="hub-card-copy"><h3>${c.name} loop</h3><p>${c.description}</p><div class="card-bottom"><span>${stats.rounds ? `Best ${fmt(stats.best)} · ${fmt(stats.rounds)} rounds` : 'Up to ' + fmt(c.max) + ' per round'}</span><strong>${g && (g.scores.length || g.guesses.length) ? 'Continue' : 'Loop'} <span aria-hidden="true">⟳</span></strong></div></div></button>`;
+    },
+  ).join('')}</div></section>`;
+}
+function dailyGate() {
+  if (currentUser && accountChecked && !cloudDaily.loading && !cloudDaily.error)
+    queueMicrotask(() =>
+      cloudDaily
+        .load()
+        .then(() => {
+          if (remoteDaily()) render();
+        })
+        .catch(onError),
+    );
+  const signedIn = !!currentUser,
+    waiting = !accountChecked || (signedIn && (cloudDaily.loading || !cloudDaily.error));
+  return `${modeToolbar()}<section class="hero hub-hero daily-gate"><div class="hero-copy"><span class="hub-mode">Daily quiz</span><h1>${waiting ? 'Loading today’s daily…' : signedIn ? 'The daily quiz is unavailable.' : 'One daily. One try.'}</h1><p>${waiting ? 'Fetching today’s questions from the server.' : signedIn ? esc(cloudDaily.error) : 'The daily quiz is the same for every player and counts for the leaderboard, so it needs an account: each account gets exactly one attempt and every answer is checked on the server. Infinity and Category loops stay free for everyone, no account needed.'}</p><div class="hero-actions">${waiting ? '' : signedIn ? button('daily-retry', 'Try again') : button('login', 'Sign in to play') + button('register', 'Create account', 'btn ghost')}${button('mode-infinity', 'Play Infinity', 'btn ghost')}${button('mode-loop', 'Category loop', 'btn ghost')}</div></div></section>`;
+}
+function dashboard() {
+  if (isLoop()) return loopDashboard();
+  const s = session(),
+    count = completedCount(s),
+    first = CATEGORIES.find((c) => !s.games[c.id].done),
+    infinity = state.mode === 'infinity',
+    covers = pack.anime.filter((a) => a.cover).slice(0, 8);
+  return `${modeToolbar()}${count === 5 ? `<div class="completion"><div><h2>Round complete!</h2><p>${fmt(totalScore(s))} of 100,000 points. ${infinity ? 'Ready for five new challenges?' : 'A new daily quiz arrives tomorrow.'}</p></div><div class="completion-buttons">${scoreButton()}${infinity ? nextButton() : button('share', 'Copy result', 'btn')}</div></div>` : ''}<section class="hero hub-hero"><div class="hero-copy"><span class="hub-mode">${infinity ? 'Infinity quiz' : 'Daily quiz'}</span><h1>What are we<br>guessing today?</h1><p>Five ways to know your anime. Pick a challenge and keep your loop going.</p><div class="hero-actions">${first ? button(`play:${first.id}`, count ? 'Keep playing' : 'Start playing') : button('share', 'Copy result', 'btn')}${button('help', 'How to play', 'btn ghost')}</div></div><div class="hub-round-summary"><span>${infinity ? 'Your current loop' : 'Today’s progress'}</span><strong>${fmt(totalScore(s))}<small> / 100,000 points</small></strong><div class="progress-track" role="progressbar" aria-label="Completed categories" aria-valuemin="0" aria-valuemax="5" aria-valuenow="${count}"><i style="width:${count * 20}%"></i></div><p>${count} of 5 categories complete</p>${infinity ? nextButton('btn secondary small') : `<span class="subtle">Daily quiz resets at midnight${cloudMode ? ' UTC' : ''}</span>`}</div></section><section class="hub-picker" aria-label="Choose your challenge"><div class="category-grid">${CATEGORIES.map(
+    (c, index) => {
+      const g = s.games[c.id],
+        started = g.scores.length || g.guesses.length || g.hints.length;
+      return `<button class="category-card hub-game-card" data-action="play:${c.id}">${covers[index] ? `<img class="hub-card-art" ${fastSrc(covers[index].cover, 640, esc)} alt="" loading="lazy" decoding="async">` : ''}<div class="card-top"><span class="category-icon">${c.icon}</span><span class="badge ${g.done ? 'done' : ''}">${g.done ? '✓ Complete' : started ? 'In progress' : c.id === 'anidle' ? '22 guesses' : '3 questions'}</span></div><div class="hub-card-copy"><h3>${c.name}</h3><p>${c.description}</p><div class="card-bottom"><span>${g.done ? fmt(g.scores.reduce((a, b) => a + b, 0)) : 'Up to ' + fmt(c.max)} points</span><strong>${g.done ? 'View result' : started ? 'Continue' : 'Play'} <span aria-hidden="true">↗</span></strong></div></div></button>`;
+    },
+  ).join(
+    '',
+  )}<button type="button" class="hub-create-card" data-action="mode-loop"><span class="hub-create-symbol" aria-hidden="true">⟳</span><h3>Category loop</h3><p>Only screenshots? Only openings? Loop a single category with endless three-question rounds.</p><strong>Start looping <span aria-hidden="true">↗</span></strong></button></div></section><section class="hub-community"><div><h2>Same anime. Your people.</h2><p>Compare your daily scores or take on the next loop together.</p></div><div>${button('friends', 'Friends', 'btn secondary')}${button('rooms', 'Party & Co-op', 'btn ghost')}</div></section>${social.dailyPanel()}${mediaNotice()}`;
+}
 
-function mediaNotice(){const counts=catalogIndex(pack.anime).counts;return `<aside class="notice"><span>◉</span><span><strong>${pack.anime.length} anime in the pool</strong> · ${counts.screenshot.reduce((a,b)=>a+b,0)} scene sets · ${counts.character.reduce((a,b)=>a+b,0)} characters · ${counts.opening.reduce((a,b)=>a+b,0)+counts.ending.reduce((a,b)=>a+b,0)} music tracks. Easy, Medium, and Hard are reshuffled every round. ${button('library','Explore the pool','')}</span></aside>`;}
-function field(name,label,list='anime',value=''){return `<div class="field"><label for="${name}">${label}</label><input id="${name}" name="${name}" value="${esc(value)}" data-suggest="${list}" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="${name}-suggestions" autocomplete="off" placeholder="${list==='character'?'Character name':'Type an anime title'}"><div class="suggestions" id="${name}-suggestions" role="listbox" hidden></div></div>`;}
-function submitControls(extra=''){return `<div class="form-actions"><span class="subtle">${extra||'Choose a title from the suggestions.'}</span><div>${button('giveup','Give up','btn ghost small')} <button class="btn" type="submit">Submit answers</button></div></div>`;}
-function gameView(){const c=cat(selected),g=session().games[selected],level=g.levels?.[g.index]||'Mix';return `${modeToolbar()}<div class="game-heading"><div><span class="mode-label">${c.icon} ${c.name}</span><h1>${g.done?'Your result':c.verb}</h1><p class="subtle round-meta">${c.id==='anidle'?`Guess ${g.attempt} / 22`:`Question ${g.index+1} / 3`} <span class="difficulty ${level.toLowerCase()}">${level}</span></p></div><div class="game-heading-actions">${isLoop()&&!g.done?button('loop-restart','↻ New loop','btn ghost small','title="Throw this round away and start a new one. It will not count in your stats."'):''}${state.mode==='infinity'&&!social.active&&!canAdvance(session())&&hasProgress(session())?button('infinity-restart','↻ Fresh round','btn ghost small','title="Throw this round away and start a new one. It will not count in your stats."'):''}${button('help','?','btn ghost small','aria-label="Show rules"')}</div></div><div class="game-layout"><section class="game-panel" aria-label="${esc(c.name)}">${g.done?categorySummary(g):`${selected==='screenshot'?screenshotView(g):selected==='character'?characterView(g):selected==='anidle'?anidleView(g):musicView(g)}${g.scores.length>g.index?resultView(g):''}`}</section></div>`;}
-function screenshotView(g){const a=anime(g.questions[g.index]),submitted=g.scores.length>g.index,frames=questionFrames(g),index=g.activeFrame??0,src=frames[Math.min(index,frames.length-1)];return `<div class="frame-wrap"><img class="question-image" ${fastSrc(src,1280,esc)} fetchpriority="high" decoding="async" alt="Mystery anime scene"><span class="frame-caption">${index===0?'Original scene':'Scene clue '+index}</span></div><div class="hint-buttons">${button('view-frame:0','▧ Original scene',index===0?'unlocked':'')}${[1,2,3].map(n=>button(g.hints.includes(n)&&n<3?`view-frame:${n}`:`hint:${n}`,`${g.hints.includes(n)?'✓':'♧'} ${n===3?'Title clue':`Scene clue ${n}`} ${g.hints.includes(n)?'':'−2,500'}`,g.hints.includes(n)?'unlocked':'',submitted||n>1&&!g.hints.includes(n-1)?'disabled':'')).join('')}</div>${g.hints.includes(3)?`<p class="hint-text hint-title">Main title: ${esc(maskTitle(a.englishTitle||a.alternativeTitle||a.title))}<br>Japanese title: ${esc(maskTitle(a.japaneseTitle||a.title))}</p>`:''}${!submitted?`<form class="answer-form" data-form="anime"><div class="form-line">${field('answer','Which anime is this?')}<button class="btn" type="submit">Check answer</button></div><div class="form-actions"><span class="subtle">${fmt(roundScore('screenshot',{correct:true,hints:g.hints.length}))} points available</span>${button('giveup','Give up','btn ghost small')}</div></form>`:''}`;}
-function characterView(g){const submitted=g.scores.length>g.index,answers=g.answers[g.index]?.entries||[];return `<form data-form="characters">${submitted?`<div class="round-score"><span>Your score</span><strong>${fmt(g.scores[g.index])}</strong></div>`:''}<div class="character-grid">${g.questions[g.index].map((id,i)=>{const a=questionCharacter(g,i),r=answers[i];return `<article class="character-item"><img ${fastSrc(a.characterImage,360,esc)} decoding="async" alt="Mystery character ${i+1}">${submitted?characterFeedback(a,r):`${field('character-'+i,'Character '+(i+1),'character')}${field('anime-'+i,'Anime')}`}</article>`;}).join('')}</div>${!submitted?`<div class="answer-form">${submitControls('2,000 for the name · 500 for the anime')}</div>`:''}</form>`;}
-function mediaElement(m,videoUnlocked,mode='audio',cover=null){if(!m)return '<p class="media-error">No clip is available for this question.</p>';if(mode==='video'&&videoUnlocked&&m.video)return `<div class="video-hint-layout ${selected==='ending'?'with-cover':''}">${selected==='ending'&&cover?`<figure class="ending-cover"><img id="${hintResource(cover,'cover')}" alt="Blurred cover clue"><figcaption>Cover clue</figcaption></figure>`:''}<div class="media-player"><div class="video-viewport"><video class="quiz-video" preload="metadata" playsinline data-start="zero" id="${hintResource(m.video,selected,selected==='opening'?m.videoWindow:undefined)}" aria-label="Blurred video clue"></video></div><p class="hint-processing" role="status">Preparing video… You can keep listening to the full audio.</p><div class="video-controls">${button('media-toggle','▶','media-play','aria-label="Play video"')}<input id="video-seek" type="range" min="0" max="1000" step="1" value="0" aria-label="Video position"><span id="video-time" class="media-time">0:00</span><label class="volume-label" for="video-volume" aria-label="Video volume">♪</label><input id="video-volume" type="range" min="0" max="1" step="0.01" value="0.7" aria-label="Video volume">${button('media-fullscreen','⛶','media-fullscreen','aria-label="Fullscreen video"')}</div>${selected==='opening'?'<p class="video-window-note" role="status">Loading video window…</p>':''}</div></div>`;return `<div class="music-stage full-audio" id="music-stage"><audio controls preload="metadata" controlslist="nodownload" src="${esc(m.audio||m.video)}" aria-label="Full music track"></audio></div>`;}
-function musicView(g){const a=anime(g.questions[g.index]),submitted=g.scores.length>g.index,m=a[selected],hasHint=g.hints.length>0,mode=g.musicMode||'audio',protectedHintsAvailable=Boolean(m?.video);if(!clientHints&&m?.video&&!submitted&&!hasHint&&mode==='audio')requestHint({source:m.video,kind:selected,window:m.videoWindow}).catch(()=>{});const controls=protectedHintsAvailable?button(hasHint?'music-mode:video':'hint:1',hasHint?'✓ Video clue unlocked':'♧ Unlock video clue −2,500',mode==='video'?'unlocked':'',submitted&&!hasHint?'disabled':''):button('music-mode:audio','No video clue for this track','unlocked','disabled');return `${mediaElement(m,hasHint&&protectedHintsAvailable,mode,a.cover)}<div class="hint-buttons music-mode-buttons">${button('music-mode:audio','♫ Audio only',mode==='audio'?'unlocked':'')}${controls}</div>${!submitted?`<form class="answer-form" data-form="anime"><div class="form-line">${field('answer','Which anime is this track from?')}<button class="btn" type="submit">Check answer</button></div><div class="form-actions"><span class="subtle">${fmt(roundScore(selected,{correct:true,hints:g.hints.length}))} points available · complete audio track</span>${button('giveup','Give up','btn ghost small')}</div></form>`:''}`;}
-function anidleView(g){const target=anime(g.questions[0]),done=g.done;return `${g.attempt>=13?anidleClues(g,target):''}<div class="anidle-intro"><p class="subtle">${g.guesses.length?'Use the matches from your previous guesses.':'Start with any anime. Your first three guesses cost no points.'}</p>${g.attempt<13?`<p class="clue-countdown">First clue in ${13-g.attempt} guesses</p>`:''}</div>${!done?`<form class="answer-form" data-form="anidle"><div class="form-line">${field('answer',`Your guess · Attempt ${g.attempt} / 22`)}<button type="submit" class="btn">Check guess</button></div><div class="form-actions">${g.attempt>3&&clueTarget(g.attempt)?button('skip-anidle',`⏩ Skip to ${g.attempt<13?'first':g.attempt<18?'next':'last'} clue · Guess ${clueTarget(g.attempt)}`,'btn secondary small'): '<span></span>'}${button('giveup','Give up','btn ghost small')}</div></form>`:''}${g.guesses.length?`<div class="summary-toggle"><button type="button" data-action="toggle-summary" role="switch" aria-checked="${state.showSummary!==false}" aria-controls="anidle-summary">Summary <span class="switch ${state.showSummary!==false?'on':''}"></span></button></div><div id="anidle-summary" ${state.showSummary===false?'hidden':''}>${anidleSummaryView(g,target)}</div><div class="comparison-wrap"><table class="comparison"><caption class="sr-only">Compare your guesses with the target anime</caption><thead><tr>${['Anime','Year','Studio','Source','Rating','Genres','Tags'].map(t=>`<th scope="col">${t}</th>`).join('')}</tr></thead><tbody>${[...g.guesses].reverse().map(guess=>{const a=anime(guess.id),r=compareAnime(a,target);return `<tr><td><strong>${titleMarkup(a)}</strong><br><span class="subtle">Guess ${guess.attempt}</span></td><td><span class="tag ${r.year?'miss':'match'}">${a.year??'—'} ${r.year>0?'↑':r.year<0?'↓':'✓'}</span></td><td><span class="tag ${r.studio?'match':'miss'}">${esc(a.studio)}</span></td><td><span class="tag ${r.source?'match':'miss'}">${esc(a.source)}</span></td><td><span class="tag ${r.score===null?'':r.score?'miss':'match'}">${a.score??'—'} ${r.score===null?'':r.score>0?'↑':r.score<0?'↓':'✓'}</span><small class="score-source">${esc(a.scoreSource||'MyAnimeList')}</small></td><td>${r.genres.map(t=>`<span class="tag ${t.match?'match':'miss'}">${esc(t.value)}</span>`).join('')}</td><td>${r.tags.map(t=>`<span class="tag ${t.match==='primary'?'match':t.match==='secondary'?'partial':'miss'}">${esc(t.value)}</span>`).join('')}</td></tr>`;}).join('')}</tbody></table></div><p class="subtle" style="margin-top:12px">Green = match · Amber = secondary tag · Red = no match. ↑ higher / later, ↓ lower / earlier.</p>`:''}`;}
-function nextCategory(){const s=session(),ids=CATEGORIES.map(c=>c.id),at=ids.indexOf(selected);for(let k=1;k<ids.length;k++){const id=ids[(at+k)%ids.length];if(!s.games[id]?.done)return cat(id);}return null;}
-function nextCategoryButton(){const next=nextCategory();return next?button('play:'+next.id,`Next: ${next.icon} ${next.name} →`):button('home',state.mode==='daily'?'See your daily result →':'See your round result →');}
-function resultView(g){const score=g.scores[g.index],a=selected==='character'?null:anime(g.questions[g.index]),answer=g.answers[g.index];return `<div class="result ${score===0?'wrong':''}" role="status"><strong>${score===0?'Question complete.':'Well spotted!'}</strong><div class="result-score">${fmt(score)} points</div>${a?`<p>The answer: <strong>${titleMarkup(a)}</strong></p>`:''}${answer?.value?`<p class="subtle">Your answer: ${esc(answer.value)}</p>`:''}${g.done?`<p style="margin-top:8px">Category complete: ${fmt(g.scores.reduce((a,b)=>a+b,0))} / ${fmt(cat(selected).max)} points.</p>${isLoop()?button('loop-next','⟳ Next loop round'):nextCategoryButton()}`:button('continue','Next question')}</div>`;}
-function statsView(){return statistics.view();}
-function libraryTitle(a){return a.englishTitle||a.alternativeTitle||a.title;}
-function libraryGenres(){if(libraryGenres.cache?.pack!==pack){const m=new Map();for(const a of pack.anime)for(const g of a.genres||[])m.set(g,(m.get(g)||0)+1);libraryGenres.cache={pack,list:[...m].sort((a,b)=>b[1]-a[1]).slice(0,40).map(([g])=>g).sort()};}return libraryGenres.cache.list;}
-function libraryResults(){const list=catalogIndex(pack.anime).search(libraryQuery,libraryCategory).filter(a=>libraryGenre==='all'||(a.genres||[]).includes(libraryGenre));const key=a=>libraryTitle(a).replace(/^[^\p{L}\p{N}]+/u,''),byTitle=(a,b)=>key(a).localeCompare(key(b),'en',{sensitivity:'base'});const by={az:byTitle,score:(a,b)=>(b.score||0)-(a.score||0)||byTitle(a,b),new:(a,b)=>(b.year||0)-(a.year||0)||byTitle(a,b),old:(a,b)=>(a.year||9999)-(b.year||9999)||byTitle(a,b)}[librarySort];return libraryQuery.trim()&&librarySort==='az'?list:[...list].sort(by||byTitle);}
-function libraryBadges(a){return [a.screenshots?.length?`<span title="Scenes">▧ ${a.screenshots.length}</span>`:'',a.characters?.length?`<span title="Characters">♙ ${a.characters.length}</span>`:'',a.opening?'<span title="Opening">♫ OP</span>':'',a.ending?'<span title="Ending">♪ ED</span>':''].join('');}
-function libraryCard(a){const img=a.cover||a.characterImage||a.screenshots?.[0];return `<button type="button" class="pool-card" data-action="library-open:${esc(a.id)}"><span class="pool-cover">${img?`<img loading="lazy" decoding="async" ${fastSrc(img,300,esc)} alt="">`:'<span class="cover-placeholder">▧</span>'}${a.score?`<span class="pool-score">★ ${Number(a.score).toFixed(1)}</span>`:''}</span><span class="pool-card-copy"><strong>${esc(libraryTitle(a))}</strong><small>${[a.year,a.studio].filter(Boolean).map(esc).join(' · ')||'&nbsp;'}</small><span class="pool-badges">${libraryBadges(a)}</span></span></button>`;}
-function libraryDetailView(a){if(!a)return '';const music=['opening','ending'].map(k=>a[k]?`<div class="pool-track"><span class="mode-label">${k==='opening'?'♫ Opening':'♪ Ending'}</span><strong>${esc(a[k].song||'Untitled track')}</strong><small>${esc(a[k].artist||'')}</small>${a[k].audio||a[k].video?`<audio controls preload="none" controlslist="nodownload" src="${esc(a[k].audio||a[k].video)}"></audio>`:''}</div>`:'').join('');return `<div class="pool-detail-backdrop" data-action="library-close"></div><section class="pool-detail" role="dialog" aria-modal="true" aria-labelledby="pool-detail-title"><div class="pool-detail-hero">${a.cover?`<img class="pool-detail-blur" ${fastSrc(a.cover,300,esc)} alt="">`:''}<div class="pool-detail-cover">${a.cover?`<img ${fastSrc(a.cover,300,esc)} alt="Cover">`:'<span class="cover-placeholder">▧</span>'}</div><div class="pool-detail-head"><span class="mode-label">${esc([a.year,a.source].filter(Boolean).join(' · '))}</span><h2 id="pool-detail-title">${titleMarkup(a)}</h2><p class="subtle">${esc(a.studio||'Unknown studio')}${a.score?` · ★ ${Number(a.score).toFixed(2)}`:''}</p><div class="pool-genres">${(a.genres||[]).map(g=>`<span>${esc(g)}</span>`).join('')}</div></div>${button('library-close','✕','pool-detail-close','aria-label="Close details"')}</div><div class="pool-detail-body">${a.hasSynopsis||a.synopsis?`<p class="synopsis-clue library-synopsis" data-synopsis-id="${esc(a.id)}">${esc(synopsisText(a))}</p>`:''}${a.screenshots?.length?`<h3>Scenes</h3><div class="pool-scenes">${a.screenshots.map(src=>`<img loading="lazy" decoding="async" ${fastSrc(src,480,esc)} alt="Scene from ${esc(libraryTitle(a))}">`).join('')}</div>`:''}${a.characters?.length?`<h3>Characters</h3><div class="pool-characters">${a.characters.slice(0,12).map(c=>`<figure>${c.image?`<img loading="lazy" decoding="async" ${fastSrc(c.image,160,esc)} alt="">`:'<span class="cover-placeholder">♙</span>'}<figcaption>${esc(c.name)}</figcaption></figure>`).join('')}</div>`:''}${music?`<h3>Music</h3><div class="pool-music">${music}</div>`:''}<div class="pool-detail-actions">${button('edit:'+a.id,'Edit media','btn ghost small')}${button('library-close','Close','btn secondary small')}</div></div></section>`;}
-function libraryView(){const counts=catalogIndex(pack.anime).counts,filtered=libraryResults(),pages=Math.max(1,Math.ceil(filtered.length/LIBRARY_PAGE));libraryPage=Math.min(libraryPage,pages);const visible=filtered.slice((libraryPage-1)*LIBRARY_PAGE,libraryPage*LIBRARY_PAGE),sum=list=>list.reduce((a,b)=>a+b,0),filteredView=libraryQuery.trim()||libraryGenre!=='all'||libraryCategory!=='all';const pageButtons=[...new Set([1,libraryPage-1,libraryPage,libraryPage+1,pages])].filter(n=>n>=1&&n<=pages).sort((a,b)=>a-b);return `<section class="pool-heading"><div><span class="mode-label">Media pool</span><h1>Every anime in the quiz.</h1><p>Browse the scenes, characters and music behind your rounds. Heads-up: this page shows answers.</p></div><div class="pool-totals"><div><strong>${fmt(pack.anime.length)}</strong><span>anime</span></div><div><strong>${fmt(sum(counts.screenshot))}</strong><span>scene sets</span></div><div><strong>${fmt(sum(counts.character))}</strong><span>characters</span></div><div><strong>${fmt(sum(counts.opening)+sum(counts.ending))}</strong><span>tracks</span></div></div></section><div class="pool-toolbar"><div class="pool-search-field"><span aria-hidden="true">⌕</span><input id="library-search" type="search" value="${esc(libraryQuery)}" placeholder="Search a title, alias or character" autocomplete="off" aria-label="Search anime or characters"></div><label class="pool-select"><span>Genre</span><select id="library-genre"><option value="all">All genres</option>${libraryGenres().map(g=>`<option value="${esc(g)}" ${libraryGenre===g?'selected':''}>${esc(g)}</option>`).join('')}</select></label><label class="pool-select"><span>Sort</span><select id="library-sort">${LIBRARY_SORTS.map(([id,label])=>`<option value="${id}" ${librarySort===id?'selected':''}>${label}</option>`).join('')}</select></label></div><div class="pool-chips" role="group" aria-label="Category">${[['all','All',''],...CATEGORIES.map(c=>[c.id,c.name,c.icon])].map(([id,label,icon])=>button('library-cat:'+id,`${icon?`<span aria-hidden="true">${icon}</span> `:''}${label}`,'pool-chip'+(libraryCategory===id?' selected':''),`aria-pressed="${libraryCategory===id}"`)).join('')}</div><p class="pool-results-count" id="pool-results">${fmt(filtered.length)} anime${pages>1?` · page ${libraryPage} of ${pages}`:''}${filteredView?` · ${button('clear-library','Clear filters','link-button')}`:''}</p><div class="pool-grid">${!visible.length?`<div class="library-empty" role="status"><h3>No anime found</h3><p>Try another title or character name, or loosen the filters.</p>${button('clear-library','Clear filters','btn ghost small')}</div>`:visible.map(libraryCard).join('')}</div>${pages>1?`<nav class="library-pagination" aria-label="Pages">${button('library-page:'+String(libraryPage-1),'‹','btn ghost small','aria-label="Previous page" '+(libraryPage<=1?'disabled':''))}${pageButtons.map((n,i)=>`${i&&n-pageButtons[i-1]>1?'<span class="page-gap">…</span>':''}${button('library-page:'+n,String(n),'btn ghost small page-number'+(n===libraryPage?' selected':''),n===libraryPage?'aria-current="page"':'')}`).join('')}${button('library-page:'+String(libraryPage+1),'›','btn ghost small','aria-label="Next page" '+(libraryPage>=pages?'disabled':''))}</nav>`:''}<details class="pool-manage"><summary>Manage media pack · <strong>${esc(pack.name)}</strong></summary><p class="subtle">Export the pool, import your own pack, or go back to the default collection.</p><div class="library-tools">${button('export-pack','Export pack','btn secondary small')}${button('import-pack','Import pack','btn ghost small')}${packKey()!==starter.key?button('restore-pack','Restore default pool','btn ghost small'):''}<input type="file" id="import-file" accept="application/json,.json" hidden></div></details>${libraryDetail?libraryDetailView(anime(libraryDetail)):''}${editing?editorView(anime(editing)):''}`;}
-function editorView(a){return `<section class="panel editor" id="media-editor"><div class="section-top"><h2>${titleMarkup(a)}</h2>${button('close-editor','Close','btn ghost small')}</div><form data-form="editor"><div class="editor-body"><div class="field wide"><label for="screenshots">Screenshot URLs (one per line, up to three)</label><textarea name="screenshots" id="screenshots">${esc(a.screenshots.slice(0,3).filter(s=>!s.startsWith('data:')).join('\n'))}</textarea><p class="subtle">Or upload images. Empty fields keep the existing media.</p><input class="file-input" type="file" name="screenshot-files" accept="image/png,image/jpeg,image/webp,image/gif" multiple aria-label="Upload screenshots"></div><div class="field wide"><label for="characterImage">Character image URL</label><input id="characterImage" name="characterImage" type="text" value="${esc(a.characterImage?.startsWith('data:')?'':a.characterImage||'')}"><input class="file-input" type="file" name="character-file" accept="image/png,image/jpeg,image/webp,image/gif" aria-label="Upload character image"></div>${['opening','ending'].map(type=>`<div class="field"><h3 style="margin-bottom:14px">${type==='opening'?'Opening':'Ending'}</h3><label for="${type}-audio">Audio URL</label><input id="${type}-audio" name="${type}-audio" value="${esc(a[type]?.audio?.startsWith('data:')?'':a[type]?.audio||'')}"><input class="file-input" type="file" name="${type}-audio-file" accept="audio/mpeg,audio/wav,audio/ogg,audio/webm" aria-label="${type}-Upload audio"><label for="${type}-video" style="margin-top:12px">Video URL (optional)</label><input id="${type}-video" name="${type}-video" value="${esc(a[type]?.video?.startsWith('data:')?'':a[type]?.video||'')}"><input class="file-input" type="file" name="${type}-video-file" accept="video/mp4,video/webm" aria-label="${type}-Upload video"><div style="margin-top:12px">${button(`preview:${a.id}:${type}`,a[type]?'▶ Listen to clip':'No clip available','btn secondary small',a[type]?'':'disabled')}</div></div>`).join('')}<div class="wide window-editor"><h4>Opening: allowed video window</h4><div class="window-fields"><div class="field"><label for="opening-start">Start (seconds)</label><input id="opening-start" name="opening-start" type="number" min="0" step="0.1" placeholder="Automatic: 35 %" value="${a.opening?.videoWindow?.startSeconds??''}"></div><div class="field"><label for="opening-end">End (seconds)</label><input id="opening-end" name="opening-end" type="number" min="0" step="0.1" placeholder="Automatic: 65 %" value="${a.opening?.videoWindow?.endSeconds??''}"></div></div><p>Leave both fields empty for 35–65% of the video. The video clue only plays inside this window. Audio remains complete.</p></div><p class="subtle wide">Hint videos should not reveal the anime title. Use media you have permission to use. Each upload is limited to 25 MB and stays on this device. </p><div class="wide"><button class="btn" type="submit">Save media & start new games</button></div></div></form></section>`;}
-function render(){const look=currentUser?.appearance;if(look&&look!==adoptedLook){adoptedLook=look;appearance.adoptRemote(look,true);}else if(cloudMode&&currentUser&&!look&&adoptedLook!==currentUser.id){adoptedLook=currentUser.id;appearance.pushLocal();}rememberAccount();appearance.updateContext();stopAudio();hintJobs=[];app.innerHTML=shell(remoteDaily()&&!cloudDaily.session&&['home','game'].includes(view)?dailyGate():view==='home'?dashboard():view==='game'?gameView():view==='library'?libraryView():view==='friends'?friends.view():view==='appearance'?appearance.view():view==='bug-report'?bugReport.view():POLICY_PAGES.includes(view)?policies.view(view):social.isView(view)?social.view(view):view==='leaderboard'?leaderboardView():view==='account'?accountView():statsView());updateCountdown();prepareHints();if(view==='stats')statistics.afterRender();const heading=app.querySelector('main h1');if(heading)heading.setAttribute('tabindex','-1');warmMedia();celebrateAnswer();}
-let celebrateNext=false;
-function celebrateAnswer(){if(!celebrateNext)return;const result=app.querySelector('.result');if(!result)return;celebrateNext=false;const effect=social.rewards?.slots?.effect;if(effect&&!result.classList.contains('wrong'))celebrate(effect);}
+function mediaNotice() {
+  const counts = catalogIndex(pack.anime).counts;
+  return `<aside class="notice"><span>◉</span><span><strong>${pack.anime.length} anime in the pool</strong> · ${counts.screenshot.reduce((a, b) => a + b, 0)} scene sets · ${counts.character.reduce((a, b) => a + b, 0)} characters · ${counts.opening.reduce((a, b) => a + b, 0) + counts.ending.reduce((a, b) => a + b, 0)} music tracks. Easy, Medium, and Hard are reshuffled every round. ${button('library', 'Explore the pool', '')}</span></aside>`;
+}
+function field(name, label, list = 'anime', value = '') {
+  return `<div class="field"><label for="${name}">${label}</label><input id="${name}" name="${name}" value="${esc(value)}" data-suggest="${list}" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="${name}-suggestions" autocomplete="off" placeholder="${list === 'character' ? 'Character name' : 'Type an anime title'}"><div class="suggestions" id="${name}-suggestions" role="listbox" hidden></div></div>`;
+}
+function submitControls(extra = '') {
+  return `<div class="form-actions"><span class="subtle">${extra || 'Choose a title from the suggestions.'}</span><div>${button('giveup', 'Give up', 'btn ghost small')} <button class="btn" type="submit">Submit answers</button></div></div>`;
+}
+function gameView() {
+  const c = cat(selected),
+    g = session().games[selected],
+    level = g.levels?.[g.index] || 'Mix';
+  return `${modeToolbar()}<div class="game-heading"><div><span class="mode-label">${c.icon} ${c.name}</span><h1>${g.done ? 'Your result' : c.verb}</h1><p class="subtle round-meta">${c.id === 'anidle' ? `Guess ${g.attempt} / 22` : `Question ${g.index + 1} / 3`} <span class="difficulty ${level.toLowerCase()}">${level}</span></p></div><div class="game-heading-actions">${isLoop() && !g.done ? button('loop-restart', '↻ New loop', 'btn ghost small', 'title="Throw this round away and start a new one. It will not count in your stats."') : ''}${state.mode === 'infinity' && !social.active && !canAdvance(session()) && hasProgress(session()) ? button('infinity-restart', '↻ Fresh round', 'btn ghost small', 'title="Throw this round away and start a new one. It will not count in your stats."') : ''}${button('help', '?', 'btn ghost small', 'aria-label="Show rules"')}</div></div><div class="game-layout"><section class="game-panel" aria-label="${esc(c.name)}">${g.done ? categorySummary(g) : `${selected === 'screenshot' ? screenshotView(g) : selected === 'character' ? characterView(g) : selected === 'anidle' ? anidleView(g) : musicView(g)}${g.scores.length > g.index ? resultView(g) : ''}`}</section></div>`;
+}
+function screenshotView(g) {
+  const a = anime(g.questions[g.index]),
+    submitted = g.scores.length > g.index,
+    frames = questionFrames(g),
+    index = g.activeFrame ?? 0,
+    src = frames[Math.min(index, frames.length - 1)];
+  return `<div class="frame-wrap"><img class="question-image" ${fastSrc(src, 1280, esc)} fetchpriority="high" decoding="async" alt="Mystery anime scene"><span class="frame-caption">${index === 0 ? 'Original scene' : 'Scene clue ' + index}</span></div><div class="hint-buttons">${button('view-frame:0', '▧ Original scene', index === 0 ? 'unlocked' : '')}${[1, 2, 3].map((n) => button(g.hints.includes(n) && n < 3 ? `view-frame:${n}` : `hint:${n}`, `${g.hints.includes(n) ? '✓' : '♧'} ${n === 3 ? 'Title clue' : `Scene clue ${n}`} ${g.hints.includes(n) ? '' : '−2,500'}`, g.hints.includes(n) ? 'unlocked' : '', submitted || (n > 1 && !g.hints.includes(n - 1)) ? 'disabled' : '')).join('')}</div>${g.hints.includes(3) ? `<p class="hint-text hint-title">Main title: ${esc(maskTitle(a.englishTitle || a.alternativeTitle || a.title))}<br>Japanese title: ${esc(maskTitle(a.japaneseTitle || a.title))}</p>` : ''}${!submitted ? `<form class="answer-form" data-form="anime"><div class="form-line">${field('answer', 'Which anime is this?')}<button class="btn" type="submit">Check answer</button></div><div class="form-actions"><span class="subtle">${fmt(roundScore('screenshot', {correct: true, hints: g.hints.length}))} points available</span>${button('giveup', 'Give up', 'btn ghost small')}</div></form>` : ''}`;
+}
+function characterView(g) {
+  const submitted = g.scores.length > g.index,
+    answers = g.answers[g.index]?.entries || [];
+  return `<form data-form="characters">${submitted ? `<div class="round-score"><span>Your score</span><strong>${fmt(g.scores[g.index])}</strong></div>` : ''}<div class="character-grid">${g.questions[
+    g.index
+  ]
+    .map((id, i) => {
+      const a = questionCharacter(g, i),
+        r = answers[i];
+      return `<article class="character-item"><img ${fastSrc(a.characterImage, 360, esc)} decoding="async" alt="Mystery character ${i + 1}">${submitted ? characterFeedback(a, r) : `${field('character-' + i, 'Character ' + (i + 1), 'character')}${field('anime-' + i, 'Anime')}`}</article>`;
+    })
+    .join(
+      '',
+    )}</div>${!submitted ? `<div class="answer-form">${submitControls('2,000 for the name · 500 for the anime')}</div>` : ''}</form>`;
+}
+function mediaElement(m, videoUnlocked, mode = 'audio', cover = null) {
+  if (!m) return '<p class="media-error">No clip is available for this question.</p>';
+  if (mode === 'video' && videoUnlocked && m.video)
+    return `<div class="video-hint-layout ${selected === 'ending' ? 'with-cover' : ''}">${selected === 'ending' && cover ? `<figure class="ending-cover"><img id="${hintResource(cover, 'cover')}" alt="Blurred cover clue"><figcaption>Cover clue</figcaption></figure>` : ''}<div class="media-player"><div class="video-viewport"><video class="quiz-video" preload="metadata" playsinline data-start="zero" id="${hintResource(m.video, selected, selected === 'opening' ? m.videoWindow : undefined)}" aria-label="Blurred video clue"></video></div><p class="hint-processing" role="status">Preparing video… You can keep listening to the full audio.</p><div class="video-controls">${button('media-toggle', '▶', 'media-play', 'aria-label="Play video"')}<input id="video-seek" type="range" min="0" max="1000" step="1" value="0" aria-label="Video position"><span id="video-time" class="media-time">0:00</span><label class="volume-label" for="video-volume" aria-label="Video volume">♪</label><input id="video-volume" type="range" min="0" max="1" step="0.01" value="0.7" aria-label="Video volume">${button('media-fullscreen', '⛶', 'media-fullscreen', 'aria-label="Fullscreen video"')}</div>${selected === 'opening' ? '<p class="video-window-note" role="status">Loading video window…</p>' : ''}</div></div>`;
+  return `<div class="music-stage full-audio" id="music-stage"><audio controls preload="metadata" controlslist="nodownload" src="${esc(m.audio || m.video)}" aria-label="Full music track"></audio></div>`;
+}
+function musicView(g) {
+  const a = anime(g.questions[g.index]),
+    submitted = g.scores.length > g.index,
+    m = a[selected],
+    hasHint = g.hints.length > 0,
+    mode = g.musicMode || 'audio',
+    protectedHintsAvailable = Boolean(m?.video);
+  if (!clientHints && m?.video && !submitted && !hasHint && mode === 'audio')
+    requestHint({source: m.video, kind: selected, window: m.videoWindow}).catch(() => {});
+  const controls = protectedHintsAvailable
+    ? button(
+        hasHint ? 'music-mode:video' : 'hint:1',
+        hasHint ? '✓ Video clue unlocked' : '♧ Unlock video clue −2,500',
+        mode === 'video' ? 'unlocked' : '',
+        submitted && !hasHint ? 'disabled' : '',
+      )
+    : button('music-mode:audio', 'No video clue for this track', 'unlocked', 'disabled');
+  return `${mediaElement(m, hasHint && protectedHintsAvailable, mode, a.cover)}<div class="hint-buttons music-mode-buttons">${button('music-mode:audio', '♫ Audio only', mode === 'audio' ? 'unlocked' : '')}${controls}</div>${!submitted ? `<form class="answer-form" data-form="anime"><div class="form-line">${field('answer', 'Which anime is this track from?')}<button class="btn" type="submit">Check answer</button></div><div class="form-actions"><span class="subtle">${fmt(roundScore(selected, {correct: true, hints: g.hints.length}))} points available · complete audio track</span>${button('giveup', 'Give up', 'btn ghost small')}</div></form>` : ''}`;
+}
+function anidleView(g) {
+  const target = anime(g.questions[0]),
+    done = g.done;
+  return `${g.attempt >= 13 ? anidleClues(g, target) : ''}<div class="anidle-intro"><p class="subtle">${g.guesses.length ? 'Use the matches from your previous guesses.' : 'Start with any anime. Your first three guesses cost no points.'}</p>${g.attempt < 13 ? `<p class="clue-countdown">First clue in ${13 - g.attempt} guesses</p>` : ''}</div>${!done ? `<form class="answer-form" data-form="anidle"><div class="form-line">${field('answer', `Your guess · Attempt ${g.attempt} / 22`)}<button type="submit" class="btn">Check guess</button></div><div class="form-actions">${g.attempt > 3 && clueTarget(g.attempt) ? button('skip-anidle', `⏩ Skip to ${g.attempt < 13 ? 'first' : g.attempt < 18 ? 'next' : 'last'} clue · Guess ${clueTarget(g.attempt)}`, 'btn secondary small') : '<span></span>'}${button('giveup', 'Give up', 'btn ghost small')}</div></form>` : ''}${
+    g.guesses.length
+      ? `<div class="summary-toggle"><button type="button" data-action="toggle-summary" role="switch" aria-checked="${state.showSummary !== false}" aria-controls="anidle-summary">Summary <span class="switch ${state.showSummary !== false ? 'on' : ''}"></span></button></div><div id="anidle-summary" ${state.showSummary === false ? 'hidden' : ''}>${anidleSummaryView(g, target)}</div><div class="comparison-wrap"><table class="comparison"><caption class="sr-only">Compare your guesses with the target anime</caption><thead><tr>${['Anime', 'Year', 'Studio', 'Source', 'Rating', 'Genres', 'Tags'].map((t) => `<th scope="col">${t}</th>`).join('')}</tr></thead><tbody>${[
+          ...g.guesses,
+        ]
+          .reverse()
+          .map((guess) => {
+            const a = anime(guess.id),
+              r = compareAnime(a, target);
+            return `<tr><td><strong>${titleMarkup(a)}</strong><br><span class="subtle">Guess ${guess.attempt}</span></td><td><span class="tag ${r.year ? 'miss' : 'match'}">${a.year ?? '—'} ${r.year > 0 ? '↑' : r.year < 0 ? '↓' : '✓'}</span></td><td><span class="tag ${r.studio ? 'match' : 'miss'}">${esc(a.studio)}</span></td><td><span class="tag ${r.source ? 'match' : 'miss'}">${esc(a.source)}</span></td><td><span class="tag ${r.score === null ? '' : r.score ? 'miss' : 'match'}">${a.score ?? '—'} ${r.score === null ? '' : r.score > 0 ? '↑' : r.score < 0 ? '↓' : '✓'}</span><small class="score-source">${esc(a.scoreSource || 'MyAnimeList')}</small></td><td>${r.genres.map((t) => `<span class="tag ${t.match ? 'match' : 'miss'}">${esc(t.value)}</span>`).join('')}</td><td>${r.tags.map((t) => `<span class="tag ${t.match === 'primary' ? 'match' : t.match === 'secondary' ? 'partial' : 'miss'}">${esc(t.value)}</span>`).join('')}</td></tr>`;
+          })
+          .join(
+            '',
+          )}</tbody></table></div><p class="subtle" style="margin-top:12px">Green = match · Amber = secondary tag · Red = no match. ↑ higher / later, ↓ lower / earlier.</p>`
+      : ''
+  }`;
+}
+function nextCategory() {
+  const s = session(),
+    ids = CATEGORIES.map((c) => c.id),
+    at = ids.indexOf(selected);
+  for (let k = 1; k < ids.length; k++) {
+    const id = ids[(at + k) % ids.length];
+    if (!s.games[id]?.done) return cat(id);
+  }
+  return null;
+}
+function nextCategoryButton() {
+  const next = nextCategory();
+  return next
+    ? button('play:' + next.id, `Next: ${next.icon} ${next.name} →`)
+    : button('home', state.mode === 'daily' ? 'See your daily result →' : 'See your round result →');
+}
+function resultView(g) {
+  const score = g.scores[g.index],
+    a = selected === 'character' ? null : anime(g.questions[g.index]),
+    answer = g.answers[g.index];
+  return `<div class="result ${score === 0 ? 'wrong' : ''}" role="status"><strong>${score === 0 ? 'Question complete.' : 'Well spotted!'}</strong><div class="result-score">${fmt(score)} points</div>${a ? `<p>The answer: <strong>${titleMarkup(a)}</strong></p>` : ''}${answer?.value ? `<p class="subtle">Your answer: ${esc(answer.value)}</p>` : ''}${g.done ? `<p style="margin-top:8px">Category complete: ${fmt(g.scores.reduce((a, b) => a + b, 0))} / ${fmt(cat(selected).max)} points.</p>${isLoop() ? button('loop-next', '⟳ Next loop round') : nextCategoryButton()}` : button('continue', 'Next question')}</div>`;
+}
+function statsView() {
+  return statistics.view();
+}
+function libraryTitle(a) {
+  return a.englishTitle || a.alternativeTitle || a.title;
+}
+function libraryGenres() {
+  if (libraryGenres.cache?.pack !== pack) {
+    const m = new Map();
+    for (const a of pack.anime) for (const g of a.genres || []) m.set(g, (m.get(g) || 0) + 1);
+    libraryGenres.cache = {
+      pack,
+      list: [...m]
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 40)
+        .map(([g]) => g)
+        .sort(),
+    };
+  }
+  return libraryGenres.cache.list;
+}
+function libraryResults() {
+  const list = catalogIndex(pack.anime)
+    .search(libraryQuery, libraryCategory)
+    .filter((a) => libraryGenre === 'all' || (a.genres || []).includes(libraryGenre));
+  const key = (a) => libraryTitle(a).replace(/^[^\p{L}\p{N}]+/u, ''),
+    byTitle = (a, b) => key(a).localeCompare(key(b), 'en', {sensitivity: 'base'});
+  const by = {
+    az: byTitle,
+    score: (a, b) => (b.score || 0) - (a.score || 0) || byTitle(a, b),
+    new: (a, b) => (b.year || 0) - (a.year || 0) || byTitle(a, b),
+    old: (a, b) => (a.year || 9999) - (b.year || 9999) || byTitle(a, b),
+  }[librarySort];
+  return libraryQuery.trim() && librarySort === 'az' ? list : [...list].sort(by || byTitle);
+}
+function libraryBadges(a) {
+  return [
+    a.screenshots?.length ? `<span title="Scenes">▧ ${a.screenshots.length}</span>` : '',
+    a.characters?.length ? `<span title="Characters">♙ ${a.characters.length}</span>` : '',
+    a.opening ? '<span title="Opening">♫ OP</span>' : '',
+    a.ending ? '<span title="Ending">♪ ED</span>' : '',
+  ].join('');
+}
+function libraryCard(a) {
+  const img = a.cover || a.characterImage || a.screenshots?.[0];
+  return `<button type="button" class="pool-card" data-action="library-open:${esc(a.id)}"><span class="pool-cover">${img ? `<img loading="lazy" decoding="async" ${fastSrc(img, 300, esc)} alt="">` : '<span class="cover-placeholder">▧</span>'}${a.score ? `<span class="pool-score">★ ${Number(a.score).toFixed(1)}</span>` : ''}</span><span class="pool-card-copy"><strong>${esc(libraryTitle(a))}</strong><small>${[a.year, a.studio].filter(Boolean).map(esc).join(' · ') || '&nbsp;'}</small><span class="pool-badges">${libraryBadges(a)}</span></span></button>`;
+}
+function libraryDetailView(a) {
+  if (!a) return '';
+  const music = ['opening', 'ending']
+    .map((k) =>
+      a[k]
+        ? `<div class="pool-track"><span class="mode-label">${k === 'opening' ? '♫ Opening' : '♪ Ending'}</span><strong>${esc(a[k].song || 'Untitled track')}</strong><small>${esc(a[k].artist || '')}</small>${a[k].audio || a[k].video ? `<audio controls preload="none" controlslist="nodownload" src="${esc(a[k].audio || a[k].video)}"></audio>` : ''}</div>`
+        : '',
+    )
+    .join('');
+  return `<div class="pool-detail-backdrop" data-action="library-close"></div><section class="pool-detail" role="dialog" aria-modal="true" aria-labelledby="pool-detail-title"><div class="pool-detail-hero">${a.cover ? `<img class="pool-detail-blur" ${fastSrc(a.cover, 300, esc)} alt="">` : ''}<div class="pool-detail-cover">${a.cover ? `<img ${fastSrc(a.cover, 300, esc)} alt="Cover">` : '<span class="cover-placeholder">▧</span>'}</div><div class="pool-detail-head"><span class="mode-label">${esc([a.year, a.source].filter(Boolean).join(' · '))}</span><h2 id="pool-detail-title">${titleMarkup(a)}</h2><p class="subtle">${esc(a.studio || 'Unknown studio')}${a.score ? ` · ★ ${Number(a.score).toFixed(2)}` : ''}</p><div class="pool-genres">${(a.genres || []).map((g) => `<span>${esc(g)}</span>`).join('')}</div></div>${button('library-close', '✕', 'pool-detail-close', 'aria-label="Close details"')}</div><div class="pool-detail-body">${a.hasSynopsis || a.synopsis ? `<p class="synopsis-clue library-synopsis" data-synopsis-id="${esc(a.id)}">${esc(synopsisText(a))}</p>` : ''}${a.screenshots?.length ? `<h3>Scenes</h3><div class="pool-scenes">${a.screenshots.map((src) => `<img loading="lazy" decoding="async" ${fastSrc(src, 480, esc)} alt="Scene from ${esc(libraryTitle(a))}">`).join('')}</div>` : ''}${
+    a.characters?.length
+      ? `<h3>Characters</h3><div class="pool-characters">${a.characters
+          .slice(0, 12)
+          .map(
+            (c) =>
+              `<figure>${c.image ? `<img loading="lazy" decoding="async" ${fastSrc(c.image, 160, esc)} alt="">` : '<span class="cover-placeholder">♙</span>'}<figcaption>${esc(c.name)}</figcaption></figure>`,
+          )
+          .join('')}</div>`
+      : ''
+  }${music ? `<h3>Music</h3><div class="pool-music">${music}</div>` : ''}<div class="pool-detail-actions">${button('edit:' + a.id, 'Edit media', 'btn ghost small')}${button('library-close', 'Close', 'btn secondary small')}</div></div></section>`;
+}
+function libraryView() {
+  const counts = catalogIndex(pack.anime).counts,
+    filtered = libraryResults(),
+    pages = Math.max(1, Math.ceil(filtered.length / LIBRARY_PAGE));
+  libraryPage = Math.min(libraryPage, pages);
+  const visible = filtered.slice((libraryPage - 1) * LIBRARY_PAGE, libraryPage * LIBRARY_PAGE),
+    sum = (list) => list.reduce((a, b) => a + b, 0),
+    filteredView = libraryQuery.trim() || libraryGenre !== 'all' || libraryCategory !== 'all';
+  const pageButtons = [...new Set([1, libraryPage - 1, libraryPage, libraryPage + 1, pages])]
+    .filter((n) => n >= 1 && n <= pages)
+    .sort((a, b) => a - b);
+  return `<section class="pool-heading"><div><span class="mode-label">Media pool</span><h1>Every anime in the quiz.</h1><p>Browse the scenes, characters and music behind your rounds. Heads-up: this page shows answers.</p></div><div class="pool-totals"><div><strong>${fmt(pack.anime.length)}</strong><span>anime</span></div><div><strong>${fmt(sum(counts.screenshot))}</strong><span>scene sets</span></div><div><strong>${fmt(sum(counts.character))}</strong><span>characters</span></div><div><strong>${fmt(sum(counts.opening) + sum(counts.ending))}</strong><span>tracks</span></div></div></section><div class="pool-toolbar"><div class="pool-search-field"><span aria-hidden="true">⌕</span><input id="library-search" type="search" value="${esc(libraryQuery)}" placeholder="Search a title, alias or character" autocomplete="off" aria-label="Search anime or characters"></div><label class="pool-select"><span>Genre</span><select id="library-genre"><option value="all">All genres</option>${libraryGenres()
+    .map((g) => `<option value="${esc(g)}" ${libraryGenre === g ? 'selected' : ''}>${esc(g)}</option>`)
+    .join(
+      '',
+    )}</select></label><label class="pool-select"><span>Sort</span><select id="library-sort">${LIBRARY_SORTS.map(([id, label]) => `<option value="${id}" ${librarySort === id ? 'selected' : ''}>${label}</option>`).join('')}</select></label></div><div class="pool-chips" role="group" aria-label="Category">${[['all', 'All', ''], ...CATEGORIES.map((c) => [c.id, c.name, c.icon])].map(([id, label, icon]) => button('library-cat:' + id, `${icon ? `<span aria-hidden="true">${icon}</span> ` : ''}${label}`, 'pool-chip' + (libraryCategory === id ? ' selected' : ''), `aria-pressed="${libraryCategory === id}"`)).join('')}</div><p class="pool-results-count" id="pool-results">${fmt(filtered.length)} anime${pages > 1 ? ` · page ${libraryPage} of ${pages}` : ''}${filteredView ? ` · ${button('clear-library', 'Clear filters', 'link-button')}` : ''}</p><div class="pool-grid">${!visible.length ? `<div class="library-empty" role="status"><h3>No anime found</h3><p>Try another title or character name, or loosen the filters.</p>${button('clear-library', 'Clear filters', 'btn ghost small')}</div>` : visible.map(libraryCard).join('')}</div>${pages > 1 ? `<nav class="library-pagination" aria-label="Pages">${button('library-page:' + String(libraryPage - 1), '‹', 'btn ghost small', 'aria-label="Previous page" ' + (libraryPage <= 1 ? 'disabled' : ''))}${pageButtons.map((n, i) => `${i && n - pageButtons[i - 1] > 1 ? '<span class="page-gap">…</span>' : ''}${button('library-page:' + n, String(n), 'btn ghost small page-number' + (n === libraryPage ? ' selected' : ''), n === libraryPage ? 'aria-current="page"' : '')}`).join('')}${button('library-page:' + String(libraryPage + 1), '›', 'btn ghost small', 'aria-label="Next page" ' + (libraryPage >= pages ? 'disabled' : ''))}</nav>` : ''}<details class="pool-manage"><summary>Manage media pack · <strong>${esc(pack.name)}</strong></summary><p class="subtle">Export the pool, import your own pack, or go back to the default collection.</p><div class="library-tools">${button('export-pack', 'Export pack', 'btn secondary small')}${button('import-pack', 'Import pack', 'btn ghost small')}${packKey() !== starter.key ? button('restore-pack', 'Restore default pool', 'btn ghost small') : ''}<input type="file" id="import-file" accept="application/json,.json" hidden></div></details>${libraryDetail ? libraryDetailView(anime(libraryDetail)) : ''}${editing ? editorView(anime(editing)) : ''}`;
+}
+function editorView(a) {
+  return `<section class="panel editor" id="media-editor"><div class="section-top"><h2>${titleMarkup(a)}</h2>${button('close-editor', 'Close', 'btn ghost small')}</div><form data-form="editor"><div class="editor-body"><div class="field wide"><label for="screenshots">Screenshot URLs (one per line, up to three)</label><textarea name="screenshots" id="screenshots">${esc(
+    a.screenshots
+      .slice(0, 3)
+      .filter((s) => !s.startsWith('data:'))
+      .join('\n'),
+  )}</textarea><p class="subtle">Or upload images. Empty fields keep the existing media.</p><input class="file-input" type="file" name="screenshot-files" accept="image/png,image/jpeg,image/webp,image/gif" multiple aria-label="Upload screenshots"></div><div class="field wide"><label for="characterImage">Character image URL</label><input id="characterImage" name="characterImage" type="text" value="${esc(a.characterImage?.startsWith('data:') ? '' : a.characterImage || '')}"><input class="file-input" type="file" name="character-file" accept="image/png,image/jpeg,image/webp,image/gif" aria-label="Upload character image"></div>${['opening', 'ending'].map((type) => `<div class="field"><h3 style="margin-bottom:14px">${type === 'opening' ? 'Opening' : 'Ending'}</h3><label for="${type}-audio">Audio URL</label><input id="${type}-audio" name="${type}-audio" value="${esc(a[type]?.audio?.startsWith('data:') ? '' : a[type]?.audio || '')}"><input class="file-input" type="file" name="${type}-audio-file" accept="audio/mpeg,audio/wav,audio/ogg,audio/webm" aria-label="${type}-Upload audio"><label for="${type}-video" style="margin-top:12px">Video URL (optional)</label><input id="${type}-video" name="${type}-video" value="${esc(a[type]?.video?.startsWith('data:') ? '' : a[type]?.video || '')}"><input class="file-input" type="file" name="${type}-video-file" accept="video/mp4,video/webm" aria-label="${type}-Upload video"><div style="margin-top:12px">${button(`preview:${a.id}:${type}`, a[type] ? '▶ Listen to clip' : 'No clip available', 'btn secondary small', a[type] ? '' : 'disabled')}</div></div>`).join('')}<div class="wide window-editor"><h4>Opening: allowed video window</h4><div class="window-fields"><div class="field"><label for="opening-start">Start (seconds)</label><input id="opening-start" name="opening-start" type="number" min="0" step="0.1" placeholder="Automatic: 35 %" value="${a.opening?.videoWindow?.startSeconds ?? ''}"></div><div class="field"><label for="opening-end">End (seconds)</label><input id="opening-end" name="opening-end" type="number" min="0" step="0.1" placeholder="Automatic: 65 %" value="${a.opening?.videoWindow?.endSeconds ?? ''}"></div></div><p>Leave both fields empty for 35–65% of the video. The video clue only plays inside this window. Audio remains complete.</p></div><p class="subtle wide">Hint videos should not reveal the anime title. Use media you have permission to use. Each upload is limited to 25 MB and stays on this device. </p><div class="wide"><button class="btn" type="submit">Save media & start new games</button></div></div></form></section>`;
+}
+function render() {
+  const look = currentUser?.appearance;
+  if (look && look !== adoptedLook) {
+    adoptedLook = look;
+    appearance.adoptRemote(look, true);
+  } else if (cloudMode && currentUser && !look && adoptedLook !== currentUser.id) {
+    adoptedLook = currentUser.id;
+    appearance.pushLocal();
+  }
+  rememberAccount();
+  appearance.updateContext();
+  stopAudio();
+  hintJobs = [];
+  app.innerHTML = shell(
+    remoteDaily() && !cloudDaily.session && ['home', 'game'].includes(view)
+      ? dailyGate()
+      : view === 'home'
+        ? dashboard()
+        : view === 'game'
+          ? gameView()
+          : view === 'library'
+            ? libraryView()
+            : view === 'friends'
+              ? friends.view()
+              : view === 'appearance'
+                ? appearance.view()
+                : view === 'bug-report'
+                  ? bugReport.view()
+                  : POLICY_PAGES.includes(view)
+                    ? policies.view(view)
+                    : social.isView(view)
+                      ? social.view(view)
+                      : view === 'leaderboard'
+                        ? leaderboardView()
+                        : view === 'account'
+                          ? accountView()
+                          : statsView(),
+  );
+  updateCountdown();
+  prepareHints();
+  if (view === 'stats') statistics.afterRender();
+  const heading = app.querySelector('main h1');
+  if (heading) heading.setAttribute('tabindex', '-1');
+  warmMedia();
+  celebrateAnswer();
+}
+let celebrateNext = false;
+function celebrateAnswer() {
+  if (!celebrateNext) return;
+  const result = app.querySelector('.result');
+  if (!result) return;
+  celebrateNext = false;
+  const effect = social.rewards?.slots?.effect;
+  if (effect && !result.classList.contains('wrong')) celebrate(effect);
+}
 // Synopses are only needed for one Anidle clue, so they load in the background on demand.
-let synopsisCache=null,synopsisRequest=null;
-function loadSynopses(){return synopsisRequest??=fetch('data/synopsis.json').then(r=>{if(!r.ok)throw new Error('synopsis');return r.json();}).then(data=>{synopsisCache=data;app.querySelectorAll('.synopsis-clue[data-synopsis-id]:not(.locked)').forEach(el=>{el.textContent=data[el.dataset.synopsisId]||'No synopsis available.';});}).catch(()=>{synopsisRequest=null;});}
-function synopsisText(a){if(typeof a.synopsis==='string'&&a.synopsis)return a.synopsis;if(synopsisCache)return synopsisCache[a.id]||'No synopsis available.';loadSynopses();return 'Loading synopsis…';}
+let synopsisCache = null,
+  synopsisRequest = null;
+function loadSynopses() {
+  return (synopsisRequest ??= fetch('data/synopsis.json')
+    .then((r) => {
+      if (!r.ok) throw new Error('synopsis');
+      return r.json();
+    })
+    .then((data) => {
+      synopsisCache = data;
+      app.querySelectorAll('.synopsis-clue[data-synopsis-id]:not(.locked)').forEach((el) => {
+        el.textContent = data[el.dataset.synopsisId] || 'No synopsis available.';
+      });
+    })
+    .catch(() => {
+      synopsisRequest = null;
+    }));
+}
+function synopsisText(a) {
+  if (typeof a.synopsis === 'string' && a.synopsis) return a.synopsis;
+  if (synopsisCache) return synopsisCache[a.id] || 'No synopsis available.';
+  loadSynopses();
+  return 'Loading synopsis…';
+}
 // Preload the clues of the current question and the next question while the player thinks.
-function warmMedia(){try{if(view==='home'){const g=session()?.games?.screenshot;if(g?.questions?.[g.index]&&!g.done)warmImages(questionFrames(g).slice(0,1),1280);return;}if(view!=='game'||!selected)return;const g=session()?.games?.[selected];if(!g?.questions?.length)return;if(selected==='screenshot'){const urls=g.questions[g.index]?questionFrames(g):[];if(g.questions[g.index+1])urls.push(questionFrames(g,g.index+1)[0]);warmImages(urls.filter(Boolean),1280);}else if(selected==='character'&&g.questions[g.index+1]){warmImages(g.questions[g.index+1].map((_,i)=>questionCharacter(g,i,g.index+1)?.characterImage).filter(Boolean),360);}else if(selected==='anidle'&&!synopsisCache)loadSynopses();}catch{/* preloading is best effort */}}
-let lastRouteURL='',helpRoute=false;
-function go(newView,{historyMode='push'}={}){
- helpRoute=newView==='help';view=helpRoute?'home':newView;
- const hash=routeHash({view:newView,selected,mode:state.mode});
- if(historyMode!=='none'){
-  if(historyMode==='replace')window.history.replaceState({aniloop:true,scroll:0},'',hash);
-  else if(location.hash!==hash){window.history.replaceState({...window.history.state,scroll:scrollY},'',location.href);window.history.pushState({aniloop:true,aniloopPrevious:true,scroll:0},'',hash);}
- }
- lastRouteURL=location.href;render();window.scrollTo({top:0,behavior:'instant'});
- if(helpRoute)help();else app.querySelector('main h1')?.focus({preventScroll:true});
+function warmMedia() {
+  try {
+    if (view === 'home') {
+      const g = session()?.games?.screenshot;
+      if (g?.questions?.[g.index] && !g.done) warmImages(questionFrames(g).slice(0, 1), 1280);
+      return;
+    }
+    if (view !== 'game' || !selected) return;
+    const g = session()?.games?.[selected];
+    if (!g?.questions?.length) return;
+    if (selected === 'screenshot') {
+      const urls = g.questions[g.index] ? questionFrames(g) : [];
+      if (g.questions[g.index + 1]) urls.push(questionFrames(g, g.index + 1)[0]);
+      warmImages(urls.filter(Boolean), 1280);
+    } else if (selected === 'character' && g.questions[g.index + 1]) {
+      warmImages(
+        g.questions[g.index + 1].map((_, i) => questionCharacter(g, i, g.index + 1)?.characterImage).filter(Boolean),
+        360,
+      );
+    } else if (selected === 'anidle' && !synopsisCache) loadSynopses();
+  } catch {
+    /* preloading is best effort */
+  }
 }
-async function restoreNavigation(){
- if(!pack||lastRouteURL===location.href)return;
- const route=readRoute(location.hash,state.mode),restoreScroll=window.history.state?.scroll||0;
- if(dialog.open)dialog.close();selected=route.selected;
- if(state.mode!==route.mode){state.mode=route.mode;persist();}
- go(route.view,{historyMode:'none'});window.scrollTo({top:restoreScroll,behavior:'instant'});
- if(route.view==='leaderboard')await loadLeaderboard();
- else if(route.view==='friends')await friends.load();
- else if(['rooms','room','rewards','appearance'].includes(route.view)&&currentUser){await social.refresh();if((helpRoute?'help':view)===route.view)render();}
+let lastRouteURL = '',
+  helpRoute = false;
+function go(newView, {historyMode = 'push'} = {}) {
+  helpRoute = newView === 'help';
+  view = helpRoute ? 'home' : newView;
+  const hash = routeHash({view: newView, selected, mode: state.mode});
+  if (historyMode !== 'none') {
+    if (historyMode === 'replace') window.history.replaceState({aniloop: true, scroll: 0}, '', hash);
+    else if (location.hash !== hash) {
+      window.history.replaceState({...window.history.state, scroll: scrollY}, '', location.href);
+      window.history.pushState({aniloop: true, aniloopPrevious: true, scroll: 0}, '', hash);
+    }
+  }
+  lastRouteURL = location.href;
+  render();
+  window.scrollTo({top: 0, behavior: 'instant'});
+  if (helpRoute) help();
+  else app.querySelector('main h1')?.focus({preventScroll: true});
+}
+async function restoreNavigation() {
+  if (!pack || lastRouteURL === location.href) return;
+  const route = readRoute(location.hash, state.mode),
+    restoreScroll = window.history.state?.scroll || 0;
+  if (dialog.open) dialog.close();
+  selected = route.selected;
+  if (state.mode !== route.mode) {
+    state.mode = route.mode;
+    persist();
+  }
+  go(route.view, {historyMode: 'none'});
+  window.scrollTo({top: restoreScroll, behavior: 'instant'});
+  if (route.view === 'leaderboard') await loadLeaderboard();
+  else if (route.view === 'friends') await friends.load();
+  else if (['rooms', 'room', 'rewards', 'appearance'].includes(route.view) && currentUser) {
+    await social.refresh();
+    if ((helpRoute ? 'help' : view) === route.view) render();
+  }
 }
 
-function confirmDialog(title,body,action,label){dialog.innerHTML=`<div class="dialog-head"><h2 id="dialog-title">${title}</h2>${button('close-dialog','×','','aria-label="Close dialog"')}</div><p>${body}</p><div class="form-actions">${button('close-dialog','Cancel','btn ghost')}${button(action,label)}</div>`;dialog.showModal();}
-function help(){dialog.innerHTML=`<div class="dialog-head"><h2 id="dialog-title">How to play AniLoop</h2>${button('close-dialog','×','','aria-label="Close dialog"')}</div><div class="help-copy"><p>In Infinity, all five categories belong to one round. Complete every category to unlock the next round. Play in any order. Giving up scores zero for the current question.</p><h3>Category loop</h3><p>Want only screenshots, or only openings? Switch to <strong>⟳ Category loop</strong> and pick a category. Every loop round has three questions (one game for Anidle); finish it and start the next round with one click. Each category keeps its own round counter, best score and average, separate from Infinity and the daily quiz.</p><h3>100,000 points per round</h3><ul><li><strong>Screenshots:</strong> Three questions worth 10,000 points each. Every additional clue costs 2,500 points. Each question has three real scenes, selected randomly.</li><li><strong>Characters:</strong> Three questions with four characters each. Earn 2,000 points for each name and 500 for their anime. Partial answers count.</li><li><strong>Openings & Endings:</strong> Three questions per category, worth 5,000 points each. Hear the complete opening or ending. Unlock a blurred video clue for 2,500 points. Opening video is locked to 35–65% of the clip by default. Ending video is complete, allows free seeking, and includes a blurred cover.</li><li><strong>Anidle:</strong> Earn 10,000 points on guesses 1–3, then lose 500 per guess, including skips. You have 22 guesses, with 500 points available on the last. Cover clue at guess 13, synopsis at 18, most popular character at 22. The summary combines evidence from previous guesses.</li></ul><p>In Anidle, green means a match and amber a secondary tag. Arrows show whether the target year or rating is higher or lower. Ratings are saved catalog values; each guess shows its source. Missing values appear as —.</p><h3>Easy, Medium, Hard</h3><p>Each category except Anidle includes one Easy, Medium, and Hard question. Anime, characters, and scenes are randomly drawn from matching pools. Previous-round titles are avoided where possible. Anidle draws from anime with complete comparison data.</p><h3>Daily quiz & saves</h3><p>${cloudMode?'The daily quiz is the same for everyone, resets at midnight UTC and needs an account: you get one attempt, and the server checks every answer. Infinity and Category loops need no account and are saved in your browser; signed-in players also get a cloud copy.':'The daily quiz resets at local midnight. Play as many Infinity and loop rounds as you like. Progress is saved in your browser and custom media in IndexedDB. No account is required; signed-in players also get a cloud copy of their progress.'}</p></div>`;dialog.showModal();}
-function resolveTitle(value){return ids().find(a=>matches(value,[a.title]))||ids().find(a=>matches(value,a.aliases||[]));}
-function finish(score,answer){const s=session(),g=s.games[selected];answer={...answer,hints:[...g.hints],attempt:g.attempt};commitRound(s,selected,score,answer);recordActivity(state,s);if(isLoop()){if(g.done){const total=g.scores.reduce((a,b)=>a+b,0),stats=loopStats(selected);stats.rounds++;stats.total+=total;stats.best=Math.max(stats.best,total);}}else captureRound(state,s,pack.name);persist();render();}
-function giveup(){const g=session().games[selected];if(g.done||g.scores.length>g.index)return;finish(0,{value:'Gave up',entries:selected==='character'?g.questions[g.index].map(()=>({character:false,anime:false})):undefined});}
-async function replacePack(newPack){createSession('infinity',1,'validate',newPack?.anime||starter.anime,newPack?.key||starter.key);await savePack(newPack);archive(state.daily);archive(state.infinity);pack=newPack||starter;state.daily=null;state.infinity=null;editing=null;ensureSessions();persist();go('library');toast('Media pack activated. New rounds are ready.');}
-async function handleAction(action){
- if(action.startsWith('auth-provider:')){const provider=action.split(':')[1];if(!['local','supabase'].includes(provider)||provider==='supabase'&&!supabaseEnabled)return;const mode=dialog.querySelector('form')?.dataset.communityForm||'login';authProvider=provider;authDialog(mode);return;}
- if(action==='privacy-settings'){if(dialog.open)dialog.close();stopAudio();await privacyGate({force:true});return;}
- if(POLICY_PAGES.includes(action)){if(dialog.open)dialog.close();go(action);return;}
- if(action==='export-account'){const data=await communityAPI('/api/account/export');const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'})),link=document.createElement('a');link.href=url;link.download='aniloop-account-data.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);return;}
- if(bugReport.action(action))return;
- if(action==='theme-picker'){await appearance.action('appearance:tab:themes');await appearance.action('appearance');return;}
- if(await appearance.action(action))return;
- if(statistics.action(action))return;
- if(await friends.action(action))return;
- if(await social.action(action))return;
- if(action==='login'||action==='register'||action==='forgot'){authDialog(action);return;}
- if(action==='logout'){if(cloudMode&&currentUser)await communityAPI('/api/account/save',{state}).catch(()=>{});await communityAPI('/api/logout',{});currentUser=null;if(cloudMode){setStateScope(null);state=readState();ensureSessions();}social.clear();friends.clear();cloudDaily.clear();render();toast('Signed out.');return;}
- if(action==='leaderboard'){selected=null;go('leaderboard');await loadLeaderboard();return;}
- if(action==='board-refresh'){await loadLeaderboard();return;}
- if(action.startsWith('board-mode:')){board.mode=action.split(':')[1]==='daily'?'daily':'infinity';await loadLeaderboard();return;}
- if(action.startsWith('board-scope:')){board.scope=action.split(':')[1]==='friends'?'friends':'global';await loadLeaderboard();return;}
- if(action==='submit-score'){await publishScore();return;}
+function confirmDialog(title, body, action, label) {
+  dialog.innerHTML = `<div class="dialog-head"><h2 id="dialog-title">${title}</h2>${button('close-dialog', '×', '', 'aria-label="Close dialog"')}</div><p>${body}</p><div class="form-actions">${button('close-dialog', 'Cancel', 'btn ghost')}${button(action, label)}</div>`;
+  dialog.showModal();
+}
+function help() {
+  dialog.innerHTML = `<div class="dialog-head"><h2 id="dialog-title">How to play AniLoop</h2>${button('close-dialog', '×', '', 'aria-label="Close dialog"')}</div><div class="help-copy"><p>In Infinity, all five categories belong to one round. Complete every category to unlock the next round. Play in any order. Giving up scores zero for the current question.</p><h3>Category loop</h3><p>Want only screenshots, or only openings? Switch to <strong>⟳ Category loop</strong> and pick a category. Every loop round has three questions (one game for Anidle); finish it and start the next round with one click. Each category keeps its own round counter, best score and average, separate from Infinity and the daily quiz.</p><h3>100,000 points per round</h3><ul><li><strong>Screenshots:</strong> Three questions worth 10,000 points each. Every additional clue costs 2,500 points. Each question has three real scenes, selected randomly.</li><li><strong>Characters:</strong> Three questions with four characters each. Earn 2,000 points for each name and 500 for their anime. Partial answers count.</li><li><strong>Openings & Endings:</strong> Three questions per category, worth 5,000 points each. Hear the complete opening or ending. Unlock a blurred video clue for 2,500 points. Opening video is locked to 35–65% of the clip by default. Ending video is complete, allows free seeking, and includes a blurred cover.</li><li><strong>Anidle:</strong> Earn 10,000 points on guesses 1–3, then lose 500 per guess, including skips. You have 22 guesses, with 500 points available on the last. Cover clue at guess 13, synopsis at 18, most popular character at 22. The summary combines evidence from previous guesses.</li></ul><p>In Anidle, green means a match and amber a secondary tag. Arrows show whether the target year or rating is higher or lower. Ratings are saved catalog values; each guess shows its source. Missing values appear as —.</p><h3>Easy, Medium, Hard</h3><p>Each category except Anidle includes one Easy, Medium, and Hard question. Anime, characters, and scenes are randomly drawn from matching pools. Previous-round titles are avoided where possible. Anidle draws from anime with complete comparison data.</p><h3>Daily quiz & saves</h3><p>${cloudMode ? 'The daily quiz is the same for everyone, resets at midnight UTC and needs an account: you get one attempt, and the server checks every answer. Infinity and Category loops need no account and are saved in your browser; signed-in players also get a cloud copy.' : 'The daily quiz resets at local midnight. Play as many Infinity and loop rounds as you like. Progress is saved in your browser and custom media in IndexedDB. No account is required; signed-in players also get a cloud copy of their progress.'}</p></div>`;
+  dialog.showModal();
+}
+function resolveTitle(value) {
+  return ids().find((a) => matches(value, [a.title])) || ids().find((a) => matches(value, a.aliases || []));
+}
+function finish(score, answer) {
+  const s = session(),
+    g = s.games[selected];
+  answer = {...answer, hints: [...g.hints], attempt: g.attempt};
+  commitRound(s, selected, score, answer);
+  recordActivity(state, s);
+  if (isLoop()) {
+    if (g.done) {
+      const total = g.scores.reduce((a, b) => a + b, 0),
+        stats = loopStats(selected);
+      stats.rounds++;
+      stats.total += total;
+      stats.best = Math.max(stats.best, total);
+    }
+  } else captureRound(state, s, pack.name);
+  persist();
+  render();
+}
+function giveup() {
+  const g = session().games[selected];
+  if (g.done || g.scores.length > g.index) return;
+  finish(0, {
+    value: 'Gave up',
+    entries: selected === 'character' ? g.questions[g.index].map(() => ({character: false, anime: false})) : undefined,
+  });
+}
+async function replacePack(newPack) {
+  createSession('infinity', 1, 'validate', newPack?.anime || starter.anime, newPack?.key || starter.key);
+  await savePack(newPack);
+  archive(state.daily);
+  archive(state.infinity);
+  pack = newPack || starter;
+  state.daily = null;
+  state.infinity = null;
+  editing = null;
+  ensureSessions();
+  persist();
+  go('library');
+  toast('Media pack activated. New rounds are ready.');
+}
+async function handleAction(action) {
+  if (action.startsWith('auth-provider:')) {
+    const provider = action.split(':')[1];
+    if (!['local', 'supabase'].includes(provider) || (provider === 'supabase' && !supabaseEnabled)) return;
+    const mode = dialog.querySelector('form')?.dataset.communityForm || 'login';
+    authProvider = provider;
+    authDialog(mode);
+    return;
+  }
+  if (action === 'privacy-settings') {
+    if (dialog.open) dialog.close();
+    stopAudio();
+    await privacyGate({force: true});
+    return;
+  }
+  if (POLICY_PAGES.includes(action)) {
+    if (dialog.open) dialog.close();
+    go(action);
+    return;
+  }
+  if (action === 'export-account') {
+    const data = await communityAPI('/api/account/export');
+    const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'})),
+      link = document.createElement('a');
+    link.href = url;
+    link.download = 'aniloop-account-data.json';
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    return;
+  }
+  if (bugReport.action(action)) return;
+  if (action === 'theme-picker') {
+    await appearance.action('appearance:tab:themes');
+    await appearance.action('appearance');
+    return;
+  }
+  if (await appearance.action(action)) return;
+  if (statistics.action(action)) return;
+  if (await friends.action(action)) return;
+  if (await social.action(action)) return;
+  if (action === 'login' || action === 'register' || action === 'forgot') {
+    authDialog(action);
+    return;
+  }
+  if (action === 'logout') {
+    if (cloudMode && currentUser) await communityAPI('/api/account/save', {state}).catch(() => {});
+    await communityAPI('/api/logout', {});
+    currentUser = null;
+    if (cloudMode) {
+      setStateScope(null);
+      state = readState();
+      ensureSessions();
+    }
+    social.clear();
+    friends.clear();
+    cloudDaily.clear();
+    render();
+    toast('Signed out.');
+    return;
+  }
+  if (action === 'leaderboard') {
+    selected = null;
+    go('leaderboard');
+    await loadLeaderboard();
+    return;
+  }
+  if (action === 'board-refresh') {
+    await loadLeaderboard();
+    return;
+  }
+  if (action.startsWith('board-mode:')) {
+    board.mode = action.split(':')[1] === 'daily' ? 'daily' : 'infinity';
+    await loadLeaderboard();
+    return;
+  }
+  if (action.startsWith('board-scope:')) {
+    board.scope = action.split(':')[1] === 'friends' ? 'friends' : 'global';
+    await loadLeaderboard();
+    return;
+  }
+  if (action === 'submit-score') {
+    await publishScore();
+    return;
+  }
 
- if(['home','library','stats','account'].includes(action)){selected=null;go(action);return;}
- if(action==='help'){go('help');return;}
- if(action.startsWith('library-page:')){libraryPage=Math.max(1,Number(action.split(':')[1]));render();app.querySelector('#pool-results')?.scrollIntoView({block:'start'});return;}
- if(action==='toggle-summary'){state.showSummary=state.showSummary===false;persist();const summary=app.querySelector('#anidle-summary');if(summary)summary.hidden=!state.showSummary;const toggle=app.querySelector('[data-action=\"toggle-summary\"]');toggle?.setAttribute('aria-checked',String(state.showSummary));toggle?.querySelector('.switch')?.classList.toggle('on',state.showSummary);return;}
- if(action.startsWith('music-mode:')){const g=session().games[selected],mode=action.split(':')[1];if(mode==='video'&&!g.hints.length)return;const answer=app.querySelector('#answer')?.value||'';g.musicMode=mode;persist();render();const field=app.querySelector('#answer');if(field)field.value=answer;return;}
- if(action==='media-toggle'){const video=app.querySelector('.quiz-video');if(video){if(video.paused)await video.play();else video.pause();}return;}
- if(action==='media-fullscreen'){await app.querySelector('.media-player')?.requestFullscreen?.();return;}
- if(action==='close-dialog'){dialog.close();stopAudio();if(helpRoute){if(window.history.state?.aniloopPrevious)window.history.back();else go('home',{historyMode:'replace'});}return;}
- if(action==='daily-retry'){await setMode('daily');return;}
- if(action.startsWith('mode-')){await setMode(action.slice(5));return;}
- if(remoteDaily()&&cloudDaily.session&&view==='game'&&cat(selected)&&await dailyAction(action))return;
- if(action.startsWith('play:')){const id=action.slice(5);if(!cat(id))return;selected=id;if(state.mode==='loop'){state.loopCategory=id;persist();}go('game');return;}
- if(action==='loop-restart'){if(!isLoop())return;const id=selected||state.loopCategory,old=loopSession(id);if(old.games[id].done){await handleAction('loop-next');return;}if(!confirm('Start a new loop round? This round is thrown away and does not count in your loop statistics.'))return;const next=createSession('loop',old.number,uid(),ids(),packKey(),old);next.category=id;state.loops[id]=next;persist();render();window.scrollTo({top:0,behavior:'instant'});toast(`New ${cat(id).name} loop round. The old one was discarded.`);return;}
- if(action==='infinity-restart'){const s=session();if(state.mode!=='infinity'||social.active||canAdvance(s))return;if(!confirm('Start a fresh Infinity round? This round is thrown away and does not count in your statistics or on the leaderboard.'))return;const key=s.key||`infinity:${s.seed}`;if(state.statistics?.rounds)state.statistics.rounds=state.statistics.rounds.filter(r=>r.key!==key);const next=createSession('infinity',s.number,uid(),ids(),s.packKey,s);state.infinity=next;persist();go('home');toast('Fresh Infinity round ready. The old one was discarded.');return;}
- if(action==='loop-next'){if(!isLoop())return;if(nextLoop()){render();window.scrollTo({top:0,behavior:'instant'});app.querySelector('main h1')?.focus({preventScroll:true});toast(`${cat(selected||state.loopCategory).name} loop · round ${session().number}`);}return;}
- if(action==='next'){if(!canAdvance(session())){toast('Complete all five categories first.');return;}archive(session());state.infinity=nextInfinity(session(),ids(),uid());persist();go('home');toast(`Infinity-Round ${session().number} is ready.`);return;}
- if(action.startsWith('view-frame:')){const g=session().games.screenshot,n=Number(action.split(':')[1]);if(n!==0&&!g.hints.includes(n))return;g.activeFrame=n;persist();render();return;}
- if(action==='continue'){session().games[selected].activeFrame=0;continueCategory(session(),selected);persist();render();return;}
- if(action.startsWith('hint:')){const g=session().games[selected],n=Number(action.split(':')[1]);if(g.done||g.scores.length>g.index||g.hints.includes(n))return;if(selected==='screenshot'&&n>1&&!g.hints.includes(n-1))return;const answer=app.querySelector('#answer')?.value||'';g.hints.push(n);if(selected==='screenshot'&&n<3)g.activeFrame=n;if(selected==='opening'||selected==='ending')g.musicMode='video';persist();render();const field=app.querySelector('#answer');if(field){field.value=answer;field.focus();}return;}
- if(action==='giveup'){giveup();return;}
- if(action==='skip-anidle'){if(skipAnidle(session())){persist();render();}return;}
- if(action.startsWith('edit:')){editing=action.slice(5);libraryDetail=null;render();document.querySelector('#media-editor')?.scrollIntoView({behavior:'smooth'});return;}
- if(action==='close-editor'){editing=null;render();return;}
- if(action.startsWith('preview:')){const [,id,type]=action.split(':'),a=anime(id),m=a[type];if(!m){toast('No clip is available for this anime.');return;}if(m.demo){toast('Practice melodies are no longer supported.');return;}dialog.innerHTML=`<div class="dialog-head"><h2 id="dialog-title">${titleMarkup(a)} · ${type}</h2>${button('close-dialog','×','','aria-label="Close dialog"')}</div>${m.video?`<video controls class="music-video" src="${esc(m.video)}"></video>`:`<audio controls src="${esc(m.audio)}" style="width:100%"></audio>`}`;dialog.showModal();return;}
- if(action==='share'){const loopId=selected||state.loopCategory,text=isLoop()?`AniLoop ⟳ ${cat(loopId).name} loop · round ${session().number}: ${fmt(session().games[loopId].scores.reduce((a,b)=>a+b,0))}/${fmt(cat(loopId).max)} points.`:`AniLoop ${state.mode==='infinity'?'∞ Round '+session().number:'Daily quiz '+(cloudMode&&cloudDaily.day||dayKey())}: ${fmt(totalScore(session()))}/100,000 points · ${completedCount(session())}/5 categories.`;try{await navigator.clipboard.writeText(text);toast('Result copied.');}catch{dialog.innerHTML=`<div class="dialog-head"><h2 id="dialog-title">Your result</h2>${button('close-dialog','×','','aria-label="Close dialog"')}</div><div class="field"><textarea aria-label="Result to copy" readonly>${esc(text)}</textarea></div>`;dialog.showModal();}return;}
- if(action==='clear-library'){libraryQuery='';libraryGenre='all';libraryCategory='all';libraryPage=1;render();document.querySelector('#library-search')?.focus();return;}
- if(action.startsWith('library-cat:')){const id=action.slice(12);libraryCategory=id==='all'||cat(id)?id:'all';libraryPage=1;render();return;}
- if(action.startsWith('library-open:')){libraryDetail=action.slice(13);render();app.querySelector('.pool-detail-close')?.focus();if(anime(libraryDetail)?.hasSynopsis)loadSynopses();return;}
- if(action==='library-close'){const id=libraryDetail;libraryDetail=null;render();app.querySelector(`[data-action="library-open:${CSS.escape(id||'')}"]`)?.focus();return;}
- if(action==='export-pack'){const blob=new Blob([JSON.stringify(pack,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='aniloop-media-pack.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);return;}
- if(action==='import-pack'){document.querySelector('#import-file').click();return;}
- if(action==='restore-pack'){confirmDialog('Restore the default pool?','Your current games will be archived. The default pool will replace your custom pack. Export it first if you want to keep it.','confirm-restore','Restore');return;}
- if(action==='confirm-restore'){dialog.close();await replacePack(null);}
+  if (['home', 'library', 'stats', 'account'].includes(action)) {
+    selected = null;
+    go(action);
+    return;
+  }
+  if (action === 'help') {
+    go('help');
+    return;
+  }
+  if (action.startsWith('library-page:')) {
+    libraryPage = Math.max(1, Number(action.split(':')[1]));
+    render();
+    app.querySelector('#pool-results')?.scrollIntoView({block: 'start'});
+    return;
+  }
+  if (action === 'toggle-summary') {
+    state.showSummary = state.showSummary === false;
+    persist();
+    const summary = app.querySelector('#anidle-summary');
+    if (summary) summary.hidden = !state.showSummary;
+    const toggle = app.querySelector('[data-action=\"toggle-summary\"]');
+    toggle?.setAttribute('aria-checked', String(state.showSummary));
+    toggle?.querySelector('.switch')?.classList.toggle('on', state.showSummary);
+    return;
+  }
+  if (action.startsWith('music-mode:')) {
+    const g = session().games[selected],
+      mode = action.split(':')[1];
+    if (mode === 'video' && !g.hints.length) return;
+    const answer = app.querySelector('#answer')?.value || '';
+    g.musicMode = mode;
+    persist();
+    render();
+    const field = app.querySelector('#answer');
+    if (field) field.value = answer;
+    return;
+  }
+  if (action === 'media-toggle') {
+    const video = app.querySelector('.quiz-video');
+    if (video) {
+      if (video.paused) await video.play();
+      else video.pause();
+    }
+    return;
+  }
+  if (action === 'media-fullscreen') {
+    await app.querySelector('.media-player')?.requestFullscreen?.();
+    return;
+  }
+  if (action === 'close-dialog') {
+    dialog.close();
+    stopAudio();
+    if (helpRoute) {
+      if (window.history.state?.aniloopPrevious) window.history.back();
+      else go('home', {historyMode: 'replace'});
+    }
+    return;
+  }
+  if (action === 'daily-retry') {
+    await setMode('daily');
+    return;
+  }
+  if (action.startsWith('mode-')) {
+    await setMode(action.slice(5));
+    return;
+  }
+  if (remoteDaily() && cloudDaily.session && view === 'game' && cat(selected) && (await dailyAction(action))) return;
+  if (action.startsWith('play:')) {
+    const id = action.slice(5);
+    if (!cat(id)) return;
+    selected = id;
+    if (state.mode === 'loop') {
+      state.loopCategory = id;
+      persist();
+    }
+    go('game');
+    return;
+  }
+  if (action === 'loop-restart') {
+    if (!isLoop()) return;
+    const id = selected || state.loopCategory,
+      old = loopSession(id);
+    if (old.games[id].done) {
+      await handleAction('loop-next');
+      return;
+    }
+    if (!confirm('Start a new loop round? This round is thrown away and does not count in your loop statistics.'))
+      return;
+    const next = createSession('loop', old.number, uid(), ids(), packKey(), old);
+    next.category = id;
+    state.loops[id] = next;
+    persist();
+    render();
+    window.scrollTo({top: 0, behavior: 'instant'});
+    toast(`New ${cat(id).name} loop round. The old one was discarded.`);
+    return;
+  }
+  if (action === 'infinity-restart') {
+    const s = session();
+    if (state.mode !== 'infinity' || social.active || canAdvance(s)) return;
+    if (
+      !confirm(
+        'Start a fresh Infinity round? This round is thrown away and does not count in your statistics or on the leaderboard.',
+      )
+    )
+      return;
+    const key = s.key || `infinity:${s.seed}`;
+    if (state.statistics?.rounds) state.statistics.rounds = state.statistics.rounds.filter((r) => r.key !== key);
+    const next = createSession('infinity', s.number, uid(), ids(), s.packKey, s);
+    state.infinity = next;
+    persist();
+    go('home');
+    toast('Fresh Infinity round ready. The old one was discarded.');
+    return;
+  }
+  if (action === 'loop-next') {
+    if (!isLoop()) return;
+    if (nextLoop()) {
+      render();
+      window.scrollTo({top: 0, behavior: 'instant'});
+      app.querySelector('main h1')?.focus({preventScroll: true});
+      toast(`${cat(selected || state.loopCategory).name} loop · round ${session().number}`);
+    }
+    return;
+  }
+  if (action === 'next') {
+    if (!canAdvance(session())) {
+      toast('Complete all five categories first.');
+      return;
+    }
+    archive(session());
+    state.infinity = nextInfinity(session(), ids(), uid());
+    persist();
+    go('home');
+    toast(`Infinity-Round ${session().number} is ready.`);
+    return;
+  }
+  if (action.startsWith('view-frame:')) {
+    const g = session().games.screenshot,
+      n = Number(action.split(':')[1]);
+    if (n !== 0 && !g.hints.includes(n)) return;
+    g.activeFrame = n;
+    persist();
+    render();
+    return;
+  }
+  if (action === 'continue') {
+    session().games[selected].activeFrame = 0;
+    continueCategory(session(), selected);
+    persist();
+    render();
+    return;
+  }
+  if (action.startsWith('hint:')) {
+    const g = session().games[selected],
+      n = Number(action.split(':')[1]);
+    if (g.done || g.scores.length > g.index || g.hints.includes(n)) return;
+    if (selected === 'screenshot' && n > 1 && !g.hints.includes(n - 1)) return;
+    const answer = app.querySelector('#answer')?.value || '';
+    g.hints.push(n);
+    if (selected === 'screenshot' && n < 3) g.activeFrame = n;
+    if (selected === 'opening' || selected === 'ending') g.musicMode = 'video';
+    persist();
+    render();
+    const field = app.querySelector('#answer');
+    if (field) {
+      field.value = answer;
+      field.focus();
+    }
+    return;
+  }
+  if (action === 'giveup') {
+    giveup();
+    return;
+  }
+  if (action === 'skip-anidle') {
+    if (skipAnidle(session())) {
+      persist();
+      render();
+    }
+    return;
+  }
+  if (action.startsWith('edit:')) {
+    editing = action.slice(5);
+    libraryDetail = null;
+    render();
+    document.querySelector('#media-editor')?.scrollIntoView({behavior: 'smooth'});
+    return;
+  }
+  if (action === 'close-editor') {
+    editing = null;
+    render();
+    return;
+  }
+  if (action.startsWith('preview:')) {
+    const [, id, type] = action.split(':'),
+      a = anime(id),
+      m = a[type];
+    if (!m) {
+      toast('No clip is available for this anime.');
+      return;
+    }
+    if (m.demo) {
+      toast('Practice melodies are no longer supported.');
+      return;
+    }
+    dialog.innerHTML = `<div class="dialog-head"><h2 id="dialog-title">${titleMarkup(a)} · ${type}</h2>${button('close-dialog', '×', '', 'aria-label="Close dialog"')}</div>${m.video ? `<video controls class="music-video" src="${esc(m.video)}"></video>` : `<audio controls src="${esc(m.audio)}" style="width:100%"></audio>`}`;
+    dialog.showModal();
+    return;
+  }
+  if (action === 'share') {
+    const loopId = selected || state.loopCategory,
+      text = isLoop()
+        ? `AniLoop ⟳ ${cat(loopId).name} loop · round ${session().number}: ${fmt(session().games[loopId].scores.reduce((a, b) => a + b, 0))}/${fmt(cat(loopId).max)} points.`
+        : `AniLoop ${state.mode === 'infinity' ? '∞ Round ' + session().number : 'Daily quiz ' + ((cloudMode && cloudDaily.day) || dayKey())}: ${fmt(totalScore(session()))}/100,000 points · ${completedCount(session())}/5 categories.`;
+    try {
+      await navigator.clipboard.writeText(text);
+      toast('Result copied.');
+    } catch {
+      dialog.innerHTML = `<div class="dialog-head"><h2 id="dialog-title">Your result</h2>${button('close-dialog', '×', '', 'aria-label="Close dialog"')}</div><div class="field"><textarea aria-label="Result to copy" readonly>${esc(text)}</textarea></div>`;
+      dialog.showModal();
+    }
+    return;
+  }
+  if (action === 'clear-library') {
+    libraryQuery = '';
+    libraryGenre = 'all';
+    libraryCategory = 'all';
+    libraryPage = 1;
+    render();
+    document.querySelector('#library-search')?.focus();
+    return;
+  }
+  if (action.startsWith('library-cat:')) {
+    const id = action.slice(12);
+    libraryCategory = id === 'all' || cat(id) ? id : 'all';
+    libraryPage = 1;
+    render();
+    return;
+  }
+  if (action.startsWith('library-open:')) {
+    libraryDetail = action.slice(13);
+    render();
+    app.querySelector('.pool-detail-close')?.focus();
+    if (anime(libraryDetail)?.hasSynopsis) loadSynopses();
+    return;
+  }
+  if (action === 'library-close') {
+    const id = libraryDetail;
+    libraryDetail = null;
+    render();
+    app.querySelector(`[data-action="library-open:${CSS.escape(id || '')}"]`)?.focus();
+    return;
+  }
+  if (action === 'export-pack') {
+    const blob = new Blob([JSON.stringify(pack, null, 2)], {type: 'application/json'}),
+      url = URL.createObjectURL(blob),
+      a = document.createElement('a');
+    a.href = url;
+    a.download = 'aniloop-media-pack.json';
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    return;
+  }
+  if (action === 'import-pack') {
+    document.querySelector('#import-file').click();
+    return;
+  }
+  if (action === 'restore-pack') {
+    confirmDialog(
+      'Restore the default pool?',
+      'Your current games will be archived. The default pool will replace your custom pack. Export it first if you want to keep it.',
+      'confirm-restore',
+      'Restore',
+    );
+    return;
+  }
+  if (action === 'confirm-restore') {
+    dialog.close();
+    await replacePack(null);
+  }
 }
-async function fileData(file){if(file.size>25*1024*1024)throw new Error('Each file must be 25 MB or smaller.');return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=()=>reject(new Error('Could not read the file.'));r.readAsDataURL(file);});}
-async function saveEditor(form){const data=new FormData(form),newPack=structuredClone(pack),a=newPack.anime.find(a=>a.id===editing);const shots=String(data.get('screenshots')).split('\n').map(s=>s.trim()).filter(Boolean);if(shots.length>3)throw new Error('Use up to three screenshots.');if(shots.length)a.screenshots=shots;const uploads=data.getAll('screenshot-files').filter(f=>f.size);if(uploads.length>3)throw new Error('Upload up to three screenshots.');if(uploads.length)a.screenshots=await Promise.all(uploads.map(fileData));const character=data.get('character-file');if(character?.size){a.characterImage=await fileData(character);if(a.characters?.length)a.characters[0].image=a.characterImage;}else if(data.get('characterImage').trim())a.characterImage=data.get('characterImage').trim();for(const type of ['opening','ending']){let changed=false;const media={...a[type]};for(const kind of ['audio','video']){const file=data.get(`${type}-${kind}-file`),url=data.get(`${type}-${kind}`).trim();if(file?.size){media[kind]=await fileData(file);changed=true;}else if(url){media[kind]=url;changed=true;}}if(changed){media.demo=false;media.difficulty??=a.difficulty?.anidle||'Medium';delete media.notes;a[type]=media;}}
- const startText=data.get('opening-start')?.trim()||'',endText=data.get('opening-end')?.trim()||'';if(a.opening){if(startText||endText){const start=Number(startText),end=Number(endText);if(!startText||!endText||!Number.isFinite(start)||!Number.isFinite(end)||start<0||end<=start)throw new Error('Enter a valid start and end in seconds.');if(a.opening.videoDuration&&start>=a.opening.videoDuration)throw new Error('The time window starts after the video ends.');a.opening.videoWindow={startSeconds:start,endSeconds:end};}else a.opening.videoWindow={startFraction:.35,endFraction:.65};}newPack.key=uid();newPack.name=packKey()===starter.key?'My anime media pack':pack.name;newPack.demo=newPack.anime.some(a=>a.opening?.demo||a.ending?.demo);validatePack(newPack);createSession('infinity',1,'validate',newPack.anime,newPack.key);await savePack(newPack);archive(state.daily);archive(state.infinity);pack=newPack;state.daily=null;state.infinity=null;ensureSessions();editing=a.id;render();document.querySelector('#media-editor')?.scrollIntoView();toast('Media saved. New game rounds are ready.');}
-async function submit(form){const type=form.dataset.form,data=new FormData(form);if(social.active&&['anime','characters','anidle'].includes(type)){await social.answer(form);return;}if(remoteDaily()&&['anime','characters','anidle'].includes(type)){await dailyAnswer(type,data);return;}if(type==='editor'){await saveEditor(form);return;}const s=session(),g=s.games[selected];if(g.done||g.scores.length>g.index)return;if(type==='anime'){const value=String(data.get('answer')).trim(),guess=resolveTitle(value);if(!guess){toast('Choose an anime from the suggestions or give up.');return;}const target=anime(g.questions[g.index]);const correct=matches(value,[target.title,...target.aliases||[]]);finish(roundScore(selected,{correct,hints:g.hints.length}),{value:guess.title,correct});return;}if(type==='characters'){let invalid=false;const entries=g.questions[g.index].map((id,i)=>{const a=questionCharacter(g,i),cv=String(data.get(`character-${i}`)).trim(),av=String(data.get(`anime-${i}`)).trim();if(cv&&!pack.anime.some(x=>matches(cv,[x.character,...x.characterAliases||[],...(x.characters||[]).flatMap(c=>[c.name,...c.aliases])])))invalid=true;if(av&&!resolveTitle(av))invalid=true;return {character:matches(cv,[a.character,...a.characterAliases||[]]),anime:matches(av,[a.title,...a.aliases||[]]),characterValue:cv,animeValue:av};});if(invalid){toast('Choose valid suggestions or leave unknown fields empty.');return;}finish(roundScore('character',{characters:entries}),{entries});return;}if(type==='anidle'){const value=String(data.get('answer')).trim(),guess=resolveTitle(value);if(!guess){toast('Choose an anime from the suggestions.');return;}if(g.guesses.some(x=>x.id===guess.id)){toast('You have already guessed this anime.');return;}recordActivity(state,s);g.guesses.push({id:guess.id,attempt:g.attempt});if(guess.id===g.questions[0]){finish(roundScore('anidle',{correct:true,attempt:g.attempt}),{value:guess.title});return;}if(g.attempt>=22){finish(0,{value:guess.title});return;}g.attempt++;persist();render();document.querySelector('#answer')?.focus();}}
-async function setMode(mode){state.mode=['daily','loop'].includes(mode)?mode:'infinity';persist();if(remoteDaily()&&currentUser&&!cloudDaily.session){const pending=cloudDaily.load();go('home');await pending;if(remoteDaily())render();return;}go('home');}
-function afterDailyStep(){const s=session();recordActivity(state,s);if(s.games[selected]?.done)captureRound(state,s,pack.name);persist();render();}
-async function dailyAction(action){
- if(action.startsWith('hint:')){const n=Number(action.split(':')[1]),answer=app.querySelector('#answer')?.value||'';if(!await cloudDaily.act(selected,'hint',{number:n}))return true;const g=session().games[selected];if(selected==='screenshot'&&n<3)g.activeFrame=n;if(selected==='opening'||selected==='ending')g.musicMode='video';render();const field=app.querySelector('#answer');if(field){field.value=answer;field.focus();}return true;}
- if(action==='giveup'){if(await cloudDaily.act(selected,'giveup'))afterDailyStep();return true;}
- if(action==='skip-anidle'){if(await cloudDaily.act(selected,'skip'))render();return true;}
- if(action==='continue'){if(await cloudDaily.act(selected,'continue'))render();return true;}
- return false;
+async function fileData(file) {
+  if (file.size > 25 * 1024 * 1024) throw new Error('Each file must be 25 MB or smaller.');
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(r.result);
+    r.onerror = () => reject(new Error('Could not read the file.'));
+    r.readAsDataURL(file);
+  });
 }
-async function dailyAnswer(type,data){if(type==='characters'){if(await cloudDaily.act(selected,'answer',{entries:Array.from({length:4},(_,i)=>({characterValue:String(data.get('character-'+i)||'').trim(),animeValue:String(data.get('anime-'+i)||'').trim()}))}))afterDailyStep();return;}const value=String(data.get('answer')||'').trim();if(!resolveTitle(value)){toast(type==='anidle'?'Choose an anime from the suggestions.':'Choose an anime from the suggestions or give up.');return;}if(await cloudDaily.act(selected,'answer',{value}))afterDailyStep();if(type==='anidle')document.querySelector('#answer')?.focus();}
+async function saveEditor(form) {
+  const data = new FormData(form),
+    newPack = structuredClone(pack),
+    a = newPack.anime.find((a) => a.id === editing);
+  const shots = String(data.get('screenshots'))
+    .split('\n')
+    .map((s) => s.trim())
+    .filter(Boolean);
+  if (shots.length > 3) throw new Error('Use up to three screenshots.');
+  if (shots.length) a.screenshots = shots;
+  const uploads = data.getAll('screenshot-files').filter((f) => f.size);
+  if (uploads.length > 3) throw new Error('Upload up to three screenshots.');
+  if (uploads.length) a.screenshots = await Promise.all(uploads.map(fileData));
+  const character = data.get('character-file');
+  if (character?.size) {
+    a.characterImage = await fileData(character);
+    if (a.characters?.length) a.characters[0].image = a.characterImage;
+  } else if (data.get('characterImage').trim()) a.characterImage = data.get('characterImage').trim();
+  for (const type of ['opening', 'ending']) {
+    let changed = false;
+    const media = {...a[type]};
+    for (const kind of ['audio', 'video']) {
+      const file = data.get(`${type}-${kind}-file`),
+        url = data.get(`${type}-${kind}`).trim();
+      if (file?.size) {
+        media[kind] = await fileData(file);
+        changed = true;
+      } else if (url) {
+        media[kind] = url;
+        changed = true;
+      }
+    }
+    if (changed) {
+      media.demo = false;
+      media.difficulty ??= a.difficulty?.anidle || 'Medium';
+      delete media.notes;
+      a[type] = media;
+    }
+  }
+  const startText = data.get('opening-start')?.trim() || '',
+    endText = data.get('opening-end')?.trim() || '';
+  if (a.opening) {
+    if (startText || endText) {
+      const start = Number(startText),
+        end = Number(endText);
+      if (!startText || !endText || !Number.isFinite(start) || !Number.isFinite(end) || start < 0 || end <= start)
+        throw new Error('Enter a valid start and end in seconds.');
+      if (a.opening.videoDuration && start >= a.opening.videoDuration)
+        throw new Error('The time window starts after the video ends.');
+      a.opening.videoWindow = {startSeconds: start, endSeconds: end};
+    } else a.opening.videoWindow = {startFraction: 0.35, endFraction: 0.65};
+  }
+  newPack.key = uid();
+  newPack.name = packKey() === starter.key ? 'My anime media pack' : pack.name;
+  newPack.demo = newPack.anime.some((a) => a.opening?.demo || a.ending?.demo);
+  validatePack(newPack);
+  createSession('infinity', 1, 'validate', newPack.anime, newPack.key);
+  await savePack(newPack);
+  archive(state.daily);
+  archive(state.infinity);
+  pack = newPack;
+  state.daily = null;
+  state.infinity = null;
+  ensureSessions();
+  editing = a.id;
+  render();
+  document.querySelector('#media-editor')?.scrollIntoView();
+  toast('Media saved. New game rounds are ready.');
+}
+async function submit(form) {
+  const type = form.dataset.form,
+    data = new FormData(form);
+  if (social.active && ['anime', 'characters', 'anidle'].includes(type)) {
+    await social.answer(form);
+    return;
+  }
+  if (remoteDaily() && ['anime', 'characters', 'anidle'].includes(type)) {
+    await dailyAnswer(type, data);
+    return;
+  }
+  if (type === 'editor') {
+    await saveEditor(form);
+    return;
+  }
+  const s = session(),
+    g = s.games[selected];
+  if (g.done || g.scores.length > g.index) return;
+  if (type === 'anime') {
+    const value = String(data.get('answer')).trim(),
+      guess = resolveTitle(value);
+    if (!guess) {
+      toast('Choose an anime from the suggestions or give up.');
+      return;
+    }
+    const target = anime(g.questions[g.index]);
+    const correct = matches(value, [target.title, ...(target.aliases || [])]);
+    finish(roundScore(selected, {correct, hints: g.hints.length}), {value: guess.title, correct});
+    return;
+  }
+  if (type === 'characters') {
+    let invalid = false;
+    const entries = g.questions[g.index].map((id, i) => {
+      const a = questionCharacter(g, i),
+        cv = String(data.get(`character-${i}`)).trim(),
+        av = String(data.get(`anime-${i}`)).trim();
+      if (
+        cv &&
+        !pack.anime.some((x) =>
+          matches(cv, [
+            x.character,
+            ...(x.characterAliases || []),
+            ...(x.characters || []).flatMap((c) => [c.name, ...c.aliases]),
+          ]),
+        )
+      )
+        invalid = true;
+      if (av && !resolveTitle(av)) invalid = true;
+      return {
+        character: matches(cv, [a.character, ...(a.characterAliases || [])]),
+        anime: matches(av, [a.title, ...(a.aliases || [])]),
+        characterValue: cv,
+        animeValue: av,
+      };
+    });
+    if (invalid) {
+      toast('Choose valid suggestions or leave unknown fields empty.');
+      return;
+    }
+    finish(roundScore('character', {characters: entries}), {entries});
+    return;
+  }
+  if (type === 'anidle') {
+    const value = String(data.get('answer')).trim(),
+      guess = resolveTitle(value);
+    if (!guess) {
+      toast('Choose an anime from the suggestions.');
+      return;
+    }
+    if (g.guesses.some((x) => x.id === guess.id)) {
+      toast('You have already guessed this anime.');
+      return;
+    }
+    recordActivity(state, s);
+    g.guesses.push({id: guess.id, attempt: g.attempt});
+    if (guess.id === g.questions[0]) {
+      finish(roundScore('anidle', {correct: true, attempt: g.attempt}), {value: guess.title});
+      return;
+    }
+    if (g.attempt >= 22) {
+      finish(0, {value: guess.title});
+      return;
+    }
+    g.attempt++;
+    persist();
+    render();
+    document.querySelector('#answer')?.focus();
+  }
+}
+async function setMode(mode) {
+  state.mode = ['daily', 'loop'].includes(mode) ? mode : 'infinity';
+  persist();
+  if (remoteDaily() && currentUser && !cloudDaily.session) {
+    const pending = cloudDaily.load();
+    go('home');
+    await pending;
+    if (remoteDaily()) render();
+    return;
+  }
+  go('home');
+}
+function afterDailyStep() {
+  const s = session();
+  recordActivity(state, s);
+  if (s.games[selected]?.done) captureRound(state, s, pack.name);
+  persist();
+  render();
+}
+async function dailyAction(action) {
+  if (action.startsWith('hint:')) {
+    const n = Number(action.split(':')[1]),
+      answer = app.querySelector('#answer')?.value || '';
+    if (!(await cloudDaily.act(selected, 'hint', {number: n}))) return true;
+    const g = session().games[selected];
+    if (selected === 'screenshot' && n < 3) g.activeFrame = n;
+    if (selected === 'opening' || selected === 'ending') g.musicMode = 'video';
+    render();
+    const field = app.querySelector('#answer');
+    if (field) {
+      field.value = answer;
+      field.focus();
+    }
+    return true;
+  }
+  if (action === 'giveup') {
+    if (await cloudDaily.act(selected, 'giveup')) afterDailyStep();
+    return true;
+  }
+  if (action === 'skip-anidle') {
+    if (await cloudDaily.act(selected, 'skip')) render();
+    return true;
+  }
+  if (action === 'continue') {
+    if (await cloudDaily.act(selected, 'continue')) render();
+    return true;
+  }
+  return false;
+}
+async function dailyAnswer(type, data) {
+  if (type === 'characters') {
+    if (
+      await cloudDaily.act(selected, 'answer', {
+        entries: Array.from({length: 4}, (_, i) => ({
+          characterValue: String(data.get('character-' + i) || '').trim(),
+          animeValue: String(data.get('anime-' + i) || '').trim(),
+        })),
+      })
+    )
+      afterDailyStep();
+    return;
+  }
+  const value = String(data.get('answer') || '').trim();
+  if (!resolveTitle(value)) {
+    toast(
+      type === 'anidle' ? 'Choose an anime from the suggestions.' : 'Choose an anime from the suggestions or give up.',
+    );
+    return;
+  }
+  if (await cloudDaily.act(selected, 'answer', {value})) afterDailyStep();
+  if (type === 'anidle') document.querySelector('#answer')?.focus();
+}
 // A deploy or a short outage must not sign anyone out: keep the stored session and retry.
-async function accountWithRetry(){for(let attempt=0;;attempt++){try{return await communityAPI('/api/account');}catch(error){if(!cloudMode||!cloud.signedIn||attempt>=3)throw error;await new Promise(resolve=>setTimeout(resolve,1200*(attempt+1)));}}}
-function onError(error){console.error(error);toast(error.message||'The action could not be completed. Please try again.');}
-function updateCountdown(){const e=document.querySelector('#countdown');if(e){const now=new Date(),midnight=new Date(now);if(cloudMode)midnight.setUTCHours(24,0,0,0);else midnight.setHours(24,0,0,0);const t=Math.max(0,Math.floor((midnight-now)/1000));e.textContent=`Resets in ${String(Math.floor(t/3600)).padStart(2,'0')}:${String(Math.floor(t/60)%60).padStart(2,'0')}:${String(t%60).padStart(2,'0')}`;}}
-function closeSuggestions(){app.querySelectorAll('[data-suggest]').forEach(input=>{input.setAttribute('aria-expanded','false');input.removeAttribute('aria-activedescendant');const list=document.getElementById(input.getAttribute('aria-controls'));if(list)list.hidden=true;});}
-function showSuggestions(input){const query=input.value.trim().toLocaleLowerCase('en'),list=document.getElementById(input.getAttribute('aria-controls'));if(!list)return;closeSuggestions();if(!query)return;const results=catalogIndex(ids()).suggest(query,input.dataset.suggest);list.innerHTML=results.length?results.map((r,i)=>`<button type="button" role="option" tabindex="-1" aria-selected="false" id="${input.id}-option-${i}" data-value="${esc(r.title)}"><strong>${esc(r.title)}</strong>${r.subtitle?`<small>${esc(r.subtitle)}</small>`:''}</button>`).join(''):'<p class="suggestions-empty">No matches. Try another title or name.</p>';list.hidden=false;input.setAttribute('aria-expanded','true');}
-app.addEventListener('input',event=>{if(event.target.matches('[data-suggest]'))showSuggestions(event.target);});
-app.addEventListener('focusin',event=>{if(event.target.matches('[data-suggest]')&&event.target.value)showSuggestions(event.target);});
-app.addEventListener('pointerdown',event=>{const option=event.target.closest('.suggestions [role="option"]');if(option){event.preventDefault();const input=option.closest('.field').querySelector('input');input.value=option.dataset.value;closeSuggestions();input.focus();}else if(!event.target.closest('.field'))closeSuggestions();});
-app.addEventListener('focusout',event=>{if(event.target.matches('[data-suggest]'))setTimeout(()=>{if(!event.target.closest('.field')?.contains(document.activeElement))closeSuggestions();},0);});
-app.addEventListener('keydown',event=>{if(event.key==='Escape'&&libraryDetail&&view==='library'){event.preventDefault();handleAction('library-close').catch(onError);return;}const input=event.target;if(!input.matches('[data-suggest]'))return;const list=document.getElementById(input.getAttribute('aria-controls'));if(!list||list.hidden)return;const options=[...list.querySelectorAll('[role="option"]')];let index=options.findIndex(o=>o.getAttribute('aria-selected')==='true');if(event.key==='Escape'){closeSuggestions();event.preventDefault();return;}if(event.key==='ArrowDown'||event.key==='ArrowUp'){event.preventDefault();if(!options.length)return;index=(index+(event.key==='ArrowDown'?1:-1)+options.length)%options.length;options.forEach((o,i)=>o.setAttribute('aria-selected',String(i===index)));input.setAttribute('aria-activedescendant',options[index].id);options[index].scrollIntoView({block:'nearest'});}if(event.key==='Enter'&&index>=0){event.preventDefault();input.value=options[index].dataset.value;closeSuggestions();}});
-app.addEventListener('click',e=>{const b=e.target.closest('[data-action]');if(!b||b.disabled)return;e.preventDefault();handleAction(b.dataset.action).catch(onError);});
-dialog.addEventListener('click',e=>{const b=e.target.closest('[data-action]');if(b)handleAction(b.dataset.action).catch(onError);});
-dialog.addEventListener('close',stopAudio);
-dialog.addEventListener('submit',e=>{if(e.target.dataset.communityForm){e.preventDefault();submitCommunity(e.target);}});
-app.addEventListener('submit',e=>{e.preventDefault();if(e.target.hasAttribute('data-bug-report')){bugReport.submit(e.target).catch(onError);return;}if(e.target.dataset.friendsForm){friends.submit(e.target).catch(onError);return;}if(e.target.dataset.socialForm){social.submit(e.target).catch(onError);return;}if(e.target.dataset.communityForm){submitCommunity(e.target);return;}const form=e.target;const btn=form.querySelector('[type="submit"]');if(btn)btn.disabled=true;celebrateNext=['anime','characters','anidle'].includes(form.dataset.form);submit(form).catch(onError).finally(()=>{celebrateNext=false;if(btn?.isConnected)btn.disabled=false;});});
-app.addEventListener('input',e=>{bugReport.input(e.target);appearance.input(e.target);if(e.target.id==='library-search'){libraryQuery=e.target.value;libraryPage=1;clearTimeout(libraryTimer);const cursor=e.target.selectionStart;libraryTimer=setTimeout(()=>{render();const f=app.querySelector('#library-search');f?.focus();f?.setSelectionRange(cursor,cursor);},180);return;}const video=app.querySelector('.quiz-video');if(!video)return;if(e.target.id==='video-seek'&&Number.isFinite(video.duration))video.currentTime=Number(video.dataset.windowStart||0)+Number(e.target.value)/1000*(Number(video.dataset.windowEnd||video.duration)-Number(video.dataset.windowStart||0));if(e.target.id==='video-volume')video.volume=Number(e.target.value);});
-app.addEventListener('change',async e=>{if(await appearance.change(e.target))return;if(statistics.change(e.target))return;if(e.target.id==='friends-day'){await friends.selectDay(e.target.value);return;}if(e.target.id==='board-period'){board.period=e.target.value;await loadLeaderboard();return;}if(e.target.id==='library-genre'){libraryGenre=e.target.value;libraryPage=1;render();return;}if(e.target.id==='library-sort'){librarySort=LIBRARY_SORTS.some(([id])=>id===e.target.value)?e.target.value:'az';libraryPage=1;render();return;}if(e.target.id==='import-file'&&e.target.files[0])try{const file=e.target.files[0];if(file.size>150*1024*1024)throw new Error('The pack is too large (150 MB maximum).');const imported=validatePack(JSON.parse(await file.text()));if(imported.demo||imported.anime.some(a=>a.opening?.demo||a.ending?.demo))throw new Error('Use a pack with real media.');createSession('infinity',1,'validate',imported.anime,imported.key);imported.key=uid();window.pendingPack=imported;confirmDialog('Activate media pack?',`“${esc(imported.name)}” contains ${imported.anime.length} anime. Activating it replaces your current pack and starts new games. Export your current pack first to keep it.`,'confirm-import','Activate');}catch(error){onError(error);}});
-dialog.addEventListener('click',async e=>{if(e.target.closest('[data-action="confirm-import"]')&&window.pendingPack){dialog.close();const imported=window.pendingPack;delete window.pendingPack;try{await replacePack(imported);}catch(error){onError(error);}}});
-app.addEventListener('error',e=>{if(e.target.matches('img')){if(recoverImage(e.target))return;if(e.target.dataset.failed)return;e.target.dataset.failed='1';e.target.alt='Image unavailable. Check its source in the media library.';e.target.style.minHeight='100px';}else if(e.target.matches('audio,video')&&!e.target.classList.contains('hint-source')){const m=e.target;if(m.dataset.failed)return;m.dataset.failed='1';const note=document.createElement('p');note.className='media-error';note.textContent='This clip is unavailable or unsupported. Check its library source or try again.';const retry=document.createElement('button');retry.className='btn ghost small';retry.textContent='Retry';retry.addEventListener('click',()=>{m.dataset.failed='';note.remove();m.load();});note.append(' ',retry);m.after(note);}},true);
-async function init(){appearance.restore();if(cloudMode&&cloud?.signedIn&&accountCache?.rewards)social.setRewards(accountCache.rewards);try{const response=await fetch('data/pool-lite.json');if(!response.ok)throw new Error('Could not load the anime pool.');starter=validatePack(await response.json());let custom;try{custom=await loadPack();if(custom)validatePack(custom);}catch{toast('Custom media could not be loaded. Using the default pool.');}pack=custom&&!custom.demo?custom:starter;ensureSessions();const initialRoute=readRoute(location.hash,state.mode);if(state.mode!==initialRoute.mode){state.mode=initialRoute.mode;persist();}selected=initialRoute.selected;go(initialRoute.view,{historyMode:'replace'});try{const [account,config]=await Promise.all([accountWithRetry(),cloudMode?communityAPI('/api/config').catch(()=>({supabaseEnabled:true})):communityAPI('/api/config').catch(()=>({supabaseEnabled:false}))]);const previousUser=currentUser;currentUser=account.user;supabaseEnabled=cloudMode||config.supabaseEnabled===true;if(cloudMode)await switchStateForUser(currentUser,previousUser);if(!dialog.open)authProvider=cloudMode?'supabase':currentUser?(currentUser.provider||'local'):(supabaseEnabled?'supabase':'local');}catch{currentUser=null;if(cloudMode&&cloud.signedIn)toast('The server is not reachable right now. You are still signed in, reload in a moment.');}accountChecked=true;await social.refresh();if(remoteDaily())render();if(view==='leaderboard')await loadLeaderboard();else if(view==='friends')await friends.load();else if(['home','account','appearance','room','rooms','rewards'].includes(view))render();if(initialRoute.view==='home')social.boot();setInterval(()=>{updateCountdown();social.tick();if(state.daily.seed!==`${dayKey()}:${packKey()}`){ensureSessions();if(!cloudMode&&state.mode==='daily'&&!social.active){go('home');toast('A new daily quiz has begun.');}}if(cloudMode&&cloudDaily.day&&cloudDaily.day!==new Date().toISOString().slice(0,10)&&!cloudDaily.loading){cloudDaily.clear();if(remoteDaily()){toast('A new daily quiz has begun.');setMode('daily').catch(onError);}}},1000);}catch(error){app.innerHTML=`<main class="page"><div class="panel"><h1>AniLoop could not start.</h1><p style="margin-top:20px">${esc(error.message)} ${cloudMode?'Check the Supabase project configuration and deployed Edge Function.':'Start the project with python3 server.py and open localhost:8097.'}</p></div></main>`;}}
-window.addEventListener('popstate',()=>restoreNavigation().catch(onError));
-window.addEventListener('hashchange',()=>restoreNavigation().catch(onError));
-dialog.addEventListener('cancel',event=>{if(helpRoute){event.preventDefault();handleAction('close-dialog').catch(onError);}});
-const policies=createPolicies({button});
-const bugReport=createBugReport({esc,button,api:communityAPI,go,render,getView:()=>view});
-const appearance=createAppearance({esc,fmt,button,app,avatarImage:ownProfileImage,setUserPatch:patch=>{if(currentUser)Object.assign(currentUser,patch);},getView:()=>view,user:()=>shownUser(),rewards:()=>social.rewards,setRewards:value=>social.setRewards(value),refreshRewards:()=>social.refresh(),api:communityAPI,go,render,toast,login:()=>authDialog()});
-const statistics=createStatistics({esc,fmt,button,app,state:()=>state,session:()=>session(),render,play:mode=>{setMode(mode).catch(onError);}});
-const friends=createFriends({esc,button,fmt,api:communityAPI,user:()=>currentUser,getView:()=>view,go,render,toast,login:()=>authDialog(),playDaily:()=>{setMode('daily').catch(onError);}});
-const social=createSocial({appearanceTeaser:()=>appearance.rewardsTeaser(),titleMarkup,app,dialog,esc,button,fmt,api:communityAPI,user:()=>currentUser,getView:()=>view,select:value=>{selected=value;},go,render,toast,login:()=>authDialog(),soloDaily:()=>cloudMode?cloudDaily.session:state.daily,playDaily:()=>{setMode('daily').catch(onError);},anime,views:{screenshot:screenshotView,character:characterView,opening:musicView,ending:musicView,anidle:anidleView}});
-const cloudDaily=createCloudDaily({api:communityAPI,user:()=>currentUser,toast,setRewards:value=>{social.setRewards(value);}});
+async function accountWithRetry() {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await communityAPI('/api/account');
+    } catch (error) {
+      if (!cloudMode || !cloud.signedIn || attempt >= 3) throw error;
+      await new Promise((resolve) => setTimeout(resolve, 1200 * (attempt + 1)));
+    }
+  }
+}
+function onError(error) {
+  console.error(error);
+  toast(error.message || 'The action could not be completed. Please try again.');
+}
+function updateCountdown() {
+  const e = document.querySelector('#countdown');
+  if (e) {
+    const now = new Date(),
+      midnight = new Date(now);
+    if (cloudMode) midnight.setUTCHours(24, 0, 0, 0);
+    else midnight.setHours(24, 0, 0, 0);
+    const t = Math.max(0, Math.floor((midnight - now) / 1000));
+    e.textContent = `Resets in ${String(Math.floor(t / 3600)).padStart(2, '0')}:${String(Math.floor(t / 60) % 60).padStart(2, '0')}:${String(t % 60).padStart(2, '0')}`;
+  }
+}
+function closeSuggestions() {
+  app.querySelectorAll('[data-suggest]').forEach((input) => {
+    input.setAttribute('aria-expanded', 'false');
+    input.removeAttribute('aria-activedescendant');
+    const list = document.getElementById(input.getAttribute('aria-controls'));
+    if (list) list.hidden = true;
+  });
+}
+function showSuggestions(input) {
+  const query = input.value.trim().toLocaleLowerCase('en'),
+    list = document.getElementById(input.getAttribute('aria-controls'));
+  if (!list) return;
+  closeSuggestions();
+  if (!query) return;
+  const results = catalogIndex(ids()).suggest(query, input.dataset.suggest);
+  list.innerHTML = results.length
+    ? results
+        .map(
+          (r, i) =>
+            `<button type="button" role="option" tabindex="-1" aria-selected="false" id="${input.id}-option-${i}" data-value="${esc(r.title)}"><strong>${esc(r.title)}</strong>${r.subtitle ? `<small>${esc(r.subtitle)}</small>` : ''}</button>`,
+        )
+        .join('')
+    : '<p class="suggestions-empty">No matches. Try another title or name.</p>';
+  list.hidden = false;
+  input.setAttribute('aria-expanded', 'true');
+}
+app.addEventListener('input', (event) => {
+  if (event.target.matches('[data-suggest]')) showSuggestions(event.target);
+});
+app.addEventListener('focusin', (event) => {
+  if (event.target.matches('[data-suggest]') && event.target.value) showSuggestions(event.target);
+});
+app.addEventListener('pointerdown', (event) => {
+  const option = event.target.closest('.suggestions [role="option"]');
+  if (option) {
+    event.preventDefault();
+    const input = option.closest('.field').querySelector('input');
+    input.value = option.dataset.value;
+    closeSuggestions();
+    input.focus();
+  } else if (!event.target.closest('.field')) closeSuggestions();
+});
+app.addEventListener('focusout', (event) => {
+  if (event.target.matches('[data-suggest]'))
+    setTimeout(() => {
+      if (!event.target.closest('.field')?.contains(document.activeElement)) closeSuggestions();
+    }, 0);
+});
+app.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && libraryDetail && view === 'library') {
+    event.preventDefault();
+    handleAction('library-close').catch(onError);
+    return;
+  }
+  const input = event.target;
+  if (!input.matches('[data-suggest]')) return;
+  const list = document.getElementById(input.getAttribute('aria-controls'));
+  if (!list || list.hidden) return;
+  const options = [...list.querySelectorAll('[role="option"]')];
+  let index = options.findIndex((o) => o.getAttribute('aria-selected') === 'true');
+  if (event.key === 'Escape') {
+    closeSuggestions();
+    event.preventDefault();
+    return;
+  }
+  if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+    event.preventDefault();
+    if (!options.length) return;
+    index = (index + (event.key === 'ArrowDown' ? 1 : -1) + options.length) % options.length;
+    options.forEach((o, i) => o.setAttribute('aria-selected', String(i === index)));
+    input.setAttribute('aria-activedescendant', options[index].id);
+    options[index].scrollIntoView({block: 'nearest'});
+  }
+  if (event.key === 'Enter' && index >= 0) {
+    event.preventDefault();
+    input.value = options[index].dataset.value;
+    closeSuggestions();
+  }
+});
+app.addEventListener('click', (e) => {
+  const b = e.target.closest('[data-action]');
+  if (!b || b.disabled) return;
+  e.preventDefault();
+  handleAction(b.dataset.action).catch(onError);
+});
+dialog.addEventListener('click', (e) => {
+  const b = e.target.closest('[data-action]');
+  if (b) handleAction(b.dataset.action).catch(onError);
+});
+dialog.addEventListener('close', stopAudio);
+dialog.addEventListener('submit', (e) => {
+  if (e.target.dataset.communityForm) {
+    e.preventDefault();
+    submitCommunity(e.target);
+  }
+});
+app.addEventListener('submit', (e) => {
+  e.preventDefault();
+  if (e.target.hasAttribute('data-bug-report')) {
+    bugReport.submit(e.target).catch(onError);
+    return;
+  }
+  if (e.target.dataset.friendsForm) {
+    friends.submit(e.target).catch(onError);
+    return;
+  }
+  if (e.target.dataset.socialForm) {
+    social.submit(e.target).catch(onError);
+    return;
+  }
+  if (e.target.dataset.communityForm) {
+    submitCommunity(e.target);
+    return;
+  }
+  const form = e.target;
+  const btn = form.querySelector('[type="submit"]');
+  if (btn) btn.disabled = true;
+  celebrateNext = ['anime', 'characters', 'anidle'].includes(form.dataset.form);
+  submit(form)
+    .catch(onError)
+    .finally(() => {
+      celebrateNext = false;
+      if (btn?.isConnected) btn.disabled = false;
+    });
+});
+app.addEventListener('input', (e) => {
+  bugReport.input(e.target);
+  appearance.input(e.target);
+  if (e.target.id === 'library-search') {
+    libraryQuery = e.target.value;
+    libraryPage = 1;
+    clearTimeout(libraryTimer);
+    const cursor = e.target.selectionStart;
+    libraryTimer = setTimeout(() => {
+      render();
+      const f = app.querySelector('#library-search');
+      f?.focus();
+      f?.setSelectionRange(cursor, cursor);
+    }, 180);
+    return;
+  }
+  const video = app.querySelector('.quiz-video');
+  if (!video) return;
+  if (e.target.id === 'video-seek' && Number.isFinite(video.duration))
+    video.currentTime =
+      Number(video.dataset.windowStart || 0) +
+      (Number(e.target.value) / 1000) *
+        (Number(video.dataset.windowEnd || video.duration) - Number(video.dataset.windowStart || 0));
+  if (e.target.id === 'video-volume') video.volume = Number(e.target.value);
+});
+app.addEventListener('change', async (e) => {
+  if (await appearance.change(e.target)) return;
+  if (statistics.change(e.target)) return;
+  if (e.target.id === 'friends-day') {
+    await friends.selectDay(e.target.value);
+    return;
+  }
+  if (e.target.id === 'board-period') {
+    board.period = e.target.value;
+    await loadLeaderboard();
+    return;
+  }
+  if (e.target.id === 'library-genre') {
+    libraryGenre = e.target.value;
+    libraryPage = 1;
+    render();
+    return;
+  }
+  if (e.target.id === 'library-sort') {
+    librarySort = LIBRARY_SORTS.some(([id]) => id === e.target.value) ? e.target.value : 'az';
+    libraryPage = 1;
+    render();
+    return;
+  }
+  if (e.target.id === 'import-file' && e.target.files[0])
+    try {
+      const file = e.target.files[0];
+      if (file.size > 150 * 1024 * 1024) throw new Error('The pack is too large (150 MB maximum).');
+      const imported = validatePack(JSON.parse(await file.text()));
+      if (imported.demo || imported.anime.some((a) => a.opening?.demo || a.ending?.demo))
+        throw new Error('Use a pack with real media.');
+      createSession('infinity', 1, 'validate', imported.anime, imported.key);
+      imported.key = uid();
+      window.pendingPack = imported;
+      confirmDialog(
+        'Activate media pack?',
+        `“${esc(imported.name)}” contains ${imported.anime.length} anime. Activating it replaces your current pack and starts new games. Export your current pack first to keep it.`,
+        'confirm-import',
+        'Activate',
+      );
+    } catch (error) {
+      onError(error);
+    }
+});
+dialog.addEventListener('click', async (e) => {
+  if (e.target.closest('[data-action="confirm-import"]') && window.pendingPack) {
+    dialog.close();
+    const imported = window.pendingPack;
+    delete window.pendingPack;
+    try {
+      await replacePack(imported);
+    } catch (error) {
+      onError(error);
+    }
+  }
+});
+app.addEventListener(
+  'error',
+  (e) => {
+    if (e.target.matches('img')) {
+      if (recoverImage(e.target)) return;
+      if (e.target.dataset.failed) return;
+      e.target.dataset.failed = '1';
+      e.target.alt = 'Image unavailable. Check its source in the media library.';
+      e.target.style.minHeight = '100px';
+    } else if (e.target.matches('audio,video') && !e.target.classList.contains('hint-source')) {
+      const m = e.target;
+      if (m.dataset.failed) return;
+      m.dataset.failed = '1';
+      const note = document.createElement('p');
+      note.className = 'media-error';
+      note.textContent = 'This clip is unavailable or unsupported. Check its library source or try again.';
+      const retry = document.createElement('button');
+      retry.className = 'btn ghost small';
+      retry.textContent = 'Retry';
+      retry.addEventListener('click', () => {
+        m.dataset.failed = '';
+        note.remove();
+        m.load();
+      });
+      note.append(' ', retry);
+      m.after(note);
+    }
+  },
+  true,
+);
+async function init() {
+  appearance.restore();
+  if (cloudMode && cloud?.signedIn && accountCache?.rewards) social.setRewards(accountCache.rewards);
+  try {
+    const response = await fetch('data/pool-lite.json');
+    if (!response.ok) throw new Error('Could not load the anime pool.');
+    starter = validatePack(await response.json());
+    let custom;
+    try {
+      custom = await loadPack();
+      if (custom) validatePack(custom);
+    } catch {
+      toast('Custom media could not be loaded. Using the default pool.');
+    }
+    pack = custom && !custom.demo ? custom : starter;
+    ensureSessions();
+    const initialRoute = readRoute(location.hash, state.mode);
+    if (state.mode !== initialRoute.mode) {
+      state.mode = initialRoute.mode;
+      persist();
+    }
+    selected = initialRoute.selected;
+    go(initialRoute.view, {historyMode: 'replace'});
+    try {
+      const [account, config] = await Promise.all([
+        accountWithRetry(),
+        cloudMode
+          ? communityAPI('/api/config').catch(() => ({supabaseEnabled: true}))
+          : communityAPI('/api/config').catch(() => ({supabaseEnabled: false})),
+      ]);
+      const previousUser = currentUser;
+      currentUser = account.user;
+      supabaseEnabled = cloudMode || config.supabaseEnabled === true;
+      if (cloudMode) await switchStateForUser(currentUser, previousUser);
+      if (!dialog.open)
+        authProvider = cloudMode
+          ? 'supabase'
+          : currentUser
+            ? currentUser.provider || 'local'
+            : supabaseEnabled
+              ? 'supabase'
+              : 'local';
+    } catch {
+      currentUser = null;
+      if (cloudMode && cloud.signedIn)
+        toast('The server is not reachable right now. You are still signed in, reload in a moment.');
+    }
+    accountChecked = true;
+    await social.refresh();
+    if (remoteDaily()) render();
+    if (view === 'leaderboard') await loadLeaderboard();
+    else if (view === 'friends') await friends.load();
+    else if (['home', 'account', 'appearance', 'room', 'rooms', 'rewards'].includes(view)) render();
+    if (initialRoute.view === 'home') social.boot();
+    setInterval(() => {
+      updateCountdown();
+      social.tick();
+      if (state.daily.seed !== `${dayKey()}:${packKey()}`) {
+        ensureSessions();
+        if (!cloudMode && state.mode === 'daily' && !social.active) {
+          go('home');
+          toast('A new daily quiz has begun.');
+        }
+      }
+      if (
+        cloudMode &&
+        cloudDaily.day &&
+        cloudDaily.day !== new Date().toISOString().slice(0, 10) &&
+        !cloudDaily.loading
+      ) {
+        cloudDaily.clear();
+        if (remoteDaily()) {
+          toast('A new daily quiz has begun.');
+          setMode('daily').catch(onError);
+        }
+      }
+    }, 1000);
+  } catch (error) {
+    app.innerHTML = `<main class="page"><div class="panel"><h1>AniLoop could not start.</h1><p style="margin-top:20px">${esc(error.message)} ${cloudMode ? 'Check the Supabase project configuration and deployed Edge Function.' : 'Start the project with python3 server.py and open localhost:8097.'}</p></div></main>`;
+  }
+}
+window.addEventListener('popstate', () => restoreNavigation().catch(onError));
+window.addEventListener('hashchange', () => restoreNavigation().catch(onError));
+dialog.addEventListener('cancel', (event) => {
+  if (helpRoute) {
+    event.preventDefault();
+    handleAction('close-dialog').catch(onError);
+  }
+});
+const policies = createPolicies({button});
+const bugReport = createBugReport({esc, button, api: communityAPI, go, render, getView: () => view});
+const appearance = createAppearance({
+  esc,
+  fmt,
+  button,
+  app,
+  avatarImage: ownProfileImage,
+  setUserPatch: (patch) => {
+    if (currentUser) Object.assign(currentUser, patch);
+  },
+  getView: () => view,
+  user: () => shownUser(),
+  rewards: () => social.rewards,
+  setRewards: (value) => social.setRewards(value),
+  refreshRewards: () => social.refresh(),
+  api: communityAPI,
+  go,
+  render,
+  toast,
+  login: () => authDialog(),
+});
+const statistics = createStatistics({
+  esc,
+  fmt,
+  button,
+  app,
+  state: () => state,
+  session: () => session(),
+  render,
+  play: (mode) => {
+    setMode(mode).catch(onError);
+  },
+});
+const friends = createFriends({
+  esc,
+  button,
+  fmt,
+  api: communityAPI,
+  user: () => currentUser,
+  getView: () => view,
+  go,
+  render,
+  toast,
+  login: () => authDialog(),
+  playDaily: () => {
+    setMode('daily').catch(onError);
+  },
+});
+const social = createSocial({
+  appearanceTeaser: () => appearance.rewardsTeaser(),
+  titleMarkup,
+  app,
+  dialog,
+  esc,
+  button,
+  fmt,
+  api: communityAPI,
+  user: () => currentUser,
+  getView: () => view,
+  select: (value) => {
+    selected = value;
+  },
+  go,
+  render,
+  toast,
+  login: () => authDialog(),
+  soloDaily: () => (cloudMode ? cloudDaily.session : state.daily),
+  playDaily: () => {
+    setMode('daily').catch(onError);
+  },
+  anime,
+  views: {
+    screenshot: screenshotView,
+    character: characterView,
+    opening: musicView,
+    ending: musicView,
+    anidle: anidleView,
+  },
+});
+const cloudDaily = createCloudDaily({
+  api: communityAPI,
+  user: () => currentUser,
+  toast,
+  setRewards: (value) => {
+    social.setRewards(value);
+  },
+});
 init();
-if(recoveryReturn)authDialog('reset');else if(recoveryError){authDialog('forgot');const message=dialog.querySelector('.account-error');message.hidden=false;message.textContent=recoveryError;}
+if (recoveryReturn) authDialog('reset');
+else if (recoveryError) {
+  authDialog('forgot');
+  const message = dialog.querySelector('.account-error');
+  message.hidden = false;
+  message.textContent = recoveryError;
+}

@@ -18,22 +18,28 @@ const ROOT_MODULES = ['app.js', 'core.js', 'catalog.js', 'storage.js', 'social-u
 const hash = (text) => createHash('sha256').update(text.replace(/\r\n/g, '\n')).digest('hex').slice(0, 10);
 
 async function assetHashes() {
-  const assets = (await readdir(path.join(root, 'assets'))).filter((f) => /\.(js|css)$/.test(f)).map((f) => 'assets/' + f);
-  const files = [...ROOT_MODULES, ...assets, 'styles.css', 'skin.css', 'assets/fonts/fonts.css'];
+  const assets = (await readdir(path.join(root, 'assets')))
+    .filter((f) => /\.(js|css)$/.test(f))
+    .map((f) => 'assets/' + f);
+  const files = [...ROOT_MODULES, ...assets, 'styles.css', 'assets/fonts/fonts.css'];
   const out = {};
   for (const file of files) out[file] = hash(await readFile(path.join(root, file), 'utf8'));
   return out;
 }
 
 export function stampPage(html, hashes) {
-  const modules = Object.keys(hashes).filter((f) => f.endsWith('.js')).sort();
+  const modules = Object.keys(hashes)
+    .filter((f) => f.endsWith('.js'))
+    .sort();
   const map = JSON.stringify({imports: Object.fromEntries(modules.map((f) => ['./' + f, `./${f}?v=${hashes[f]}`]))});
   const tag = `<script type="importmap">${map}</script>`;
   let next = html.replace(/<script type="importmap">[^<]*<\/script>/, '');
   // The import map must come before the first module script or modulepreload.
   const anchor = next.search(/<link rel="modulepreload"|<script type="module"/);
   if (anchor >= 0) next = next.slice(0, anchor) + tag + next.slice(anchor);
-  next = next.replace(/(href|src)="([a-z0-9/_-]+\.(?:js|css))(?:\?v=[0-9a-f]+)?"/gi, (all, attr, file) => (hashes[file] ? `${attr}="${file}?v=${hashes[file]}"` : all));
+  next = next.replace(/(href|src)="([a-z0-9/_-]+\.(?:js|css))(?:\?v=[0-9a-f]+)?"/gi, (all, attr, file) =>
+    hashes[file] ? `${attr}="${file}?v=${hashes[file]}"` : all,
+  );
   return next;
 }
 

@@ -24,7 +24,7 @@ with sync_playwright() as pw:
     page.locator('form[data-community-form=register] button[type=submit]').click();expect(page.locator('dialog')).not_to_be_visible()
     page.locator('[data-action=account]').first.click()
     with page.expect_download() as downloaded:page.locator('[data-action=export-account]').click()
-    data=json.loads(Path(downloaded.value.path()).read_text());assert data['account']['username']==name
+    data=json.loads(Path(downloaded.value.path()).read_text(encoding='utf-8'));assert data['account']['username']==name
     assert 'scrypt$' not in json.dumps(data) and '"token"' not in json.dumps(data)
     page.locator('.policy-footer-links [data-action=privacy]').click();page.screenshot(path=str(ROOT/'qa/privacy-desktop.png'),full_page=True)
     assert page.evaluate("localStorage.getItem('aniloop-state-v1')")==saved

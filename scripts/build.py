@@ -24,7 +24,7 @@ def check_replaceable(directory):
     marker=directory/MARKER
     if marker.is_symlink() or not marker.is_file():
         raise ValueError('Existing build/ is not owned by this command. Move it aside first; nothing was removed.')
-    try:record=json.loads(marker.read_text())
+    try:record=json.loads(marker.read_text(encoding='utf-8'))
     except (ValueError,OSError) as error:raise ValueError('Build marker is unreadable; move build/ aside first.') from error
     if record.get('generator')!=GENERATOR or record.get('files')!=hashes(directory):
         raise ValueError('build/ contains added or changed files, possibly accounts or custom media. Move it aside first; nothing was removed.')
@@ -42,8 +42,8 @@ def build(output=None,prepare_fn=prepare):
             'publicLaunchCleared':False,
             'requires':['Python backend','persistent database','ffmpeg','review PUBLIC_LAUNCH.md'],
             'supabaseIntegration':'Supabase Auth/profiles connected; game data stays on Python/SQLite; account_actions.sql required for cloud export/deletion'
-        },indent=2)+'\n')
-        (pending/MARKER).write_text(json.dumps({'generator':GENERATOR,'files':hashes(pending)},sort_keys=True,indent=2)+'\n')
+        },indent=2)+'\n',encoding='utf-8')
+        (pending/MARKER).write_text(json.dumps({'generator':GENERATOR,'files':hashes(pending)},sort_keys=True,indent=2)+'\n',encoding='utf-8')
         check_replaceable(output)
         previous=staging/'previous'
         if output.exists():output.rename(previous)

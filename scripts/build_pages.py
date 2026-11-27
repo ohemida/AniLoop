@@ -6,7 +6,7 @@ ROOT=Path(__file__).resolve().parents[1]
 OUTPUT=ROOT/'pages-build'
 CONFIG=ROOT/'supabase/project.json'
 def source_map():
-    return {row['path']:row['source'] for row in json.loads((ROOT/'data/media-sources.json').read_text())}
+    return {row['path']:row['source'] for row in json.loads((ROOT/'data/media-sources.json').read_text(encoding='utf-8'))}
 def rewrite_pool(pool,registry,sources):
     def media(value):
         if not isinstance(value,str):return value
@@ -32,27 +32,27 @@ def rewrite_pool(pool,registry,sources):
 def build(output=OUTPUT):
     output=Path(output)
     if output.exists():raise SystemExit(f'{output} already exists; move it aside manually before rebuilding. Nothing was removed.')
-    config=json.loads(CONFIG.read_text())
+    config=json.loads(CONFIG.read_text(encoding='utf-8'))
     if not config.get('enabled') or not config.get('url') or not config.get('publishableKey'):
         raise SystemExit('Set the Supabase project URL and publishable key in supabase/project.json first.')
     output.mkdir(parents=True)
-    files=['index.html','admin.html','app.js','catalog.js','social-ui.js','core.js','storage.js','styles.css','skin.css']
+    files=['index.html','admin.html','app.js','catalog.js','social-ui.js','core.js','storage.js','styles.css']
     for name in files:shutil.copy2(ROOT/name,output/name)
     shutil.copytree(ROOT/'assets',output/'assets',ignore=shutil.ignore_patterns('media','*.py','__pycache__'))
     (output/'data').mkdir()
-    registry=json.loads((ROOT/'data/media-index.json').read_text())
-    pool=json.loads((ROOT/'data/pool.json').read_text())
+    registry=json.loads((ROOT/'data/media-index.json').read_text(encoding='utf-8'))
+    pool=json.loads((ROOT/'data/pool.json').read_text(encoding='utf-8'))
     pool=rewrite_pool(pool,registry,source_map())
-    (output/'data/pool.json').write_text(json.dumps(pool,ensure_ascii=False,separators=(',',':')))
+    (output/'data/pool.json').write_text(json.dumps(pool,ensure_ascii=False,separators=(',',':')),encoding='utf-8')
     shutil.copy2(ROOT/'data/media-index.json',output/'data/media-index.json')
     shutil.copy2(ROOT/'data/media-sources.json',output/'data/media-sources.json')
     runtime={'mode':'supabase','supabaseUrl':config['url'],'publishableKey':config['publishableKey'],'functionUrl':config['url'].rstrip('/')+'/functions/v1/aniloop','videoHintsEnabled':False}
-    (output/'assets/runtime-config.js').write_text('export const runtimeConfig=Object.freeze('+json.dumps(runtime,separators=(',',':'))+');\n')
-    (output/'.nojekyll').write_text('')
+    (output/'assets/runtime-config.js').write_text('export const runtimeConfig=Object.freeze('+json.dumps(runtime,separators=(',',':'))+');\n',encoding='utf-8')
+    (output/'.nojekyll').write_text('',encoding='utf-8')
     # Never copy game DBs, account/session data, local media, caches, or service keys.
     hint_count=sum(1 for p in (ROOT/'.tools/hint-cache').glob('*.mp4')) if (ROOT/'.tools/hint-cache').exists() else 0
     status={'artifact':'github-pages-supabase-static','pythonRuntimeRequired':False,'edgeFunction':'supabase/functions/aniloop','databaseMigration':'supabase/cloud_runtime.sql','protectedVideoHints':'not bundled; no original or unblurred video is exposed','cachedLocalVideoDerivatives':hint_count,'requiresSupabaseFunctionDeployment':True}
-    (output/'BUILD_STATUS.json').write_text(json.dumps(status,indent=2)+'\n')
+    (output/'BUILD_STATUS.json').write_text(json.dumps(status,indent=2)+'\n',encoding='utf-8')
     print(f'Python-free Pages bundle created at {output} ({sum(p.stat().st_size for p in output.rglob("*") if p.is_file()):,} bytes).')
     print(f'Supabase Edge Function required. {hint_count} protected video derivatives exist in the private local cache but are not published by this build.')
     return output

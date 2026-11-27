@@ -26,15 +26,16 @@ class RetentionTests(unittest.TestCase):
             self.assertEqual(db.execute('SELECT COUNT(*) FROM room_members').fetchone()[0],0);self.assertEqual(db.execute('SELECT id FROM bug_reports').fetchone()[0],'new')
     def test_backup_rotation_scoped_private_and_restorable(self):
         self.maintenance.backups=True;self.maintenance.run(self.now);folder=self.maintenance.directory/'backups';snapshot=next(folder.glob('snapshot-*.sqlite3'))
-        self.assertEqual(snapshot.stat().st_mode&0o777,0o600)
+        if os.name!='nt':self.assertEqual(snapshot.stat().st_mode&0o777,0o600)
         with closing(sqlite3.connect(snapshot)) as db:self.assertEqual(db.execute('SELECT username FROM users').fetchone()[0],'Preserved')
-        manual=folder/'my-old-backup.sqlite3';manual.write_text('preserve');outside=self.root/'outside.sqlite3';outside.write_text('preserve');link=folder/'snapshot-2000-01-01.sqlite3';link.symlink_to(outside)
-        partial=folder/(snapshot.name+'.qa.part');partial.write_text('unfinished snapshot');os.utime(partial,(0,0));os.utime(snapshot,(self.now-31*DAY,self.now-31*DAY));os.utime(manual,(0,0));self.maintenance.backups=False;self.maintenance.run(self.now)
-        self.assertFalse(snapshot.exists());self.assertFalse(partial.exists());self.assertTrue(link.is_symlink());self.assertEqual(outside.read_text(),'preserve');self.assertTrue(manual.exists())
+        manual=folder/'my-old-backup.sqlite3';manual.write_text('preserve',encoding='utf-8');outside=self.root/'outside.sqlite3';outside.write_text('preserve',encoding='utf-8');link=folder/'snapshot-2000-01-01.sqlite3';link.symlink_to(outside)
+        partial=folder/(snapshot.name+'.qa.part');partial.write_text('unfinished snapshot',encoding='utf-8');os.utime(partial,(0,0));os.utime(snapshot,(self.now-31*DAY,self.now-31*DAY));os.utime(manual,(0,0));self.maintenance.backups=False;self.maintenance.run(self.now)
+        self.assertFalse(snapshot.exists());self.assertFalse(partial.exists());self.assertTrue(link.is_symlink());self.assertEqual(outside.read_text(encoding='utf-8'),'preserve');self.assertTrue(manual.exists())
     def test_optional_logs_have_no_request_identifiers_and_expire(self):
         self.maintenance.log_request(200);self.assertFalse(self.maintenance.directory.exists())
-        self.maintenance.access_logs=True;self.maintenance.log_request(403);path=next((self.maintenance.directory/'logs').glob('*.jsonl'));data=json.loads(path.read_text())
-        self.assertEqual(set(data),{'time','status'});self.assertEqual(data['status'],403);self.assertEqual(path.stat().st_mode&0o777,0o600)
+        self.maintenance.access_logs=True;self.maintenance.log_request(403);path=next((self.maintenance.directory/'logs').glob('*.jsonl'));data=json.loads(path.read_text(encoding='utf-8'))
+        self.assertEqual(set(data),{'time','status'});self.assertEqual(data['status'],403)
+        if os.name!='nt':self.assertEqual(path.stat().st_mode&0o777,0o600)
         os.utime(path,(self.now-8*DAY,self.now-8*DAY));self.maintenance.run(self.now);self.assertFalse(path.exists())
     def test_cases_have_calendar_deadlines_and_minimal_retention(self):
         jan=int(datetime(2027,1,31,12,tzinfo=timezone.utc).timestamp());self.assertEqual(datetime.fromtimestamp(month_deadline(jan),timezone.utc).day,28)

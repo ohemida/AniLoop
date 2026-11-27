@@ -14,9 +14,9 @@ ORIGIN='https://cms.aniguessr.com'
 
 def request(url):
  key=hashlib.sha256(url.encode()).hexdigest();path=CACHE/(key+'.json')
- if path.exists():return json.loads(path.read_text())
+ if path.exists():return json.loads(path.read_text(encoding='utf-8'))
  raw=subprocess.check_output(['curl','--fail','-L','-sS','--retry','2','--max-time','40',url])
- data=json.loads(raw);path.write_text(json.dumps(data));time.sleep(.12);return data
+ data=json.loads(raw);path.write_text(json.dumps(data),encoding='utf-8');time.sleep(.12);return data
 
 def daily(item):
  mode,day=item
@@ -99,7 +99,7 @@ def enrich(a):
 with ThreadPoolExecutor(max_workers=3) as pool:
  for a in pool.map(enrich,list(entries.values())):print('META',a['title'],a['score'],flush=True)
 
-manifest=json.loads((ROOT/'data/media-sources.json').read_text()) if (ROOT/'data/media-sources.json').exists() else []
+manifest=json.loads((ROOT/'data/media-sources.json').read_text(encoding='utf-8')) if (ROOT/'data/media-sources.json').exists() else []
 def download(url,ext,clip=False):
  key=hashlib.sha256((url+('full-v1' if clip else '')).encode()).hexdigest()[:24];dest=MEDIA/(key+ext)
  if dest.exists() and dest.stat().st_size>100:return 'assets/media/'+dest.name
@@ -144,8 +144,8 @@ def media(a):
 with ThreadPoolExecutor(max_workers=3) as pool:records=list(pool.map(media,entries.values()))
 records=[a for a in records if a['screenshots'] or a['characters'] or a['opening'] or a['ending']]
 pack={'version':1,'key':'real-pool-v2','name':'Anime-Pool','demo':False,'builtAt':date.today().isoformat(),'sources':['https://aniguessr.com/database','https://animethemes.moe/','https://myanimelist.net/'],'description':'Echte Anime-Szenen, Figurenbilder und vollständige Opening-/Ending-Sequenzen. Schwierigkeitsstufen aus dem öffentlichen Katalog.','anime':records}
-(ROOT/'data/pool.json').write_text(json.dumps(pack,ensure_ascii=False,indent=2))
-(ROOT/'data/media-sources.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2))
+(ROOT/'data/pool.json').write_text(json.dumps(pack,ensure_ascii=False,indent=2),encoding='utf-8')
+(ROOT/'data/media-sources.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2),encoding='utf-8')
 print('POOL READY',len(records),flush=True)
 for kind in ['screenshot','character','opening','ending','anidle']:
  for level in ['Easy','Medium','Hard']:

@@ -8,15 +8,15 @@ from urllib.parse import urlparse,urlencode
 import json,hashlib,subprocess,time,base64,html,re,threading
 ROOT=Path(__file__).resolve().parents[1];CACHE=ROOT/'.tools/source-cache';CACHE.mkdir(parents=True,exist_ok=True)
 ORIGIN='https://cms.aniguessr.com';TODAY=date.today();DAYS=365
-base=json.loads((ROOT/'data/pool.json').read_text());entries={a['id']:a for a in base['anime']}
-media_index=json.loads((ROOT/'data/media-index.json').read_text()) if (ROOT/'data/media-index.json').exists() else {}
+base=json.loads((ROOT/'data/pool.json').read_text(encoding='utf-8'));entries={a['id']:a for a in base['anime']}
+media_index=json.loads((ROOT/'data/media-index.json').read_text(encoding='utf-8')) if (ROOT/'data/media-index.json').exists() else {}
 
 def request(url):
  path=CACHE/(hashlib.sha256(url.encode()).hexdigest()+'.json')
- if path.exists():return json.loads(path.read_text())
+ if path.exists():return json.loads(path.read_text(encoding='utf-8'))
  result=subprocess.run(['curl','--fail','-L','-sS','--retry','1','--max-time','25',url],capture_output=True)
  if result.returncode:raise RuntimeError(result.stderr.decode()[-160:])
- data=json.loads(result.stdout);path.write_text(json.dumps(data));time.sleep(.16);return data
+ data=json.loads(result.stdout);path.write_text(json.dumps(data),encoding='utf-8');time.sleep(.16);return data
 
 def asset(url,kind='image'):
  if not url:return None
@@ -79,7 +79,7 @@ with ThreadPoolExecutor(max_workers=3) as workers:
   ingest(kind,rows)
   if n%40==0:
    print('ARCHIVE',n,'/',len(jobs),'anime',len(entries),flush=True)
-   (ROOT/'.tools/expanded-checkpoint.json').write_text(json.dumps({'anime':list(entries.values()),'mediaIndex':media_index}))
+   (ROOT/'.tools/expanded-checkpoint.json').write_text(json.dumps({'anime':list(entries.values()),'mediaIndex':media_index}),encoding='utf-8')
 
 # Include the rest of the catalogue as genuine titles, but do not pretend they have pictures or music.
 for d in all_meta:
@@ -96,7 +96,7 @@ for a in entries.values():
  if a['opening']:a['opening']['videoWindow']={'startFraction':.35,'endFraction':.65}
 
 # Deduplicate downloaded scenes and remote copies of the identical source image.
-source_map={r['path']:r['source'] for r in json.loads((ROOT/'data/media-sources.json').read_text())}
+source_map={r['path']:r['source'] for r in json.loads((ROOT/'data/media-sources.json').read_text(encoding='utf-8'))}
 for a in entries.values():
  seen=set();clean=[]
  for path in a['screenshots']:
@@ -114,7 +114,7 @@ for offset in range(0,len(needs),25):
  query='query {'+' '.join('m%d: Media(idMal: %s,type:ANIME) { description(asHtml:false) averageScore characters(sort:FAVOURITES_DESC,perPage:1) { nodes { name { full } } } }'%(i,re.search(r'/anime/(\d+)',a['malLink']).group(1)) for i,a in enumerate(batch))+'}'
  path=CACHE/('expanded-anilist-'+hashlib.sha256(query.encode()).hexdigest()+'.json')
  try:
-  if path.exists():data=json.loads(path.read_text())
+  if path.exists():data=json.loads(path.read_text(encoding='utf-8'))
   else:
    for retry in range(4):
     time.sleep(max(0,rate_next-time.monotonic()))
@@ -126,7 +126,7 @@ for offset in range(0,len(needs),25):
      print('RATE LIMIT: waiting before retry',offset,flush=True);time.sleep(55);continue
     data=json.loads(body)
     if not data.get('data'):raise RuntimeError(str(data.get('errors'))[:200])
-    path.write_text(json.dumps(data));break
+    path.write_text(json.dumps(data),encoding='utf-8');break
    else:raise RuntimeError('Rate limit remained after retries')
   for i,a in enumerate(batch):
    d=(data.get('data') or {}).get('m'+str(i)) or {};desc=html.unescape(re.sub(r'<[^>]+>',' ',d.get('description') or ''));desc=re.sub(r'\s+',' ',desc).strip();desc=re.split(r'\(Source:|\[Written by',desc)[0].strip()
@@ -143,6 +143,6 @@ expanded=finalize({'anime':expanded},media_index)['anime']
 pack={**base,'key':'expanded-pool-v3','name':'Anime-Pool XL','anime':expanded,'builtAt':TODAY.isoformat(),'mediaMode':'bounded-cache','description':'Großer Katalog aus echten Archivaufgaben; Medien werden beim Spielen geladen und begrenzt lokal zwischengespeichert.'}
 # Index is saved first. Atomic writes prevent partially readable application data.
 for name,data in [('media-index.json',media_index),('pool.json',pack)]:
- dest=ROOT/'data'/name;temp=dest.with_suffix('.json.tmp');temp.write_text(json.dumps(data,ensure_ascii=False,indent=2));temp.replace(dest)
+ dest=ROOT/'data'/name;temp=dest.with_suffix('.json.tmp');temp.write_text(json.dumps(data,ensure_ascii=False,indent=2),encoding='utf-8');temp.replace(dest)
 report={'anime':len(expanded),'screenshotAnime':sum(bool(a['screenshots']) for a in expanded),'screenshots':sum(len(a['screenshots']) for a in expanded),'characters':len({c['id'] for a in expanded for c in a['characters']}),'openingAnime':sum(bool(a['opening']) for a in expanded),'endingAnime':sum(bool(a['ending']) for a in expanded),'anidleAnime':sum(bool(a['cover'] and a['synopsis'] and a['popularCharacter'] and a['score'] is not None and a['studio'] and a['source'] and a['genres']) for a in expanded),'remoteAssets':len(media_index),'archiveDays':DAYS}
-(ROOT/'data/pool-report.json').write_text(json.dumps(report,indent=2));print('EXPANDED POOL READY',json.dumps(report),flush=True)
+(ROOT/'data/pool-report.json').write_text(json.dumps(report,indent=2),encoding='utf-8');print('EXPANDED POOL READY',json.dumps(report),flush=True)

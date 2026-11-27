@@ -7,7 +7,7 @@ from playwright.sync_api import sync_playwright,expect
 ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT))
 from test_community import complete_round
 URL=os.environ.get('ANILOOP_URL','http://localhost:8100')
-PACK=json.loads((ROOT/'data/pool.json').read_text())
+PACK=json.loads((ROOT/'data/pool.json').read_text(encoding='utf-8'))
 with sync_playwright() as pw:
     browser=pw.chromium.launch();page=browser.new_page(viewport={'width':1440,'height':1000});page.set_default_timeout(30000)
     errors=[];page.on('pageerror',lambda error:errors.append(str(error)))

@@ -14,7 +14,10 @@ export function splitPool(pool) {
   const synopses = {};
   const anime = pool.anime.map((entry) => {
     const lite = {...entry};
-    if (typeof entry.synopsis === 'string' && entry.synopsis) { synopses[entry.id] = entry.synopsis; lite.hasSynopsis = true; }
+    if (typeof entry.synopsis === 'string' && entry.synopsis) {
+      synopses[entry.id] = entry.synopsis;
+      lite.hasSynopsis = true;
+    }
     for (const key of DROPPED) delete lite[key];
     return lite;
   });

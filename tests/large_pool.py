@@ -3,7 +3,7 @@ from privacy_fixture import open_app
 from pathlib import Path
 import os,json,urllib.request
 from playwright.sync_api import sync_playwright,expect
-ROOT=Path(__file__).resolve().parents[1];PACK=json.loads((ROOT/'data/pool.json').read_text());URL=os.environ.get('ANILOOP_URL','http://localhost:8097')
+ROOT=Path(__file__).resolve().parents[1];PACK=json.loads((ROOT/'data/pool.json').read_text(encoding='utf-8'));URL=os.environ.get('ANILOOP_URL','http://localhost:8097')
 def click(p,a):p.locator(f'[data-action="{a}"]:visible').first.click()
 with sync_playwright() as pw:
  b=pw.chromium.launch(headless=True);p=b.new_page(viewport={'width':1440,'height':1000},reduced_motion='reduce');errors=[];p.set_default_timeout(120000);p.on('pageerror',lambda e:errors.append(str(e)))

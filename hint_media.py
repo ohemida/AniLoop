@@ -58,7 +58,7 @@ class HintMedia:
         with lock:
             if target.exists() and info_path.exists():
                 os.utime(target, None)
-                return json.loads(info_path.read_text())
+                return json.loads(info_path.read_text(encoding='utf-8'))
             source = self.source(spec.get('source'))
             with self.slots:
                 args = ['ffmpeg', '-hide_banner', '-loglevel', 'error', '-y', '-threads', '2', '-filter_threads', '1']
@@ -83,7 +83,7 @@ class HintMedia:
                 try:
                     subprocess.run(args + [str(temporary)], capture_output=True, timeout=240, check=True)
                     temporary.replace(target)
-                    info_path.write_text(json.dumps(info))
+                    info_path.write_text(json.dumps(info),encoding='utf-8')
                 finally:
                     temporary.unlink(missing_ok=True)
             # Bound generated media, including uploaded sources, to 2 GiB.
