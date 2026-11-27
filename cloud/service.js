@@ -72,7 +72,7 @@ export class CloudService{
  }
  // Public look of other players: equipped frame, and the picture only if approved.
  async looksFor(ids){
-  if(typeof this.repo.looks==='function')return new Map((await this.repo.looks(ids)).map(r=>[r.owner_id,lookOf(r)]));
+  if(typeof this.repo.looks==='function'){try{return new Map((await this.repo.looks(ids)).map(r=>[r.owner_id,lookOf(r)]));}catch{/* Fall back to individual records if the batch query is unavailable. */}}
   const rows=await Promise.all([...new Set(ids)].map(async id=>[id,(await this.repo.getRuntime('account:'+id))?.value]));
   return new Map(rows.filter(([,a])=>a).map(([id,a])=>[id,lookOf(a)]));
  }
