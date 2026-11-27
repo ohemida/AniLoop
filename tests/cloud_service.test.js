@@ -62,6 +62,20 @@ test('room membership and answer state are isolated by player',async()=>{
  await assert.rejects(api.roomGet('ffffffff-ffff-ffff-ffff-ffffffffffff',code),/Join this room/);
 });
 
+test('room roster shows approved pictures and keeps pending pictures private',async()=>{
+ const repo=new FakeRepo(),api=new CloudService(repo,pack);
+ const base={shards:0,equipped:'classic',owned:[],claims:[],scores:[],picture:'iVBORw0KGgoAAA',pictureType:'png'};
+ repo.docs.set('account:'+users.one,{value:{...base,pictureStatus:'pending'},revision:1,owner:users.one});
+ repo.docs.set('account:'+users.two,{value:{...base,pictureStatus:'approved'},revision:1,owner:users.two});
+ const created=await api.createRoom(users.one,repo.profiles.get(users.one),'party');
+ await api.joinRoom(users.two,repo.profiles.get(users.two),created.room.code);
+ const view=await api.roomLooks(await api.roomGet(users.one,created.room.code),users.one);
+ assert.ok(view.room.players.find(p=>p.id===users.one).pictureUrl);
+ assert.ok(view.room.players.find(p=>p.id===users.two).pictureUrl);
+ const other=await api.roomLooks(await api.roomGet(users.two,created.room.code),users.two);
+ assert.equal(other.room.players.find(p=>p.id===users.one).pictureUrl,null);
+});
+
 test('profile picture accepts browser-prepared PNG data URLs and remains private',async()=>{
  const repo=new FakeRepo(),api=new CloudService(repo,pack);
  const image='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAB';

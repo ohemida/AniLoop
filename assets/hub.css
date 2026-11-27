@@ -1,5 +1,5 @@
 /* AniLoop game picker: compact top navigation, artwork, and a quieter home. */
-.sidebar { position:relative;inset:auto;width:100%;height:auto;overflow:visible;border-right:0;border-bottom:1px solid var(--line);z-index:5; }
+.sidebar { position:sticky;inset:0 auto auto 0;width:100%;height:auto;overflow:visible;border-right:0;border-bottom:1px solid var(--line);z-index:5; }
 .sidebar .header-inner { display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:0 24px;max-width:1240px;min-height:0;padding:18px 28px 0; }
 .sidebar .brand { grid-column:1;grid-row:1;font-size:1.65rem; }
 .sidebar .brand img { width:36px;height:36px; }
